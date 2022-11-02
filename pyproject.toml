@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel", "datetime", "logger"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "users"
+version = "1.0.0"
+authors = [
+  { name="Bervinov Oleg", email="unknown-312@ya.ru" },
+]
+description = "This module contains methods for working with user authorization via bots"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/obervinov/users-package"
+"Bug Tracker" = "https://github.com/obervinov/users-package/issues"
