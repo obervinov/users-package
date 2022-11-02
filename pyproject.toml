@@ -1,14 +1,14 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel", "datetime", "logger"]
+requires = ["setuptools>=61.0", "wheel", "hvac", "logger"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "users"
+name = "vault"
 version = "1.0.0"
 authors = [
   { name="Bervinov Oleg", email="unknown-312@ya.ru" },
 ]
-description = "This module contains methods for working with user authorization via bots"
+description = "This module contains a collection of methods for working with vault."
 readme = "README.md"
 requires-python = ">=3.9"
 classifiers = [
@@ -18,5 +18,5 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/obervinov/users-package"
-"Bug Tracker" = "https://github.com/obervinov/users-package/issues"
+"Homepage" = "https://github.com/obervinov/vault-package"
+"Bug Tracker" = "https://github.com/obervinov/vault-package/issues"
