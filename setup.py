@@ -22,7 +22,7 @@ setup(
     '''
     This is the short description will show on the top of the webpage of your package on pypi.org
     '''
-    description = 'This module contains a collection of methods for working with vault.',
+    description = 'This module contains methods for working with user authorization via bots.',
     
     '''
     This is the name of your main module file. No need to include the .py at the end.
@@ -37,10 +37,10 @@ setup(
     '''
     If you have many modules included in your package, you want to use the following parameter instead of py_modules.
     '''
-#     packages = ['ThePackageName1',
-#                 'ThePackageName2',
-#                 ...
-#  ],
+    # packages = ['ThePackageName1',
+    #             'ThePackageName2',
+    #             ...
+    # ],
     
     '''
     Change the author name(s) and email(s) here.
@@ -57,7 +57,7 @@ setup(
     '''
     The url to where your package is stored for public view. Normally, it will be the github url to the repository you just forked.
     '''
-    url='https://github.com/obervinov/vault-package',
+    url='https://github.com/obervinov/users-package',
     
     '''
     Leave it as deafult.
