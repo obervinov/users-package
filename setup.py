@@ -9,8 +9,8 @@ setup(
     This name will be used when people try to do pip install. And it is CASE SENSITIVE. 
     You should create an unique name. Search on pypi.org to see if the name is taken or not.
     '''
-    name = 'users', 
-    
+    name = 'users',
+ 
     '''
     The version number of your package consists of three integers "Major.Minor.Patch".
     Typically, when you fix a bug, that will lead to a patch release. (e.g. 0.1.1 --> 0.1.2)
@@ -108,6 +108,6 @@ setup(
     '''
     The keywords of your package. It will help users to find your package on pypi.org
     '''
-    keywords = ['users', 'auth', 'secure'],
+    keywords = ['user', 'auth', 'secure'],
     
 )
