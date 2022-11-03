@@ -9,8 +9,8 @@ setup(
     This name will be used when people try to do pip install. And it is CASE SENSITIVE. 
     You should create an unique name. Search on pypi.org to see if the name is taken or not.
     '''
-    name = 'users',
- 
+    name = 'users', 
+    
     '''
     The version number of your package consists of three integers "Major.Minor.Patch".
     Typically, when you fix a bug, that will lead to a patch release. (e.g. 0.1.1 --> 0.1.2)
@@ -22,7 +22,7 @@ setup(
     '''
     This is the short description will show on the top of the webpage of your package on pypi.org
     '''
-    description = 'This module contains methods for working with user authorization via bots.',
+    description = 'This module contains a collection of methods for working with vault.',
     
     '''
     This is the name of your main module file. No need to include the .py at the end.
@@ -57,7 +57,7 @@ setup(
     '''
     The url to where your package is stored for public view. Normally, it will be the github url to the repository you just forked.
     '''
-    url='https://github.com/obervinov/users-package',
+    url='https://github.com/obervinov/vault-package',
     
     '''
     Leave it as deafult.
