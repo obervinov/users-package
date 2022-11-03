@@ -9,7 +9,7 @@ setup(
     This name will be used when people try to do pip install. And it is CASE SENSITIVE. 
     You should create an unique name. Search on pypi.org to see if the name is taken or not.
     '''
-    name = 'users', 
+    name = 'users',
     
     '''
     The version number of your package consists of three integers "Major.Minor.Patch".
@@ -27,7 +27,7 @@ setup(
     '''
     This is the name of your main module file. No need to include the .py at the end.
     '''    
-    py_modules = ["users"],
+    py_modules = ['users'],
     
     '''
     Leave it as default. It shows where the module is stored.
@@ -37,10 +37,12 @@ setup(
     '''
     If you have many modules included in your package, you want to use the following parameter instead of py_modules.
     '''
-    # packages = ['ThePackageName1',
-    #             'ThePackageName2',
-    #             ...
-    # ],
+    '''
+    packages = ['ThePackageName1',
+             'ThePackageName2',
+             ...
+    ],
+    '''
     
     '''
     Change the author name(s) and email(s) here.
@@ -96,13 +98,14 @@ setup(
     "~=" means the users will need a minimum version number of the dependecies to run the package.
     If you specify all the dependencies here, you do not need to write a requirements.txt separately like many others do.
     '''
-    #install_requires = [
+    '''
+    install_requires = [
 
-    #    'pandas ~= 1.2.4',
-    #    ...
+       'pandas ~= 1.2.4',
+       ...
 
-    #],
-    
+    ],
+    '''
     
     
     '''
