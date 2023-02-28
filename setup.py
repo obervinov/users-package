@@ -36,6 +36,7 @@ setup(
     ],
     keywords=['users', 'secure', 'permissions'],
     install_requires=[
-            'git+https://github.com/obervinov/logger-package.git@v1.0.0#egg=logger'
+            'git+https://github.com/obervinov/logger-package.git@v1.0.0#egg=logger',
+            'git+https://github.com/obervinov/vault-package.git@v1.1.0#egg=vault'
     ],
 )

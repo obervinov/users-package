@@ -36,25 +36,27 @@ pip3 install git+https://github.com/obervinov/users-package.git@v1.0.0#egg=users
 ```python
 """Import module"""
 import os
-from telegram import TelegramBot
 from users import UsersAuth
+
 
 """Environment variables"""
 bot_name = os.environ.get('BOT_NAME', 'my-bot')
 
-"""Init class object"""
+
+"""Create an instance of the class"""
 Users_auth = UsersAuth(Vault, bot_name)
-Telegram = TelegramBot(bot_name)
-telegram_bot = Telegram.telegram_bot
 
-"""Decorators"""
-"""Start command"""
-@telegram_bot.message_handler(commands=['start'])
-def start_message(message):
-    access_status = Users_auth.check_permission(message.chat.id)
 
-    if access_status == "success":
-        telegram_bot.send_message(message.chat.id, "Hi")
-    else:
-        log.error(f"403: Forbidden for username: {message.from_user.username}")
+"""Checking whether there is a user in the whitelist configuration
+type: str
+return value: "success" or "faild"
+"""
+access_status = Users_auth.check_permission(message.chat.id)
+
+
+"""Usage example"""
+if access_status == "success":
+   print("Hi")
+else:
+    log.error(f"403: Forbidden for username: {message.from_user.username}")
 ```

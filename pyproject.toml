@@ -38,3 +38,4 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.6.2"
 logger = { git = "https://github.com/obervinov/logger-package.git", tag = "v1.0.0" }
+vault  = { git = "https://github.com/obervinov/vault-package.git", tag = "v1.1.0" }
