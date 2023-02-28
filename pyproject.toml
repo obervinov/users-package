@@ -4,15 +4,29 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "users"
-version = "1.0.0"
-authors = [
-  { name="Bervinov Oleg", email="unknown-312@ya.ru" },
-]
-description = "This module contains methods for working with user authorization via bots."
+version = "v1.0.1"
+description = "This module contains classes and functions for implementing the simplest authorization for telegram bots"
+repository = "https://github.com/obervinov/users-package"
+documentation = "https://github.com/obervinov/users-package/blob/main/README.md"
+license = "MIT"
 readme = "README.md"
 requires-python = ">=3.9"
+authors = [
+  { name="Bervinov Oleg", email="obervinov@pm.me" },
+]
+maintainers = [
+    "Bervinov Oleg <obervinov@pm.me>",
+]
 classifiers = [
+    "Programming Language :: Python",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: Implementation :: CPython",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
@@ -20,3 +34,7 @@ classifiers = [
 [project.urls]
 "Homepage" = "https://github.com/obervinov/users-package"
 "Bug Tracker" = "https://github.com/obervinov/users-package/issues"
+
+[tool.poetry.dependencies]
+python = "^3.6.2"
+logger = { git = "https://github.com/obervinov/logger-package.git", tag = "v1.0.0" }
