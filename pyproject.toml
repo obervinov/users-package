@@ -4,18 +4,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "users"
-version = "v1.0.1"
-description = "This module contains classes and functions for implementing the simplest authorization for telegram bots"
-repository = "https://github.com/obervinov/users-package"
-documentation = "https://github.com/obervinov/users-package/blob/main/README.md"
-license = "MIT"
+version = "1.0.1"
+description = "This module contains classes and functions for implementing the simplest authorization for telegram bots."
+license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [
   { name="Bervinov Oleg", email="obervinov@pm.me" },
 ]
 maintainers = [
-    "Bervinov Oleg <obervinov@pm.me>",
+    { name="Bervinov Oleg", email="obervinov@pm.me" },
 ]
 classifiers = [
     "Programming Language :: Python",
@@ -33,9 +31,12 @@ classifiers = [
 
 [project.urls]
 "Homepage" = "https://github.com/obervinov/users-package"
+"Repository" = "https://github.com/obervinov/users-package"
 "Bug Tracker" = "https://github.com/obervinov/users-package/issues"
+"Documentation" = "https://github.com/obervinov/users-package/blob/main/README.md"
+"Changelog" = "https://github.com/obervinov/users-package/blob/main/CHANGELOG.md"
 
 [tool.poetry.dependencies]
 python = "^3.6.2"
 logger = { git = "https://github.com/obervinov/logger-package.git", tag = "v1.0.0" }
-vault  = { git = "https://github.com/obervinov/vault-package.git", tag = "v1.1.0" }
+vault  = { git = "https://github.com/obervinov/vault-package.git", tag = "v1.1.1" }

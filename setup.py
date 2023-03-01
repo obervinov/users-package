@@ -8,12 +8,11 @@ with open('CHANGELOG.md', 'r', encoding='utf8') as changelog:
 
 setup(
     name='users',
-    version='v1.0.1',
+    version='1.0.1',
     license='MIT',
     description=(
         "This module contains classes and functions for implementing"
         "the simplest authorization for telegram bots"
-
     ),
     py_modules=["users"],
     package_dir={'': 'src'},
@@ -34,9 +33,10 @@ setup(
         'Programming Language :: Python :: 3.11',
         'Operating System :: OS Independent'
     ],
-    keywords=['users', 'secure', 'permissions'],
-    install_requires=[
-            'git+https://github.com/obervinov/logger-package.git@v1.0.0#egg=logger',
-            'git+https://github.com/obervinov/vault-package.git@v1.1.0#egg=vault'
-    ],
+    keywords=['users', 'authentication'],
+    install_requires=[],
+    dependency_links=[
+        'https://github.com/obervinov/logger-package/tarball/master#egg=logger-1.0.0'
+        'https://github.com/obervinov/vault-package/tarball/master#egg=vault-1.1.1'
+    ]
 )
