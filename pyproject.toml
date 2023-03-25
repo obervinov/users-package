@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "users"
-version = "1.0.1"
+version = "1.0.2"
 description = "This module contains classes and functions for implementing the simplest authorization for telegram bots."
 license = {text = "MIT"}
 readme = "README.md"
@@ -38,5 +38,5 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.6.2"
-logger = { git = "https://github.com/obervinov/logger-package.git", tag = "v1.0.0" }
+logger = { git = "https://github.com/obervinov/logger-package.git", tag = "v1.0.1" }
 vault  = { git = "https://github.com/obervinov/vault-package.git", tag = "v1.1.1" }
