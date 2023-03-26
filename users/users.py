@@ -38,7 +38,7 @@ class UsersAuth:
         :default userid: None
         """
         permissions = self.vault_client.vault_read_secrets(
-            'configuration/premissions',
+            'configuration/permissions',
             userid
         )
         log.info(

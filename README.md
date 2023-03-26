@@ -11,6 +11,7 @@
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/book.png" width="25" title="about"> About this project
 This module contains classes and methods for implementing the simplest authorization for telegram bots.
+
 The list of rights and their binding to the user id is stored in the **Vault**, so the **Vault** is required for the module to work.
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/github-actions.png" width="25" title="github-actions"> GitHub Actions
@@ -27,9 +28,9 @@ The list of rights and their binding to the user id is stored in the **Vault**, 
 The structure that the module expects to see in the Vault to determine `user id rights`
 ```bash
 # Permissions data
- % vault kv get configuration/premissions
+ % vault kv get configuration/permissions
 ========= Secret Path =========
-configuration/data/premissions
+configuration/data/permissions
 
 ======= Metadata =======
 Key                Value
@@ -83,7 +84,7 @@ Key                           Value
 
 The `policy `required by the module when interacting with **Vault**
 ```bash
-path "${mount_point}/configuration/data/premissions" {
+path "${mount_point}/configuration/data/permissions" {
   capabilities = ["read", "list"]
 }
 path "${mount_point}/events/login/*" {
