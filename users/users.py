@@ -1,5 +1,5 @@
 """
-This module contains classes and functions for implementing
+This module contains classes and methods for implementing
 the simplest authorization for telegram bots
 """
 import datetime
@@ -8,7 +8,7 @@ from logger import log
 
 class UsersAuth:
     """
-    This class contains functions for performing the simplest authorization in telegram bots
+    This class contains methods for performing the simplest authorization in telegram bots
     """
 
     def __init__(

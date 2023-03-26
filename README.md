@@ -27,7 +27,7 @@ The list of rights and their binding to the user id is stored in the **Vault**, 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="functions"> Data structure in Vault
 The structure that the module expects to see in the Vault to determine `user id rights`
 ```bash
-# Permissions data
+# permissions data
  % vault kv get configuration/permissions
 ========= Secret Path =========
 configuration/data/permissions
@@ -52,7 +52,7 @@ Key         Value
 The structure in which the module stores `login events`
 ```bash
 # Login events keys
- % vault kv ls events/login
+ % vault kv list events/login
 Keys
 ----
 123456
@@ -82,7 +82,7 @@ Key                           Value
 ```
 
 
-The `policy `required by the module when interacting with **Vault**
+The `policy` required by the module when interacting with **Vault**
 ```bash
 path "${mount_point}/configuration/data/permissions" {
   capabilities = ["read", "list"]
