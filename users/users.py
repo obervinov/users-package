@@ -36,8 +36,10 @@ class UsersAuth:
         :param userid: User id of telegram account to check rights on whitelist.
         :type userid: int
         :default userid: None
+        
+        :return 'allow' or 'deny'
         """
-        permissions = self.vault_client.vault_read_secrets(
+        permission = self.vault_client.vault_read_secrets(
             'configuration/permissions',
             userid
         )
@@ -46,32 +48,49 @@ class UsersAuth:
             __class__.__name__,
             userid
         )
-        if permissions == 'allow':
+        if permission == 'allow':
             log.info(
                 '[class.%s] access allowed from user id %s',
                 __class__.__name__,
                 userid
             )
-            self.vault_client.vault_put_secrets(
-                'events/login',
+            self.record_event(
                 userid,
-                {
-                    'time': datetime.datetime.now(),
-                    'action': 'allow'
-                }
+                permission
             )
-            return 'allow'
+            return permission
         log.error(
             '[class.%s] access denided from user id %s',
             __class__.__name__,
             userid
         )
+        self.record_event(
+            userid,
+            permission
+        )
+        return permission
+
+
+    def record_event(
+        self,
+        userid,
+        action
+    ) -> None:
+        """
+        This method records the login event to the Vault.
+        
+        :param userid: User id of telegram account to check rights on whitelist.
+        :type userid: int
+        :default userid: None
+        :param action: Response from the check_permissions() with permissions for the user ID.
+        :type action: str
+        :default action: None
+        """
         self.vault_client.vault_put_secrets(
             'events/login',
             userid,
             {
                 'time': datetime.datetime.now(),
-                'action': 'deny'
+                'action': action
             }
         )
-        return 'deny'

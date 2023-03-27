@@ -45,8 +45,7 @@ version            1
 Key         Value
 ---         -----
 123456      allow
-123457      allow
-123458      deny
+654321      deny
 ```
 
 The structure in which the module stores `login events`
@@ -56,8 +55,7 @@ The structure in which the module stores `login events`
 Keys
 ----
 123456
-123457
-123458
+654321
 
 # Login events data
  % vault kv get events/login/123456
