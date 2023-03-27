@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 * renamed method `check_permission()` -> `check_permissions()`
 * renamed argument `chatid` -> `userid` in method `check_permissions()`
 * changed the return result `success`/`failed` -> `allow`/`deny`
+* The functionality of recording events in Vault has been moved to a separate method - [`record_event()`](https://github.com/obervinov/users-package/blob/v1.0.2/users/users.py#L74)
 #### 🚀 Features
 * updated [GitHub Actions](https://github.com/obervinov/_templates/tree/v1.0.2) version to `v1.0.2`
 * updated [logger-package](https://github.com/obervinov/logger-package/tree/v1.0.1) version to `v1.0.1`
