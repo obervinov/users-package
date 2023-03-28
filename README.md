@@ -50,14 +50,14 @@ Key         Value
 
 The structure in which the module stores `login events`
 ```bash
-# Login events keys
+# login events keys
  % vault kv list events/login
 Keys
 ----
 123456
 654321
 
-# Login events data
+# login events data
  % vault kv get events/login/123456
 ========= Secret Path =========
 events/login/data/123456
@@ -69,7 +69,7 @@ created_time       2023-03-26T08:00:00.000000000Z
 custom_metadata    <nil>
 deletion_time      n/a
 destroyed          false
-version            1
+version            3
 
 ====== Data ======
 Key                           Value
@@ -103,17 +103,16 @@ pip3 install git+https://github.com/obervinov/users-package.git@v1.0.0#egg=users
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/config.png" width="25" title="usage"> Usage example
 ```python
-"""Import module"""
+# import module
 import os
 from users import UsersAuth
 
-"""Create an instance of the class"""
+# create an instance of the class
 users_auth = UsersAuth(vault_client)
 
-"""Checking whether there is a user in the whitelist configuration
-type: str
-return value: "allow" or "deny"
-"""
+# checking permissions for userid
+# type: str
+# return: "allow" or "deny"
 if users_auth.check_permissions(message.chat.id) == "allow":
    print("Hi")
 ```
