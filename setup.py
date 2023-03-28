@@ -8,7 +8,7 @@ with open('CHANGELOG.md', 'r', encoding='utf8') as changelog:
 
 setup(
     name='users',
-    version='1.0.1',
+    version='1.0.2',
     license='MIT',
     description=(
         "This module contains classes and functions for implementing"
@@ -33,10 +33,10 @@ setup(
         'Programming Language :: Python :: 3.11',
         'Operating System :: OS Independent'
     ],
-    keywords=['users', 'authentication'],
+    keywords=['users', 'authentication', 'secure'],
     install_requires=[],
     dependency_links=[
-        'https://github.com/obervinov/logger-package/tarball/master#egg=logger-1.0.0'
+        'https://github.com/obervinov/logger-package/tarball/master#egg=logger-1.0.1'
         'https://github.com/obervinov/vault-package/tarball/master#egg=vault-1.1.1'
     ]
 )

@@ -414,11 +414,7 @@ confidence=HIGH,
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
-disable=W1203,
-        R0903
-# W1203 - logging-fstring-interpolation
-# https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html
-# f"{var}" because this approach to string formation looks more readable than %s
+disable=
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
