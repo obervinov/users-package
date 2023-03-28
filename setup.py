@@ -15,7 +15,7 @@ setup(
         "the simplest authorization for telegram bots"
     ),
     py_modules=["users"],
-    package_dir={'': 'src'},
+    package_dir={'': 'users'},
     author='Oleg Bervinov',
     author_email='obervinov@pm.me',
     long_description=(f"{readme_content}""\n\n"f"{changelog_content}"),
