@@ -30,14 +30,12 @@ class UsersAuth:
         userid: int = None
     ) -> str:
         """
-        This method checks the chat ID passed to it for the presence in the vault whitelist.
-        After verification, it blocks by writing to the vault.
+        This method checks the rights of the user ID passed to it.
         
-        :param userid: User id of telegram account to check rights on whitelist.
+        :param userid: User id of telegram account to check rights.
         :type userid: int
         :default userid: None
-        
-        :return 'allow' or 'deny'
+        return: 'allow' or 'deny'
         """
         permission = self.vault_client.vault_read_secrets(
             'configuration/permissions',
@@ -77,9 +75,9 @@ class UsersAuth:
         action
     ) -> None:
         """
-        This method records the login event to the Vault.
+        This method writes the login event by user id to the vault.
         
-        :param userid: User id of telegram account to check rights on whitelist.
+        :param userid: User id of telegram account to check rights.
         :type userid: int
         :default userid: None
         :param action: Response from the check_permissions() with permissions for the user ID.
