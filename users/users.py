@@ -41,7 +41,7 @@ class UsersAuth:
                 or
             (str) 'deny'
         """
-        permission = self.vault.vault_read_secrets(
+        permission = self.vault.read_secret(
             'configuration/permissions',
             userid
         )
@@ -87,7 +87,7 @@ class UsersAuth:
         Returns:
             None
         """
-        self.vault.vault_put_secrets(
+        self.vault.vault_write_secret(
             'events/login',
             userid,
             {
