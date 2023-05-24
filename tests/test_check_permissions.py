@@ -21,9 +21,3 @@ def test_check_permissions():
     for userid, permissions in permissions_mapping.items():
         mock_vault.vault_read_secrets.return_value = permissions
         assert users_auth.check_permissions(userid) == permissions
-
-
-
-if __name__ == "__main__":
-    test_check_permissions()
-    print("Test with check_permissions - passed")

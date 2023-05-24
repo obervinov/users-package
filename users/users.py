@@ -1,5 +1,5 @@
 """
-This module contains classes and methods for implementing
+This module contains class and methods for implementing
 the simplest authorization for telegram bots
 """
 import datetime
@@ -13,17 +13,18 @@ class UsersAuth:
 
     def __init__(
         self,
-        vault_client: object = None
+        vault: object = None
     ) -> None:
         """
-        A method for create a new UserAuth client instance.
-        
-        :param vault_client: Vault object for interacting with the vault api.
-        :type vault_client: object
-        :default vault_client: None
-        """
-        self.vault_client = vault_client
+        A method for create a new Users Auth instance.
 
+        Args:
+            :param vault (object): vault instance for interacting with the vault api.
+
+        Returns:
+            None
+        """
+        self.vault = vault
 
     def check_permissions(
         self,
@@ -31,13 +32,16 @@ class UsersAuth:
     ) -> str:
         """
         This method checks the rights of the user ID passed to it.
-        
-        :param userid: User id of telegram account to check rights.
-        :type userid: int
-        :default userid: None
-        return: 'allow' or 'deny'
+
+        Args:
+            :param userid (int): user id of telegram account to check rights.
+
+        Returns:
+            (str) 'allow'
+                or
+            (str) 'deny'
         """
-        permission = self.vault_client.vault_read_secrets(
+        permission = self.vault.vault_read_secrets(
             'configuration/permissions',
             userid
         )
@@ -68,7 +72,6 @@ class UsersAuth:
         )
         return permission
 
-
     def record_event(
         self,
         userid,
@@ -76,15 +79,15 @@ class UsersAuth:
     ) -> None:
         """
         This method writes the login event by user id to the vault.
-        
-        :param userid: User id of telegram account to check rights.
-        :type userid: int
-        :default userid: None
-        :param action: Response from the check_permissions() with permissions for the user ID.
-        :type action: str
-        :default action: None
+
+        Args:
+            :param userid (int): user id of telegram account to check rights.
+            :param action (str): response with permissions for the user ID.
+
+        Returns:
+            None
         """
-        self.vault_client.vault_put_secrets(
+        self.vault.vault_put_secrets(
             'events/login',
             userid,
             {
