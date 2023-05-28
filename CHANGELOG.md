@@ -3,14 +3,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## v1.0.3 - 2023-05-24
+## v1.0.3 - 2023-05-29
 ### What's Changed
-**Full Changelog**: https://github.com/obervinov/users-package/compare/v1.0.2...v1.0.3 by @obervinov in https://github.com/obervinov/users-package/pull/4
-#### 🐛 Bug Fixes and 🚀 Features
-* https://github.com/obervinov/users-package/issues/6
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v1.0.2...v1.0.3 by @obervinov in https://github.com/obervinov/users-package/pull/9
+#### 🐛 Bug Fixes
+* https://github.com/obervinov/users-package/issues/12
+* https://github.com/obervinov/users-package/issues/11
+#### 🚀 Features
+* https://github.com/obervinov/users-package/issues/10
 * https://github.com/obervinov/users-package/issues/8
+* https://github.com/obervinov/users-package/issues/6
 #### 📚 Documentation
-
+* https://github.com/obervinov/users-package/issues/7
 
 ## v1.0.2 - 2023-03-28
 ### What's Changed
