@@ -28,55 +28,51 @@ class UsersAuth:
 
     def check_permissions(
         self,
-        userid: int = None
+        userid: str = None
     ) -> str:
         """
         This method checks the rights of the user ID passed to it.
 
         Args:
-            :param userid (int): user id of telegram account to check rights.
+            :param userid (str): user id of telegram account to check rights.
 
         Returns:
             (str) 'allow'
                 or
             (str) 'deny'
         """
-        permission = self.vault.read_secret(
-            'configuration/permissions',
-            userid
-        )
-        log.info(
-            '[class.%s] checking permissions from user id %s',
-            __class__.__name__,
-            userid
-        )
-        if permission == 'allow':
-            log.info(
-                '[class.%s] access allowed from user id %s',
-                __class__.__name__,
-                userid
+        try:
+            permissions = self.vault.read_secret(
+                path='configuration/permissions',
+                key=str(userid)
             )
-            self.record_event(
-                userid,
-                permission
-            )
-            return permission
+            if permissions == 'allow':
+                log.info(
+                    '[class.%s] access allowed from userid %s',
+                    __class__.__name__,
+                    userid
+                )
+                return self.record_event(
+                    userid,
+                    permissions
+                )
+        except KeyError:
+            permissions = 'deny'
         log.error(
-            '[class.%s] access denided from user id %s',
+            '[class.%s] access denided from userid %s',
             __class__.__name__,
             userid
         )
-        self.record_event(
+        return self.record_event(
             userid,
-            permission
+            permissions
         )
-        return permission
 
     def record_event(
         self,
         userid,
         action
-    ) -> None:
+    ) -> str:
         """
         This method writes the login event by user id to the vault.
 
@@ -85,13 +81,16 @@ class UsersAuth:
             :param action (str): response with permissions for the user ID.
 
         Returns:
-            None
+            (str) 'allow'
+                or
+            (str) 'deny'
         """
-        self.vault.vault_write_secret(
-            'events/login',
-            userid,
-            {
-                'time': datetime.datetime.now(),
+        self.vault.write_secret(
+            path='events/login',
+            key=userid,
+            value={
+                'time': str(datetime.datetime.now()),
                 'action': action
             }
         )
+        return action
