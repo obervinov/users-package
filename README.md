@@ -106,7 +106,7 @@ users_auth = UsersAuth(
 
 # checking permissions for userid
 # type: str
-# return: "allow" or "deny"
+# returns: "allow" or "deny"
 if users_auth.check_permissions(message.chat.id) == "allow":
    print("Hi")
 else:
