@@ -37,11 +37,11 @@ setup(
     ],
     keywords=['users', 'authentication'],
     install_requires=[
-        'logger @ git+ssh://git@github.com/obervionv/logger-package@v1.0.1',
-        'vault @ git+ssh://git@github.com/obervionv/vault-package@v2.0.0',
+        'logger @ https://github.com/obervinov/logger-package/tarball/v1.0.1#egg=logger-1.0.1',
+        'vault @ https://github.com/obervinov/vault-package/tarball/v2.0.0#egg=vault-2.0.0',
     ],
     dependency_links=[
-        'https://github.com/obervinov/logger-package/tarball/master#egg=logger-1.0.1'
-        'https://github.com/obervinov/vault-package/tarball/master#egg=vault-2.0.0'
+        'https://github.com/obervinov/logger-package/tarball/v1.0.1#egg=logger-1.0.1'
+        'https://github.com/obervinov/vault-package/tarball/v2.0.0#egg=vault-2.0.0'
     ]
 )
