@@ -84,8 +84,6 @@ The `policy` required by the module when interacting with **Vault**
 An example of a policy with all the necessary rights and a description can be found [here](tests/vault/policy.hcl)
 
 
-```
-
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/stack2.png" width="20" title="install"> Installing
 ```bash
 # Install current version
