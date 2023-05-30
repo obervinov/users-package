@@ -36,7 +36,10 @@ setup(
         'Operating System :: OS Independent'
     ],
     keywords=['users', 'authentication'],
-    install_requires=[],
+    install_requires=[
+        'https://github.com/obervinov/logger-package/tarball/master#egg=logger-1.0.1'
+        'https://github.com/obervinov/vault-package/tarball/master#egg=vault-2.0.0'
+    ],
     dependency_links=[
         'https://github.com/obervinov/logger-package/tarball/master#egg=logger-1.0.1'
         'https://github.com/obervinov/vault-package/tarball/master#egg=vault-2.0.0'

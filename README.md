@@ -17,11 +17,11 @@ The list of rights and their binding to the user id is stored in the **Vault**, 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/github-actions.png" width="25" title="github-actions"> GitHub Actions
 | Name  | Version |
 | ------------------------ | ----------- |
-| GitHub Actions Templates | [v1.0.2](https://github.com/obervinov/_templates/tree/v1.0.2) |
+| GitHub Actions Templates | [v1.0.4](https://github.com/obervinov/_templates/tree/v1.0.4) |
 
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="functions"> Supported functions
-- Check permissions for user id
+- Check permissions for `userid`
 - Recording events about logging into the vault
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="functions"> Data structure in Vault
@@ -104,15 +104,18 @@ pip3 install git+https://github.com/obervinov/users-package.git@v1.0.0#egg=users
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/config.png" width="25" title="usage"> Usage example
 ```python
 # import module
-import os
 from users import UsersAuth
 
 # create an instance of the class
-users_auth = UsersAuth(vault_client)
+users_auth = UsersAuth(
+  vault=vault_client
+)
 
 # checking permissions for userid
 # type: str
 # return: "allow" or "deny"
 if users_auth.check_permissions(message.chat.id) == "allow":
    print("Hi")
+else:
+  print("By")
 ```
