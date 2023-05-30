@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 #### 🐛 Bug Fixes
 * https://github.com/obervinov/users-package/issues/12
 * https://github.com/obervinov/users-package/issues/11
+* https://github.com/obervinov/users-package/issues/13
 #### 🚀 Features
 * https://github.com/obervinov/users-package/issues/10
 * https://github.com/obervinov/users-package/issues/8

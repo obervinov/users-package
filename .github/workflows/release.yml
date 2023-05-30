@@ -8,3 +8,4 @@ on:
 jobs:
   create-release:
     uses: obervinov/_templates/.github/workflows/create.release.yml@v1.0.4
+    needs: [pylint, verify-package, verify-changelog, pytest]
