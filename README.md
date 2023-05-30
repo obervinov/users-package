@@ -17,18 +17,18 @@ The list of rights and their binding to the user id is stored in the **Vault**, 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/github-actions.png" width="25" title="github-actions"> GitHub Actions
 | Name  | Version |
 | ------------------------ | ----------- |
-| GitHub Actions Templates | [v1.0.2](https://github.com/obervinov/_templates/tree/v1.0.2) |
+| GitHub Actions Templates | [v1.0.4](https://github.com/obervinov/_templates/tree/v1.0.4) |
 
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="functions"> Supported functions
-- Check permissions for user id
+- Check permissions for `userid`
 - Recording events about logging into the vault
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="functions"> Data structure in Vault
 The structure that the module expects to see in the Vault to determine `user id rights`
 ```bash
 # permissions data
- % vault kv get configuration/permissions
+ % vault kv get ${mount_point}/configuration/permissions
 ========= Secret Path =========
 configuration/data/permissions
 
@@ -51,14 +51,14 @@ Key         Value
 The structure in which the module stores `login events`
 ```bash
 # login events keys
- % vault kv list events/login
+ % vault kv list ${mount_point}/events/login
 Keys
 ----
 123456
 654321
 
 # login events data
- % vault kv get events/login/123456
+ % vault kv get ${mount_point}/events/login/123456
 ========= Secret Path =========
 events/login/data/123456
 
@@ -81,15 +81,8 @@ Key                           Value
 
 
 The `policy` required by the module when interacting with **Vault**
-```bash
-path "${mount_point}/configuration/data/permissions" {
-  capabilities = ["read", "list"]
-}
-path "${mount_point}/events/login/*" {
-  capabilities = ["read", "list", "create", "update"]
-}
+An example of a policy with all the necessary rights and a description can be found [here](tests/vault/policy.hcl)
 
-```
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/stack2.png" width="20" title="install"> Installing
 ```bash
@@ -104,15 +97,18 @@ pip3 install git+https://github.com/obervinov/users-package.git@v1.0.0#egg=users
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/config.png" width="25" title="usage"> Usage example
 ```python
 # import module
-import os
 from users import UsersAuth
 
 # create an instance of the class
-users_auth = UsersAuth(vault_client)
+users_auth = UsersAuth(
+  vault=vault_client
+)
 
 # checking permissions for userid
 # type: str
-# return: "allow" or "deny"
+# returns: "allow" or "deny"
 if users_auth.check_permissions(message.chat.id) == "allow":
    print("Hi")
+else:
+  print("By")
 ```

@@ -1,4 +1,6 @@
-"""This module is necessary to distribute and install the written module via pip"""
+"""
+This module is necessary to distribute and install the written module via pip
+"""
 from setuptools import setup
 
 with open('README.md', 'r', encoding='utf8') as readme:
@@ -8,7 +10,7 @@ with open('CHANGELOG.md', 'r', encoding='utf8') as changelog:
 
 setup(
     name='users',
-    version='1.0.2',
+    version='1.0.3',
     license='MIT',
     description=(
         "This module contains classes and functions for implementing"
@@ -33,10 +35,13 @@ setup(
         'Programming Language :: Python :: 3.11',
         'Operating System :: OS Independent'
     ],
-    keywords=['users', 'authentication', 'secure'],
-    install_requires=[],
+    keywords=['users', 'authentication'],
+    install_requires=[
+        'logger @ https://github.com/obervinov/logger-package/tarball/v1.0.1#egg=logger-1.0.1',
+        'vault @ https://github.com/obervinov/vault-package/tarball/v2.0.0#egg=vault-2.0.0',
+    ],
     dependency_links=[
-        'https://github.com/obervinov/logger-package/tarball/master#egg=logger-1.0.1'
-        'https://github.com/obervinov/vault-package/tarball/master#egg=vault-1.1.1'
+        'https://github.com/obervinov/logger-package/tarball/v1.0.1#egg=logger-1.0.1'
+        'https://github.com/obervinov/vault-package/tarball/v2.0.0#egg=vault-2.0.0'
     ]
 )
