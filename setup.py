@@ -10,7 +10,7 @@ with open('CHANGELOG.md', 'r', encoding='utf8') as changelog:
 
 setup(
     name='users',
-    version='1.0.3',
+    version='1.0.4',
     license='MIT',
     description=(
         "This module contains classes and functions for implementing"
@@ -26,14 +26,10 @@ setup(
     include_package_data=True,
     classifiers=[
         "License :: OSI Approved :: MIT License",
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: 3.11',
-        'Operating System :: OS Independent'
+        "Programming Language :: Python :: 3.10",
+        "Operating System :: OS Independent",
+        "Intended Audience :: Developers",
+        "Topic :: Software Development"
     ],
     keywords=['users', 'authentication'],
     install_requires=[

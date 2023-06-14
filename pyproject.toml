@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "users"
-version = "1.0.3"
+version = "1.0.4"
 description = "This module contains classes and functions for implementing the simplest authorization for telegram bots."
 license = {text = "MIT"}
 readme = "README.md"
