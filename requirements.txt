@@ -1,2 +1,2 @@
-git+https://github.com/obervinov/logger-package.git@v1.0.1#egg=logger
-git+https://github.com/obervinov/vault-package.git@v2.0.0#egg=vault
+logger @ git+https://github.com/obervinov/logger-package.git@v1.0.1
+vault @ git+https://github.com/obervinov/vault-package.git@v2.0.0
