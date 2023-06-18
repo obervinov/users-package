@@ -2,20 +2,27 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.0.4 - 2023-06-18
+### What's Changed
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v1.0.3...v1.0.4 by @obervinov in https://github.com/obervinov/users-package/pull/15
+#### 🐛 Bug Fixes
+* [Fix work with transit dependencies in setup.py](https://github.com/obervinov/users-package/issues/14)
+#### 📚 Documentation
+* [Add a description to the links in CHANGELOG.md](https://github.com/obervinov/users-package/issues/16)
 
 ## v1.0.3 - 2023-05-31
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v1.0.2...v1.0.3 by @obervinov in https://github.com/obervinov/users-package/pull/9
 #### 🐛 Bug Fixes
-* https://github.com/obervinov/users-package/issues/12
-* https://github.com/obervinov/users-package/issues/11
-* https://github.com/obervinov/users-package/issues/13
+* [Delete a block in tests if "name" == "main"](https://github.com/obervinov/users-package/issues/12)
+* [Check how the module behaves if the user_id is not recorded in the vault](https://github.com/obervinov/users-package/issues/11)
+* [Add dependencies between tasks in the GitHub Actions](https://github.com/obervinov/users-package/issues/13)
 #### 🚀 Features
-* https://github.com/obervinov/users-package/issues/10
-* https://github.com/obervinov/users-package/issues/8
-* https://github.com/obervinov/users-package/issues/6
+* [Add support for the new version of the vault-package:v2.0.0](https://github.com/obervinov/users-package/issues/10)
+* [Replace the mock with a vault container for pytests](https://github.com/obervinov/users-package/issues/8)
+* [GitHub Actions workflow updates: 2023.05.22](https://github.com/obervinov/users-package/issues/6)
 #### 📚 Documentation
-* https://github.com/obervinov/users-package/issues/7
+* [Documentation updates: pr template](https://github.com/obervinov/users-package/issues/7)
 
 ## v1.0.2 - 2023-03-28
 ### What's Changed
