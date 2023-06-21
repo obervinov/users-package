@@ -14,6 +14,11 @@ path "testapp-1/config" {
   capabilities = ["read", "list", "update"]
 }
 # For module
+# To work with secret event data
+path "auth/token/lookup-self" {
+  capabilities = ["read"]
+}
+# For module
 # To work with secret apllication data
 path "testapp-1/data/configuration/*" {
   capabilities = ["create", "read", "update", "list"]
