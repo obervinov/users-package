@@ -8,7 +8,12 @@ path "auth/token/lookup" {
 path "auth/token/revoke" {
   capabilities = ["update"]
 }
-# For pytest
+# For module
+# To work with secret event data
+path "auth/token/lookup-self" {
+  capabilities = ["read"]
+}
+# For module
 # To read and update the namespace configuration
 path "testapp-1/config" {
   capabilities = ["read", "list", "update"]

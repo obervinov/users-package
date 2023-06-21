@@ -10,7 +10,7 @@ with open('CHANGELOG.md', 'r', encoding='utf8') as changelog:
 
 setup(
     name='users',
-    version='1.0.4',
+    version='1.0.5',
     license='MIT',
     description=(
         "This module contains classes and functions for implementing"
@@ -34,6 +34,6 @@ setup(
     keywords=['users', 'authentication'],
     install_requires=[
         'logger @ git+https://github.com/obervinov/logger-package.git@v1.0.1',
-        'vault @ git+https://github.com/obervinov/vault-package.git@v2.0.0',
+        'vault @ git+https://github.com/obervinov/vault-package.git@v2.0.1',
     ]
 )
