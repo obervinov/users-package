@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## v2.0.0 - 2023-10-22
+### What's Changed
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v1.0.5...v2.0.0 by @obervinov in https://github.com/obervinov/users-package/pull/24
+#### 🐛 Bug Fixes
+* 
+#### 🚀 Features
+* (Update template workflow to v1.0.5)[https://github.com/obervinov/users-package/issues/23]
+
+
 ## v1.0.5 - 2023-06-21
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v1.0.4...v1.0.5 by @obervinov in https://github.com/obervinov/users-package/pull/20
@@ -47,7 +57,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 * [changed the structure](https://github.com/obervinov/users-package/tree/v1.0.2#-data-structure-in-vault) of saving **login events** and the structure of storing **access rights** for **user ids**
 * removed `bot_name` argument in `UsersAuth.__init__`
 * renamed method `check_permission()` -> `check_permissions()`
-* renamed argument `chatid` -> `userid` in method `check_permissions()`
+* renamed argument `chat_id` -> `user_id` in method `check_permissions()`
 * changed the return result `success`/`failed` -> `allow`/`deny`
 * the functionality of recording events in Vault has been moved to a separate method - [`record_event()`](https://github.com/obervinov/users-package/blob/v1.0.2/users/users.py#L74)
 #### 🚀 Features

@@ -17,11 +17,11 @@ The list of rights and their binding to the user id is stored in the **Vault**, 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/github-actions.png" width="25" title="github-actions"> GitHub Actions
 | Name  | Version |
 | ------------------------ | ----------- |
-| GitHub Actions Templates | [v1.0.4](https://github.com/obervinov/_templates/tree/v1.0.4) |
+| GitHub Actions Templates | [v1.0.5](https://github.com/obervinov/_templates/tree/v1.0.5) |
 
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="functions"> Supported functions
-- Check permissions for `userid`
+- Check permissions for `user_id`
 - Recording events about logging into the vault
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="functions"> Data structure in Vault
@@ -104,7 +104,7 @@ users_auth = UsersAuth(
   vault=vault_client
 )
 
-# checking permissions for userid
+# checking permissions for user_id
 # type: str
 # returns: "allow" or "deny"
 if users_auth.check_permissions(message.chat.id) == "allow":

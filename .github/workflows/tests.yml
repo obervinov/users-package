@@ -17,4 +17,5 @@ jobs:
   verify-changelog:
     uses: obervinov/_templates/.github/workflows/verify.changelog.yml@v1.0.5
   pytest:
+    # yamllint disable-line rule:line-length
     uses: obervinov/_templates/.github/workflows/test.pytest-with-vault.yml@v1.0.5
