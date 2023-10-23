@@ -54,30 +54,36 @@ class Users:
 
         Returns:
             (dict) {
-                'access': allowed/denied,
-                'permissions': allowed/denied/None
+                'access': allowed/denied
             }
               or
             (dict) {
                 'access': allowed/denied,
-                'permissions': allowed/denied/None,
-                'rate_limits': None
+                'permissions': allowed/denied
             }
               or
             (dict) {
                 'access': allowed/denied,
-                'permissions': allowed/denied/None,
+                'permissions': allowed/denied,
                 'rate_limits': {
                     'end_time': '2023-08-06 11:47:09.440933',
                 }
             }
+              or
+            (dict) {
+                'access': allowed/denied,
+                'permissions': allowed/denied,
+                'rate_limits': {
+                    'end_time': None,
+                }
+            }
         """
         user_info = {}
+
         user_info['access'] = self.authentication(
             user_id=user_id
         )
-
-        if user_info['access'] == 'allowed':
+        if user_info['access'] == 'allowed' and role_id:
             user_info['permissions'] = self.authorization(
                 user_id=user_id,
                 role_id=role_id
@@ -258,10 +264,10 @@ class Users:
 
         # If rate limits need to apply
         elif (
-            requests_configuration['requests_per_day'] < requests_counters['requests_per_day'] or
-            requests_configuration['requests_per_hour'] < requests_counters['requests_per_hour']
+            requests_configuration['requests_per_day'] <= requests_counters['requests_per_day'] or
+            requests_configuration['requests_per_hour'] <= requests_counters['requests_per_hour']
         ):
-            if requests_configuration['requests_per_day'] < requests_counters['requests_per_day']:
+            if requests_configuration['requests_per_day'] <= requests_counters['requests_per_day']:
                 log.warning(
                     '[class.%s] the request limits are exhausted (per_day), '
                     'the rate limit will be applied for user_id %s',
@@ -271,7 +277,7 @@ class Users:
                 requests_ratelimits['end_time'] = str(datetime.now() + timedelta(days=1))
                 requests_counters['requests_per_day'] = 0
                 requests_counters['requests_per_hour'] = requests_counters['requests_per_hour'] + 1
-            elif requests_configuration['requests_per_hour'] < requests_counters['requests_per_hour']:
+            elif requests_configuration['requests_per_hour'] <= requests_counters['requests_per_hour']:
                 log.warning(
                     '[class.%s] the request limits are exhausted (per_hour), '
                     'the rate limit will be applied for user_id %s',
@@ -301,8 +307,8 @@ class Users:
 
         # If don't need to apply rate limits
         elif (
-            requests_configuration['requests_per_day'] >= requests_counters['requests_per_day'] and
-            requests_configuration['requests_per_hour'] >= requests_counters['requests_per_hour'] and
+            requests_configuration['requests_per_day'] > requests_counters['requests_per_day'] and
+            requests_configuration['requests_per_hour'] > requests_counters['requests_per_hour'] and
             consider_request
         ):
             log.info(

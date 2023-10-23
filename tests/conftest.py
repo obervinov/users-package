@@ -8,7 +8,7 @@ import time
 import requests
 import pytest
 from vault import VaultClient
-from users import Users
+from users.users import Users
 
 
 def pytest_configure(config):
@@ -273,21 +273,21 @@ def fixture_users_data(vault):
     # - request limit exceeded
     # - restrictions on requests don't apply
     test_user7 = {
-        'requests_counters': {'requests_per_day': 11, 'requests_per_hour': 0},
+        'requests_counters': {'requests_per_day': 10, 'requests_per_hour': 0},
         'rate_limits': {'end_time': None}
     }
     # Test user8: detect and setup rate limits timestamps (for requests_per_hour)
     # - request limit exceeded
     # - restrictions on requests don't apply
     test_user8 = {
-        'requests_counters': {'requests_per_day': 1, 'requests_per_hour': 2},
+        'requests_counters': {'requests_per_day': 1, 'requests_per_hour': 1},
         'rate_limits': {'end_time': None}
     }
     # Test user9: detect and setup rate limits timestamps (for both)
     # - request limit exceeded
     # - restrictions on requests don't apply
     test_user9 = {
-        'requests_counters': {'requests_per_day': 11, 'requests_per_hour': 2},
+        'requests_counters': {'requests_per_day': 10, 'requests_per_hour': 1},
         'rate_limits': {'end_time': None}
     }
     # Test user10: reset expired rate limit
