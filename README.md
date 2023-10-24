@@ -66,73 +66,72 @@ This project is a Python module designed to simplify the creation and management
 
 - This module requires a dependency in the form of a Vault server for storing user configurations.
 
-This project simplifies the management of user interactions for bot developers, making it easier to handle user access, permissions, and rate limits.
+This project simplifies the management of user attributes, access rights and request restrictions for telegram bot developers.
 
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="methods"> Description of class methods
 | Method Name | Description | Arguments | Usage Examples | Returns Examples | Configuration Path | History Path |
 |-------------|-------------|-----------|----------|----------|---------------------|-----------------------|
-| `__init__` | Creates a new Users instance. | `vault (object)`: Vault instance for interacting with the Vault API. `rate_limits (bool)`: Enable the rate limit function. | `users = Users(vault=vault_client)` | N/A | N/A | N/A |
-| `user_access_check` | Main entry point for authentication, authorization, and rate limit verification. | `user_id (str)`: Required user ID. `role_id (str)`: Required role ID for the specified user ID. | `user_info = users.user_access_check(user_id='user1', role_id='admin_role')` | `{'access': allowed,'permissions': allowed,'rate_limits': {'end_time': '2023-08-06 11:47:09.440933'}}` | N/A | N/A |
+| `__init__` | Creates a new Users instance. | `vault (object)`: Vault instance for interacting with the Vault API. `rate_limits (bool)`: Enable the rate limit function. | `Users(vault=vault_client)` | N/A | N/A | N/A |
+| `user_access_check` | Main entry point for authentication, authorization, and rate limit verification. | `user_id (str)`: Required user ID. `role_id (str)`: Required role ID for the specified user ID. | `users.user_access_check(user_id='user1', role_id='admin_role')` | `{'access': allowed,'permissions': allowed,'rate_limits': {'end_time': '2023-08-06 11:47:09.440933'}}` | N/A | N/A |
 | `authentication` | Checks if the specified user ID has access to the bot. | `user_id (str)`: Required user ID. | `authentication(user_id='user1')` | `allowed` or `denied` | `configuration/users/{user_id}:status` reads configuration in Vault to determine access status. | `data/users/{user_id}:authentication` writes authentication data to Vault. |
 | `authorization` | Checks whether the user has the specified role. | `user_id (str)`: Required user ID. `role_id (str)`: Required role ID for the specified user ID. | `authorization(user_id='user1', role_id='admin_role')` | `allowed` or `denied` | `configuration/users/{user_id}:roles` reads configuration in Vault to determine role status. | `data/users/{user_id}:authorization` writes authorization data to Vault. |
 | `rl_controller` | Takes into account user requests and applies rate limits as needed. | `user_id (str)`: Required user ID. `consider_request (bool)`: Specifies whether the method should include the current request in the request counters. | `rl_controller(user_id='user1')` | `{'end_time': None}` or `{'end_time': '2023-08-06 11:47:09.440933'}` | `configuration/users/{user_id}:requests` reads configuration and `data/users/{user_id}:requests_counters` reads history counters in Vault. | `data/users/{user_id}:rate_limits` writes rate limit data and `data/users/{user_id}:requests_counters` writes requests counters to Vault. |
 
 
-## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="functions"> Data structure in Vault
-The structure that the module expects to see in the Vault to determine `user id rights`
-```bash
-# permissions data
- % vault kv get ${mount_point}/configuration/permissions
-========= Secret Path =========
-configuration/data/permissions
+## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="data-structure"> Structure of configuration and statistics data in vault
+This project uses a Vault server with the KV2 engine to store and retrieve configuration data.
+It supports user configurations to define system access rights, roles, and request restrictions.
 
-======= Metadata =======
-Key                Value
----                -----
-created_time       2023-03-26T08:00:00.000000000Z
-custom_metadata    <nil>
-deletion_time      n/a
-destroyed          false
-version            1
+### Users Configuration
+- **path to the secret**: `configuration/users/user1`
+- **keys and Values**:
+  - `status`: The status of user access, which can be either 'allowed' or 'denied'.
+  - `roles`: A list of roles associated with the user, e.g., `['role1', 'role2']`.
+  - `requests`: Limits on the number of requests per day, per hour, and a random shift time in minutes. For example:
 
-====== Data ======
-Key         Value
----         -----
-123456      allow
-654321      deny
-```
+    ```json
+    {
+        "requests_per_day": 10,
+        "requests_per_hour": 1,
+        "random_shift_minutes": 15
+    }
+    ```
 
-The structure in which the module stores `login events`
-```bash
-# login events keys
- % vault kv list ${mount_point}/events/login
-Keys
-----
-123456
-654321
+### Users Data and Historical Records
+- **path to the secret**: `data/users/user1`
+- **keys and values**:
+  - `requests_counters`: Historical data with statistics on user requests. It includes counters for the number of requests per day and per hour, e.g.:
 
-# login events data
- % vault kv get ${mount_point}/events/login/123456
-========= Secret Path =========
-events/login/data/123456
+    ```json
+    {
+        "requests_per_day": 9,
+        "requests_per_hour": 1
+    }
+    ```
 
-======= Metadata =======
-Key                Value
----                -----
-created_time       2023-03-26T08:00:00.000000000Z
-custom_metadata    <nil>
-deletion_time      n/a
-destroyed          false
-version            3
+  - `rate_limits`: Information about rate limits, including the end time of the rate limit. It can have two values:
+    - `'end_time'` with a timestamp, e.g., `'end_time': '2023-08-07 10:39:00.000000'`
+    - `'end_time'` set to `None` if no rate limits are applied.
 
-====== Data ======
-Key                           Value
----                           -----
-2023-03-26 08:00:00.000000    deny
-2023-03-26 09:00:00.000000    allow
-2023-03-26 10:00:00.000000    allow
-```
+  - `authorization`: Details about the authorization process, including the time, status ('allowed' or 'denied'), and the user's role, for example:
+
+    ```json
+    {
+        "time": "2023-08-07 10:39:00.000000",
+        "status": "allowed",
+        "role": "role1"
+    }
+    ```
+
+  - `authentication`: Records of the authentication process, indicating the time and status ('allowed' or 'denied'), like this:
+
+    ```json
+    {
+        "time": "2023-08-07 10:39:00.000000",
+        "status": "allowed"
+    }
+    ```
 
 
 The `policy` required by the module when interacting with **Vault**
