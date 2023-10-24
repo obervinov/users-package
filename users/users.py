@@ -9,8 +9,9 @@ from logger import log
 
 class Users:
     """
-    This class contains methods for implementing the simplest authorization
-    and management of user attributes in telegram bots.
+    This module contains classes and methods for implementing the simplest
+    authentication, authorization, limiting the speed of requests
+    and managing user attributes in telegram bots.
     """
 
     def __init__(
@@ -49,8 +50,8 @@ class Users:
         The main entry point for authentication, authorization and verification of the rate limit.
 
         Args:
-            :param user_id (str): user id of telegram account.
-            :param role_id (str): required role id for the specified user_id.
+            :param user_id (str): required user ID.
+            :param role_id (str): required role ID for the specified user ID.
 
         Returns:
             (dict) {
@@ -66,7 +67,7 @@ class Users:
                 'access': allowed/denied,
                 'permissions': allowed/denied,
                 'rate_limits': {
-                    'end_time': '2023-08-06 11:47:09.440933',
+                    'end_time': '2023-08-06 11:47:09.440933'
                 }
             }
               or
@@ -77,6 +78,12 @@ class Users:
                     'end_time': None,
                 }
             }
+
+        Examples:
+            >>> user_info = users.user_access_check(
+                user_id='user1',
+                role_id='admin_role'
+            )
         """
         user_info = {}
 
@@ -100,10 +107,15 @@ class Users:
         user_id: str = None
     ) -> str:
         """
-        The method for checks whether the specified chat_id can be used by the bot.
+        Checks if the specified user ID has access to the bot.
 
         Args:
-            :param user_id (str): user id of telegram account.
+            :param user_id (str): required user ID.
+
+        Examples:
+          >>> authentication(
+                user_id='user1'
+              )
 
         Returns:
             (str) 'allowed'
@@ -121,7 +133,7 @@ class Users:
             status = 'denied'
 
         log.info(
-            '[class.%s] access from user_id %s: %s',
+            '[class.%s] access from user ID %s: %s',
             __class__.__name__,
             user_id,
             status
@@ -145,8 +157,14 @@ class Users:
         The methods for checking whether the user has the specified role.
 
         Args:
-            :param user_id (str): user id of telegram account.
-            :param role_id (str): required role name for the specified user_id.
+            :param user_id (str): required user ID.
+            :param role_id (str): required role ID for the specified user ID.
+
+        Examples:
+          >>> authorization(
+                user_id='user1',
+                role_id='admin_role'
+              )
 
         Returns:
             (str) 'allowed'
@@ -167,7 +185,7 @@ class Users:
             status = 'denied'
 
         log.info(
-            '[class.%s] user_id %s has the role %s: %s',
+            '[class.%s] user ID %s has the role %s: %s',
             __class__.__name__,
             user_id,
             role_id,
@@ -194,9 +212,18 @@ class Users:
         applies or does not apply rate limits.
 
         Args:
-            :param user_id (str): user id of telegram account.
-            :param consider_request (bool): should this method call take into account the request
-                                            that called it as one unit of the rate limits counter.
+            :param user_id (str): required user ID.
+            :param consider_request (bool): specifies whether the method should include
+                                            the current request in the request counters.
+
+        Examples:
+          >>> rl_controller(
+                user_id='user1'
+              )
+          >>> rl_controller(
+                user_id='user1',
+                consider_request=False
+              )
 
         Returns:
             (dict) {'end_time': None}
@@ -241,7 +268,7 @@ class Users:
                 requests_ratelimits['end_time'], '%Y-%m-%d %H:%M:%S.%f'
             ):
                 log.info(
-                    '[class.%s] date rate limit expired, reset for user_id %s',
+                    '[class.%s] date rate limit expired, reset for user ID %s',
                     __class__.__name__,
                     user_id
                 )
@@ -255,7 +282,7 @@ class Users:
                 )
             else:
                 log.warning(
-                    '[class.%s] a speed limit has been detected for %s '
+                    '[class.%s] a speed limit has been detected for user ID %s '
                     'that has already been applied and has not expired yet',
                     __class__.__name__,
                     user_id
@@ -270,7 +297,7 @@ class Users:
             if requests_configuration['requests_per_day'] <= requests_counters['requests_per_day']:
                 log.warning(
                     '[class.%s] the request limits are exhausted (per_day), '
-                    'the rate limit will be applied for user_id %s',
+                    'the rate limit will be applied for user ID %s',
                     __class__.__name__,
                     user_id
                 )
@@ -280,7 +307,7 @@ class Users:
             elif requests_configuration['requests_per_hour'] <= requests_counters['requests_per_hour']:
                 log.warning(
                     '[class.%s] the request limits are exhausted (per_hour), '
-                    'the rate limit will be applied for user_id %s',
+                    'the rate limit will be applied for user ID %s',
                     __class__.__name__,
                     user_id
                 )
@@ -313,7 +340,7 @@ class Users:
         ):
             log.info(
                 '[class.%s] the limits have not been exhausted, '
-                'the limits on the number of requests are not applied for user_id %s',
+                'the limits on the number of requests are not applied for user ID %s',
                 __class__.__name__,
                 user_id
             )

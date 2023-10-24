@@ -10,7 +10,7 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/obervinov/users-package?style=for-the-badge)
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/book.png" width="25" title="about"> About this project
-This module contains classes and methods for implementing the simplest authorization for telegram bots.
+This module contains classes and methods for implementing the simplest **authentication**, **authorization**, **limiting the speed of requests** and **managing user attributes** in telegram bots.
 
 The list of rights and their binding to the user id is stored in the **Vault**, so the **Vault** is required for the module to work.
 
@@ -20,9 +20,15 @@ The list of rights and their binding to the user id is stored in the **Vault**, 
 | GitHub Actions Templates | [v1.0.5](https://github.com/obervinov/_templates/tree/v1.0.5) |
 
 
-## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="functions"> Supported functions
-- Check permissions for `user_id`
-- Recording events about logging into the vault
+## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="methods"> Description of class methods
+| Method Name | Description | Arguments | Usage Examples | Returns Examples | Configuration Path | History Path |
+|-------------|-------------|-----------|----------|----------|---------------------|-----------------------|
+| `__init__` | Creates a new Users instance. | `vault (object)`: Vault instance for interacting with the Vault API. `rate_limits (bool)`: Enable the rate limit function. | `users = Users(vault=vault_client)` | N/A | N/A | N/A |
+| `user_access_check` | Main entry point for authentication, authorization, and rate limit verification. | `user_id (str)`: Required user ID. `role_id (str)`: Required role ID for the specified user ID. | `user_info = users.user_access_check(user_id='user1', role_id='admin_role')` | `{'access': allowed,'permissions': allowed,'rate_limits': {'end_time': '2023-08-06 11:47:09.440933'}}` | N/A | N/A |
+| `authentication` | Checks if the specified user ID has access to the bot. | `user_id (str)`: Required user ID. | `authentication(user_id='user1')` | `allowed` or `denied` | `configuration/users/{user_id}:status` reads configuration in Vault to determine access status. | `data/users/{user_id}:authentication` writes authentication data to Vault. |
+| `authorization` | Checks whether the user has the specified role. | `user_id (str)`: Required user ID. `role_id (str)`: Required role ID for the specified user ID. | `authorization(user_id='user1', role_id='admin_role')` | `allowed` or `denied` | `configuration/users/{user_id}:roles` reads configuration in Vault to determine role status. | `data/users/{user_id}:authorization` writes authorization data to Vault. |
+| `rl_controller` | Takes into account user requests and applies rate limits as needed. | `user_id (str)`: Required user ID. `consider_request (bool)`: Specifies whether the method should include the current request in the request counters. | `rl_controller(user_id='user1')` | `{'end_time': None}` or `{'end_time': '2023-08-06 11:47:09.440933'}` | `configuration/users/{user_id}:requests` reads configuration and `data/users/{user_id}:requests_counters` reads history counters in Vault. | `data/users/{user_id}:rate_limits` writes rate limit data and `data/users/{user_id}:requests_counters` writes requests counters to Vault. |
+
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="functions"> Data structure in Vault
 The structure that the module expects to see in the Vault to determine `user id rights`
@@ -112,3 +118,4 @@ if users_auth.check_permissions(message.chat.id) == "allow":
 else:
   print("By")
 ```
+
