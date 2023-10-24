@@ -10,14 +10,63 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/obervinov/users-package?style=for-the-badge)
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/book.png" width="25" title="about"> About this project
-This module contains classes and methods for implementing the simplest **authentication**, **authorization**, **limiting the speed of requests** and **managing user attributes** in telegram bots.
+**Project Description**
 
-The list of rights and their binding to the user id is stored in the **Vault**, so the **Vault** is required for the module to work.
+This project is a Python module designed to simplify the creation and management of user attributes in Telegram bots. It serves as a utility for authentication, authorization, and rate limiting for user interactions.
 
-## <img src="https://github.com/obervinov/_templates/blob/main/icons/github-actions.png" width="25" title="github-actions"> GitHub Actions
-| Name  | Version |
-| ------------------------ | ----------- |
-| GitHub Actions Templates | [v1.0.5](https://github.com/obervinov/_templates/tree/v1.0.5) |
+**Key Features and Usage**
+
+- Written in Python, this module is designed primarily for Telegram bots but can be adapted for various projects that require user management, role-based access control, and request rate limiting.
+
+- It includes a `Users` class that provides the following functionalities:
+
+  - **Authentication**: The module allows you to check if a specified user ID has access to the bot.
+
+    - Arguments:
+      - `user_id (str)`: The user's ID.
+
+    - Example:
+      ```python
+      users.authentication(user_id='user1')
+      ```
+
+    - Returns:
+      - `'allowed'` if access is granted.
+      - `'denied'` if access is denied.
+
+  - **Authorization**: You can verify if a user has a specified role.
+
+    - Arguments:
+      - `user_id (str)`: The user's ID.
+      - `role_id (str)`: The required role ID for the specified user.
+
+    - Example:
+      ```python
+      users.authorization(user_id='user1', role_id='admin_role')
+      ```
+
+    - Returns:
+      - `'allowed'` if the user has the role.
+      - `'denied'` if the user does not have the role.
+
+  - **Rate Limiting Controller**: This feature tracks user requests and applies rate limits as needed.
+
+    - Arguments:
+      - `user_id (str)`: The user's ID.
+      - `consider_request (bool)`: Specifies whether the method should include the current request in the request counters.
+
+    - Example:
+      ```python
+      users.rl_controller(user_id='user1')
+      ```
+
+    - Returns:
+      - `{'end_time': None}` if no rate limits are applied.
+      - `{'end_time': '2023-08-06 11:47:09.440933'}` if rate limits are in effect.
+
+- This module requires a dependency in the form of a Vault server for storing user configurations.
+
+This project simplifies the management of user interactions for bot developers, making it easier to handle user access, permissions, and rate limits.
 
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="methods"> Description of class methods
@@ -119,3 +168,7 @@ else:
   print("By")
 ```
 
+## <img src="https://github.com/obervinov/_templates/blob/main/icons/github-actions.png" width="25" title="github-actions"> GitHub Actions
+| Name  | Version |
+| ------------------------ | ----------- |
+| GitHub Actions Templates | [v1.0.5](https://github.com/obervinov/_templates/tree/v1.0.5) |
