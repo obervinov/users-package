@@ -37,8 +37,8 @@ This Python module is created to simplify user management in Telegram bots, prov
       ```
 
     - Returns:
-      - `'allowed'` if access is granted.
-      - `'denied'` if access is denied.
+      - `self.user_status_allow` if access is granted.
+      - `self.user_status_deny` if access is denied.
 
   - **Authorization**: You can verify if a user has a specified role.
 
@@ -52,8 +52,8 @@ This Python module is created to simplify user management in Telegram bots, prov
       ```
 
     - Returns:
-      - `'allowed'` if the user has the role.
-      - `'denied'` if the user does not have the role.
+      - `self.user_status_allow` if the user has the role.
+      - `self.user_status_deny` if the user does not have the role.
 
   - **Rate Limiting Controller**: This feature tracks user requests and applies rate limits as needed.
 
@@ -70,15 +70,26 @@ This Python module is created to simplify user management in Telegram bots, prov
       - `{'end_time': None}` if no rate limits are applied.
       - `{'end_time': '2023-08-06 11:47:09.440933'}` if rate limits are in effect.
 
+## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="methods"> Description of class attributes
+| Data Type | Attribute          | Purpose                                | Default Value   |
+|-----------|--------------------|----------------------------------------|-----------------|
+| `object`  | `vault`            | Vault instance for interacting with the Vault API. | `None`          |
+| `bool`    | `rate_limits`      | Enable request rate limit feature.     | `True`          |
+| `str`     | `user_status_allow`| User access status: allowed.           | `"allowed"`     |
+| `str`     | `user_status_deny` | User denial status: denied.            | `"denied"`      |
+| `str`     | `vault_configuration_path` | Configuration path in the Vault storage.  | `"configuration/users"` |
+| `str`     | `vault_data_path`  | User data path in the Vault storage.   | `"data/users"`  |
+
+
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="methods"> Description of class methods
 | Method Name | Description | Arguments | Usage Examples | Returns Examples | Configuration Path | History Path |
 |-------------|-------------|-----------|----------|----------|---------------------|-----------------------|
 | `__init__` | Creates a new Users instance. | `vault (object)`: Vault instance for interacting with the Vault API. `rate_limits (bool)`: Enable the rate limit function. | `Users(vault=vault_client)` | N/A | N/A | N/A |
-| `user_access_check` | Main entry point for authentication, authorization, and rate limit verification. | `user_id (str)`: Required user ID. `role_id (str)`: Required role ID for the specified user ID. | `users.user_access_check(user_id='user1', role_id='admin_role')` | `{'access': allowed,'permissions': allowed,'rate_limits': {'end_time': '2023-08-06 11:47:09.440933'}}` | N/A | N/A |
-| `authentication` | Checks if the specified user ID has access to the bot. | `user_id (str)`: Required user ID. | `authentication(user_id='user1')` | `allowed` or `denied` | `configuration/users/{user_id}:status` reads configuration in Vault to determine access status. | `data/users/{user_id}:authentication` writes authentication data to Vault. |
-| `authorization` | Checks whether the user has the specified role. | `user_id (str)`: Required user ID. `role_id (str)`: Required role ID for the specified user ID. | `authorization(user_id='user1', role_id='admin_role')` | `allowed` or `denied` | `configuration/users/{user_id}:roles` reads configuration in Vault to determine role status. | `data/users/{user_id}:authorization` writes authorization data to Vault. |
-| `rl_controller` | Takes into account user requests and applies rate limits as needed. | `user_id (str)`: Required user ID. `consider_request (bool)`: Specifies whether the method should include the current request in the request counters. | `rl_controller(user_id='user1')` | `{'end_time': None}` or `{'end_time': '2023-08-06 11:47:09.440933'}` | `configuration/users/{user_id}:requests` reads configuration and `data/users/{user_id}:requests_counters` reads history counters in Vault. | `data/users/{user_id}:rate_limits` writes rate limit data and `data/users/{user_id}:requests_counters` writes requests counters to Vault. |
+| `user_access_check` | Main entry point for authentication, authorization, and rate limit verification. | `user_id (str)`: Required user ID. `role_id (str)`: Required role ID for the specified user ID. | `users.user_access_check(user_id='user1', role_id='admin_role')` | `{'access': self.user_status_allow,'permissions': self.user_status_allow,'rate_limits': {'end_time': '2023-08-06 11:47:09.440933'}}` | N/A | N/A |
+| `authentication` | Checks if the specified user ID has access to the bot. | `user_id (str)`: Required user ID. | `authentication(user_id='user1')` | `self.user_status_allow` or `self.user_status_deny` | `{self.vault_configuration_path}/{user_id}:status` reads configuration in Vault to determine access status. | `{self.vault_data_path}/{user_id}:authentication` writes authentication data to Vault. |
+| `authorization` | Checks whether the user has the specified role. | `user_id (str)`: Required user ID. `role_id (str)`: Required role ID for the specified user ID. | `authorization(user_id='user1', role_id='admin_role')` | `self.user_status_allow` or `self.user_status_deny` | `{self.vault_configuration_path}/{user_id}:roles` reads configuration in Vault to determine role status. | `{self.vault_data_path}/{user_id}:authorization` writes authorization data to Vault. |
+| `rl_controller` | Takes into account user requests and applies rate limits as needed. | `user_id (str)`: Required user ID. `consider_request (bool)`: Specifies whether the method should include the current request in the request counters. | `rl_controller(user_id='user1')` | `{'end_time': None}` or `{'end_time': '2023-08-06 11:47:09.440933'}` | `{self.vault_configuration_path}/{user_id}:requests` reads configuration and `{self.vault_data_path}/{user_id}:requests_counters` reads history counters in Vault. | `{self.vault_data_path}/{user_id}:rate_limits` writes rate limit data and `{self.vault_data_path}/{user_id}:requests_counters` writes requests counters to Vault. |
 
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="data-structure"> Structure of configuration and statistics data in vault

@@ -40,6 +40,10 @@ class Users:
         """
         self.vault = vault
         self.rate_limits = rate_limits
+        self.user_status_allow = "allowed"
+        self.user_status_deny = "denied"
+        self.vault_configuration_path = "configuration/users"
+        self.vault_data_path = "data/users"
 
     def user_access_check(
         self,
@@ -55,25 +59,25 @@ class Users:
 
         Returns:
             (dict) {
-                'access': 'allowed'/'denied'
+                'access': self.user_status_allow / self.user_status_deny
             }
               or
             (dict) {
-                'access': 'allowed'/'denied',
-                'permissions': 'allowed'/'denied'
+                'access': self.user_status_allow / self.user_status_deny,
+                'permissions': self.user_status_allow / self.user_status_deny
             }
               or
             (dict) {
-                'access': 'allowed'/'denied',
-                'permissions': 'allowed'/'denied',
+                'access': self.user_status_allow / self.user_status_deny,
+                'permissions': self.user_status_allow / self.user_status_deny,
                 'rate_limits': {
                     'end_time': '2023-08-06 11:47:09.440933'
                 }
             }
               or
             (dict) {
-                'access': 'allowed'/'denied',
-                'permissions': 'allowed'/'denied',
+                'access': self.user_status_allow / self.user_status_deny,
+                'permissions': self.user_status_allow / self.user_status_deny,
                 'rate_limits': {
                     'end_time': None,
                 }
@@ -90,12 +94,12 @@ class Users:
         user_info['access'] = self.authentication(
             user_id=user_id
         )
-        if user_info['access'] == 'allowed' and role_id:
+        if user_info['access'] == self.user_status_allow and role_id:
             user_info['permissions'] = self.authorization(
                 user_id=user_id,
                 role_id=role_id
             )
-            if user_info['permissions'] == 'allowed' and self.rate_limits:
+            if user_info['permissions'] == self.user_status_allow and self.rate_limits:
                 user_info['rate_limits'] = self.rl_controller(
                     user_id=user_id
                 )
@@ -118,19 +122,19 @@ class Users:
               )
 
         Returns:
-            (str) 'allowed'
+            (str) self.user_status_allow
                 or
-            (str) 'denied'
+            (str) self.user_status_deny
         """
         try:
             status = self.vault.read_secret(
-                path=f"configuration/users/{user_id}",
+                path=f"{self.vault_configuration_path}/{user_id}",
                 key='status'
             )
         # pylint: disable=W0718
         # will be fixed after the solution https://github.com/obervinov/vault-package/issues/31
         except Exception:
-            status = 'denied'
+            status = self.user_status_deny
 
         log.info(
             '[class.%s] Access from user ID %s: %s',
@@ -139,7 +143,7 @@ class Users:
             status
         )
         self.vault.write_secret(
-            path=f"data/users/{user_id}",
+            path=f"{self.vault_data_path}/{user_id}",
             key='authentication',
             value={
                 'time': str(datetime.now()),
@@ -167,22 +171,22 @@ class Users:
               )
 
         Returns:
-            (str) 'allowed'
+            (str) self.user_status_allow
                 or
-            (str) 'denied'
+            (str) self.user_status_deny
         """
         try:
             if role_id in self.vault.read_secret(
-                path=f"configuration/users/{user_id}",
+                path=f"{self.vault_configuration_path}/{user_id}",
                 key='roles'
             ):
-                status = 'allowed'
+                status = self.user_status_allow
             else:
-                status = 'denied'
+                status = self.user_status_deny
         # pylint: disable=W0718
         # will be fixed after the solution https://github.com/obervinov/vault-package/issues/31
         except Exception:
-            status = 'denied'
+            status = self.user_status_deny
 
         log.info(
             '[class.%s] User ID %s has the role %s: %s',
@@ -192,7 +196,7 @@ class Users:
             status
         )
         self.vault.write_secret(
-            path=f"data/users/{user_id}",
+            path=f"{self.vault_data_path}/{user_id}",
             key='authorization',
             value={
                 'time': str(datetime.now()),
@@ -238,12 +242,12 @@ class Users:
 
         # Read configuration and history counters
         requests_configuration = self.vault.read_secret(
-            path=f"configuration/users/{user_id}",
+            path=f"{self.vault_configuration_path}/{user_id}",
             key='requests'
         )
         try:
             requests_counters = self.vault.read_secret(
-                path=f"data/users/{user_id}",
+                path=f"{self.vault_data_path}/{user_id}",
                 key='requests_counters'
             )
         # pylint: disable=W0718
@@ -253,7 +257,7 @@ class Users:
 
         try:
             requests_ratelimits = self.vault.read_secret(
-                path=f"data/users/{user_id}",
+                path=f"{self.vault_data_path}/{user_id}",
                 key='rate_limits'
             )
         # pylint: disable=W0718
@@ -274,7 +278,7 @@ class Users:
                 )
                 requests_ratelimits['end_time'] = None
                 self.vault.write_secret(
-                    path=f"data/users/{user_id}",
+                    path=f"{self.vault_data_path}/{user_id}",
                     key='rate_limits',
                     value={
                         'end_time': requests_ratelimits['end_time']
@@ -321,12 +325,12 @@ class Users:
                 requests_counters['requests_per_hour'] = 0
                 requests_counters['requests_per_day'] = requests_counters['requests_per_day'] + 1
             self.vault.write_secret(
-                path=f"data/users/{user_id}",
+                path=f"{self.vault_data_path}/{user_id}",
                 key='requests_counters',
                 value=requests_counters
             )
             self.vault.write_secret(
-                path=f"data/users/{user_id}",
+                path=f"{self.vault_data_path}/{user_id}",
                 key='rate_limits',
                 value=requests_ratelimits
             )
@@ -347,7 +351,7 @@ class Users:
             requests_counters['requests_per_day'] = requests_counters['requests_per_day'] + 1
             requests_counters['requests_per_hour'] = requests_counters['requests_per_hour'] + 1
             self.vault.write_secret(
-                path=f"data/users/{user_id}",
+                path=f"{self.vault_data_path}/{user_id}",
                 key='requests_counters',
                 value=requests_counters
             )
