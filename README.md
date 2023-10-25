@@ -143,8 +143,31 @@ pip3 install git+https://github.com/obervinov/users-package.git@main#egg=users
 pip3 install git+https://github.com/obervinov/users-package.git@v2.0.0#egg=users
 ```
 
-
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/config.png" width="25" title="usage"> Additional usage example
+Interaction Model 1: Using a Unified Entrypoint (Method: user_access_check())
+```mermaid
+sequenceDiagram
+    participant User
+    participant Users
+    User->>Users: Create Users instance with rate limits
+    User->>Users: Call user_access_check(user_id, role_id)
+    Users-->>User: Return access, permissions, and rate limits
+```
+
+Interaction Model 2: Using Separate Methods for Authentication, Authorization, and Rate Limits
+```mermaid
+sequenceDiagram
+    participant User
+    participant Users
+    User->>Users: Create Users instance with rate limits
+    User->>Users: Call authentication(user_id)
+    Users-->>User: Return access status
+    User->>Users: Call authorization(user_id, role_id)
+    Users-->>User: Return permissions status
+    User->>Users: Call rl_controller(user_id)
+    Users-->>User: Return rate limits information
+```
+
 Example 1 - With Entrypoint and Rate Limits:
 ```python
 # import module
