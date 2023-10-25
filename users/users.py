@@ -1,6 +1,6 @@
 """
 This module contains classes and methods for implementing
-the simplest authorization and management of user attributes in telegram bots.
+the simplest authorization and management of user attributes in Telegram bots.
 """
 import random
 from datetime import datetime, timedelta
@@ -10,8 +10,8 @@ from logger import log
 class Users:
     """
     This module contains classes and methods for implementing the simplest
-    authentication, authorization, limiting the speed of requests
-    and managing user attributes in telegram bots.
+    authentication, authorization, limiting the speed of requests,
+    and managing user attributes in Telegram bots.
     """
 
     def __init__(
@@ -20,11 +20,11 @@ class Users:
         rate_limits: bool = True
     ) -> None:
         """
-        The method for create a new Users instance.
+        Method to create a new Users instance.
 
         Args:
-            :param vault (object): vault instance for interacting with the vault api.
-            :param rate_limits (bool): to enable the rate limit function.
+            :param vault (object): Vault instance for interacting with the Vault API.
+            :param rate_limits (bool): Enable rate limit functionality.
 
         Returns:
             None
@@ -47,33 +47,33 @@ class Users:
         role_id: str = None
     ) -> dict:
         """
-        The main entry point for authentication, authorization and verification of the rate limit.
+        The main entry point for authentication, authorization, and verification of the rate limit.
 
         Args:
-            :param user_id (str): required user ID.
-            :param role_id (str): required role ID for the specified user ID.
+            :param user_id (str): Required user ID.
+            :param role_id (str): Required role ID for the specified user ID.
 
         Returns:
             (dict) {
-                'access': allowed/denied
+                'access': 'allowed'/'denied'
             }
               or
             (dict) {
-                'access': allowed/denied,
-                'permissions': allowed/denied
+                'access': 'allowed'/'denied',
+                'permissions': 'allowed'/'denied'
             }
               or
             (dict) {
-                'access': allowed/denied,
-                'permissions': allowed/denied,
+                'access': 'allowed'/'denied',
+                'permissions': 'allowed'/'denied',
                 'rate_limits': {
                     'end_time': '2023-08-06 11:47:09.440933'
                 }
             }
               or
             (dict) {
-                'access': allowed/denied,
-                'permissions': allowed/denied,
+                'access': 'allowed'/'denied',
+                'permissions': 'allowed'/'denied',
                 'rate_limits': {
                     'end_time': None,
                 }
@@ -110,7 +110,7 @@ class Users:
         Checks if the specified user ID has access to the bot.
 
         Args:
-            :param user_id (str): required user ID.
+            :param user_id (str): Required user ID.
 
         Examples:
           >>> authentication(
@@ -128,12 +128,12 @@ class Users:
                 key='status'
             )
         # pylint: disable=W0718
-        # fixed after https://github.com/obervinov/vault-package/issues/31
+        # Fixed after https://github.com/obervinov/vault-package/issues/31
         except Exception:
             status = 'denied'
 
         log.info(
-            '[class.%s] access from user ID %s: %s',
+            '[class.%s] Access from user ID %s: %s',
             __class__.__name__,
             user_id,
             status
@@ -154,11 +154,11 @@ class Users:
         role_id: str = None
     ) -> str:
         """
-        The methods for checking whether the user has the specified role.
+        Methods for checking whether the user has the specified role.
 
         Args:
-            :param user_id (str): required user ID.
-            :param role_id (str): required role ID for the specified user ID.
+            :param user_id (str): Required user ID.
+            :param role_id (str): Required role ID for the specified user ID.
 
         Examples:
           >>> authorization(
@@ -180,12 +180,12 @@ class Users:
             else:
                 status = 'denied'
         # pylint: disable=W0718
-        # fixed after https://github.com/obervinov/vault-package/issues/31
+        # Fixed after https://github.com/obervinov/vault-package/issues/31
         except Exception:
             status = 'denied'
 
         log.info(
-            '[class.%s] user ID %s has the role %s: %s',
+            '[class.%s] User ID %s has the role %s: %s',
             __class__.__name__,
             user_id,
             role_id,
@@ -212,8 +212,8 @@ class Users:
         applies or does not apply rate limits.
 
         Args:
-            :param user_id (str): required user ID.
-            :param consider_request (bool): specifies whether the method should include
+            :param user_id (str): Required user ID.
+            :param consider_request (bool): Specifies whether the method should include
                                             the current request in the request counters.
 
         Examples:
@@ -232,11 +232,11 @@ class Users:
         """
         if not consider_request:
             log.warning(
-                '[class.%s] consider request disabled',
+                '[class.%s] Consider request disabled',
                 __class__.__name__,
             )
 
-        # read configuration and history counters
+        # Read configuration and history counters
         requests_configuration = self.vault.read_secret(
             path=f"configuration/users/{user_id}",
             key='requests'
@@ -247,7 +247,7 @@ class Users:
                 key='requests_counters'
             )
         # pylint: disable=W0718
-        # fixed after https://github.com/obervinov/vault-package/issues/31
+        # Fixed after https://github.com/obervinov/vault-package/issues/31
         except Exception:
             requests_counters = {'requests_per_day': 0, 'requests_per_hour': 0}
 
@@ -257,7 +257,7 @@ class Users:
                 key='rate_limits'
             )
         # pylint: disable=W0718
-        # fixed after https://github.com/obervinov/vault-package/issues/31
+        # Fixed after https://github.com/obervinov/vault-package/issues/31
         except Exception:
             requests_ratelimits = {'end_time': None}
 
@@ -268,7 +268,7 @@ class Users:
                 requests_ratelimits['end_time'], '%Y-%m-%d %H:%M:%S.%f'
             ):
                 log.info(
-                    '[class.%s] date rate limit expired, reset for user ID %s',
+                    '[class.%s] Date rate limit expired, reset for user ID %s',
                     __class__.__name__,
                     user_id
                 )
@@ -282,7 +282,7 @@ class Users:
                 )
             else:
                 log.warning(
-                    '[class.%s] a speed limit has been detected for user ID %s '
+                    '[class.%s] A speed limit has been detected for user ID %s '
                     'that has already been applied and has not expired yet',
                     __class__.__name__,
                     user_id
@@ -296,7 +296,7 @@ class Users:
         ):
             if requests_configuration['requests_per_day'] <= requests_counters['requests_per_day']:
                 log.warning(
-                    '[class.%s] the request limits are exhausted (per_day), '
+                    '[class.%s] The request limits are exhausted (per_day), '
                     'the rate limit will be applied for user ID %s',
                     __class__.__name__,
                     user_id
@@ -306,7 +306,7 @@ class Users:
                 requests_counters['requests_per_hour'] = requests_counters['requests_per_hour'] + 1
             elif requests_configuration['requests_per_hour'] <= requests_counters['requests_per_hour']:
                 log.warning(
-                    '[class.%s] the request limits are exhausted (per_hour), '
+                    '[class.%s] The request limits are exhausted (per_hour), '
                     'the rate limit will be applied for user ID %s',
                     __class__.__name__,
                     user_id
@@ -332,14 +332,14 @@ class Users:
             )
             rate_limits = requests_ratelimits
 
-        # If don't need to apply rate limits
+        # If no rate limits need to be applied
         elif (
             requests_configuration['requests_per_day'] > requests_counters['requests_per_day'] and
             requests_configuration['requests_per_hour'] > requests_counters['requests_per_hour'] and
             consider_request
         ):
             log.info(
-                '[class.%s] the limits have not been exhausted, '
+                '[class.%s] The limits have not been exhausted, '
                 'the limits on the number of requests are not applied for user ID %s',
                 __class__.__name__,
                 user_id
@@ -354,10 +354,10 @@ class Users:
             rate_limits = {'end_time': None}
         else:
             log.error(
-                '[class.%s] failed to apply rate limit for %s\n'
-                'counters: %s \n'
-                'ratelimits: %s \n'
-                'configuration: %s',
+                '[class.%s] Failed to apply rate limit for %s\n'
+                'Counters: %s \n'
+                'Ratelimits: %s \n'
+                'Configuration: %s',
                 __class__.__name__,
                 user_id,
                 requests_counters,

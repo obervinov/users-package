@@ -12,11 +12,15 @@
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/book.png" width="25" title="about"> About this project
 **Project Description**
 
-This project is a Python module designed to simplify the creation and management of user attributes in Telegram bots. It serves as a utility for authentication, authorization, and rate limiting for user interactions.
+This Python module is created to simplify user management in Telegram bots, providing essential functionality for tasks such as user authentication, authorization, and enforcing speed limits, ensuring efficient management of user attributes and access rights.
 
 **Key Features and Usage**
 
 - Written in Python, this module is designed primarily for Telegram bots but can be adapted for various projects that require user management, role-based access control, and request rate limiting.
+
+- This module requires a dependency in the form of a Vault server for storing user configurations.
+
+- The Vault policy required by the module when interacting with the Vault server can be found [here](tests/vault/policy.hcl) (with a detailed description)
 
 - It includes a `Users` class that provides the following functionalities:
 
@@ -64,10 +68,6 @@ This project is a Python module designed to simplify the creation and management
       - `{'end_time': None}` if no rate limits are applied.
       - `{'end_time': '2023-08-06 11:47:09.440933'}` if rate limits are in effect.
 
-- This module requires a dependency in the form of a Vault server for storing user configurations.
-
-This project simplifies the management of user attributes, access rights and request restrictions for telegram bot developers.
-
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="methods"> Description of class methods
 | Method Name | Description | Arguments | Usage Examples | Returns Examples | Configuration Path | History Path |
@@ -86,7 +86,7 @@ It supports user configurations to define system access rights, roles, and reque
 ### Users Configuration
 - **path to the secret**: `configuration/users/user1`
 - **keys and Values**:
-  - `status`: The status of user access, which can be either 'allowed' or 'denied'.
+  - `status`: The status of user access, which can be either `allowed` or `denied`.
   - `roles`: A list of roles associated with the user, e.g., `['role1', 'role2']`.
   - `requests`: Limits on the number of requests per day, per hour, and a random shift time in minutes. For example:
 
@@ -133,11 +133,6 @@ It supports user configurations to define system access rights, roles, and reque
     }
     ```
 
-
-The `policy` required by the module when interacting with **Vault**
-An example of a policy with all the necessary rights and a description can be found [here](tests/vault/policy.hcl)
-
-
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/stack2.png" width="20" title="install"> Installing
 ```bash
 # Install current version
@@ -145,27 +140,94 @@ pip3 install git+https://github.com/obervinov/users-package.git#egg=users
 # Install version by branch
 pip3 install git+https://github.com/obervinov/users-package.git@main#egg=users
 # Install version by tag
-pip3 install git+https://github.com/obervinov/users-package.git@v1.0.0#egg=users
+pip3 install git+https://github.com/obervinov/users-package.git@v2.0.0#egg=users
 ```
 
-## <img src="https://github.com/obervinov/_templates/blob/main/icons/config.png" width="25" title="usage"> Usage example
+
+## <img src="https://github.com/obervinov/_templates/blob/main/icons/config.png" width="25" title="usage"> Additional usage example
+Example 1 - With Entrypoint and Rate Limits:
 ```python
 # import module
-from users import UsersAuth
+from users import Users
 
-# create an instance of the class
-users_auth = UsersAuth(
-  vault=vault_client
+# create an instance of the class with rate limits
+users = Users(vault=vault_client)
+
+# use the main entrypoint
+user_info = users.user_access_check(
+  user_id=message.chat.id,
+  role_id="admin_role"
+)
+# check permissions, roles, and rate limits
+if user_info["access"] == "allowed":
+    print("Hi, you can use the bot!")
+
+    if user_info["permissions"] == "allowed":
+        if user_info["rate_limits"]["end_time"]:
+            print(f"You have sent too many requests, the limit is applied until {user_info['rate_limits']['end_time']}")
+        else:
+            print("You have admin's rights")
+    else:
+        print("You do not have access rights to this function")
+
+else:
+    print("Access denied, goodbye!")
+```
+
+Example 2 - With Entrypoint and Without Rate Limits:
+```python
+# import module
+from users import Users
+
+# create an instance of the class without rate limits
+users = Users(
+  vault=vault_client,
+  rate_limits=False
 )
 
-# checking permissions for user_id
-# type: str
-# returns: "allow" or "deny"
-if users_auth.check_permissions(message.chat.id) == "allow":
-   print("Hi")
+# use the main entrypoint
+user_info = users.user_access_check(
+  user_id=message.chat.id,
+  role_id="admin_role"
+)
+# check permissions, roles, and rate limits
+if user_info["access"] == "allowed":
+    print("Hi, you can use the bot!")
+
+    if user_info["permissions"] == "allowed":
+        print("You have admin's rights")
+    else:
+        print("You do not have access rights to this function")
+
 else:
-  print("By")
+    print("Access denied, goodbye!")
 ```
+
+Example 3 - Without Entrypoint:
+```python
+# import module
+from users import Users
+
+# create an instance of the class with rate limits
+users = Users(vault=vault_client)
+
+# check access to the bot
+if users.authentication(user_id='user1') == 'allowed':
+    print("You can use this bot")
+
+# check access to the bot
+if users.authorization(
+  user_id='user1',
+  role_id='admin_role'
+) == 'allowed':
+    print("You have admin's permissions")
+
+# check access to the bot
+user_info = users.rl_controller(user_id='user1')
+if user_info['rate_limits']['end_time']:
+    print(f"You have sent too many requests, the limit is applied until {user_info['rate_limits']['end_time']}")
+```
+
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/github-actions.png" width="25" title="github-actions"> GitHub Actions
 | Name  | Version |
