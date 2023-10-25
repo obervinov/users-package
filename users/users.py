@@ -1,6 +1,6 @@
 """
-This module contains classes and methods for implementing
-the simplest authorization and management of user attributes in Telegram bots.
+This module contains classes and methods for implementing simple user authorization
+and management of user attributes in Telegram bots.
 """
 import random
 from datetime import datetime, timedelta
@@ -9,9 +9,9 @@ from logger import log
 
 class Users:
     """
-    This module contains classes and methods for implementing the simplest
-    authentication, authorization, limiting the speed of requests,
-    and managing user attributes in Telegram bots.
+    This module contains classes and methods for implementing simple
+    user authentication, authorization, request rate limiting,
+    and management of user attributes in Telegram bots.
     """
 
     def __init__(
@@ -47,7 +47,7 @@ class Users:
         role_id: str = None
     ) -> dict:
         """
-        The main entry point for authentication, authorization, and verification of the rate limit.
+        The main entry point for authentication, authorization, and request rate limit verification.
 
         Args:
             :param user_id (str): Required user ID.
@@ -128,7 +128,7 @@ class Users:
                 key='status'
             )
         # pylint: disable=W0718
-        # Fixed after https://github.com/obervinov/vault-package/issues/31
+        # will be fixed after the solution https://github.com/obervinov/vault-package/issues/31
         except Exception:
             status = 'denied'
 
@@ -180,7 +180,7 @@ class Users:
             else:
                 status = 'denied'
         # pylint: disable=W0718
-        # Fixed after https://github.com/obervinov/vault-package/issues/31
+        # will be fixed after the solution https://github.com/obervinov/vault-package/issues/31
         except Exception:
             status = 'denied'
 
@@ -247,7 +247,7 @@ class Users:
                 key='requests_counters'
             )
         # pylint: disable=W0718
-        # Fixed after https://github.com/obervinov/vault-package/issues/31
+        # will be fixed after the solution https://github.com/obervinov/vault-package/issues/31
         except Exception:
             requests_counters = {'requests_per_day': 0, 'requests_per_hour': 0}
 
@@ -257,7 +257,7 @@ class Users:
                 key='rate_limits'
             )
         # pylint: disable=W0718
-        # Fixed after https://github.com/obervinov/vault-package/issues/31
+        # will be fixed after the solution https://github.com/obervinov/vault-package/issues/31
         except Exception:
             requests_ratelimits = {'end_time': None}
 

@@ -7,8 +7,15 @@ from datetime import timedelta, datetime
 import time
 import requests
 import pytest
+# pylint: disable=E0611
 from vault import VaultClient
-from users.users import Users
+
+if os.getenv("CI"):
+    # pylint: disable=E0401
+    from users.users import Users
+else:
+    # pylint: disable=E0401
+    from users import Users
 
 
 def pytest_configure(config):

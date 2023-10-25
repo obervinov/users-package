@@ -20,7 +20,9 @@ This Python module is created to simplify user management in Telegram bots, prov
 
 - This module requires a dependency in the form of a Vault server for storing user configurations.
 
-- The Vault policy required by the module when interacting with the Vault server can be found [here](tests/vault/policy.hcl) (with a detailed description)
+- The module also requires the dependency of an additional https://github.com/obervinov/vault-package module to interact with the vault server.
+
+- The Vault policy required by the module when interacting with the Vault server can be found [here](tests/vault/policy.hcl) (with a detailed description).
 
 - It includes a `Users` class that provides the following functionalities:
 
@@ -170,8 +172,19 @@ sequenceDiagram
 
 Example 1 - With Entrypoint and Rate Limits:
 ```python
-# import module
+# import modules
+from vault import VaultClient
 from users import Users
+
+# create the vault client
+vault_client = VaultClient(
+  url='http://0.0.0.0:8200',
+  name='mybot1',
+  approle={
+      'id': id,
+      'secret-id': secret-id
+  }
+)
 
 # create an instance of the class with rate limits
 users = Users(vault=vault_client)
@@ -199,8 +212,19 @@ else:
 
 Example 2 - With Entrypoint and Without Rate Limits:
 ```python
-# import module
+# import modules
+from vault import VaultClient
 from users import Users
+
+# create the vault client
+vault_client = VaultClient(
+  url='http://0.0.0.0:8200',
+  name='mybot1',
+  approle={
+      'id': id,
+      'secret-id': secret-id
+  }
+)
 
 # create an instance of the class without rate limits
 users = Users(
@@ -228,8 +252,19 @@ else:
 
 Example 3 - Without Entrypoint:
 ```python
-# import module
+# import modules
+from vault import VaultClient
 from users import Users
+
+# create the vault client
+vault_client = VaultClient(
+  url='http://0.0.0.0:8200',
+  name='mybot1',
+  approle={
+      'id': id,
+      'secret-id': secret-id
+  }
+)
 
 # create an instance of the class with rate limits
 users = Users(vault=vault_client)
