@@ -13,9 +13,8 @@ setup(
     version='2.0.0',
     license='MIT',
     description=(
-        "This module contains classes and methods for implementing the simplest ",
-        "authentication, authorization, limiting the speed of requests ",
-        "and managing user attributes in telegram bots."
+        "This python module is a simple implementation of user management functionality for telegram bots,"
+        "such as: authentication, authorization and request limiting."
     ),
     py_modules=["users"],
     package_dir={'': 'users'},
@@ -33,7 +32,10 @@ setup(
         "Intended Audience :: Developers",
         "Topic :: Software Development"
     ],
-    keywords=['users', 'authentication', 'authorization', 'rate-limits'],
+    keywords=[
+        'users', 'authentication', 'authorization', 'rate-limits',
+        'permissions', 'telegram-bots', 'attributes'
+    ],
     install_requires=[
         'logger @ git+https://github.com/obervinov/logger-package.git@v1.0.1',
         'vault @ git+https://github.com/obervinov/vault-package.git@v2.0.1',

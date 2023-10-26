@@ -18,11 +18,10 @@ This Python module is created to simplify user management in Telegram bots, prov
 
 - Written in Python, this module is designed primarily for Telegram bots but can be adapted for various projects that require user management, role-based access control, and request rate limiting.
 
-- This module requires a dependency in the form of a Vault server for storing user configurations.
-
-- The module also requires the dependency of an additional https://github.com/obervinov/vault-package module to interact with the vault server.
-
-- The Vault policy required by the module when interacting with the Vault server can be found [here](tests/vault/policy.hcl) (with a detailed description).
+- This module requires certain dependencies related to [Vault](https://www.vaultproject.io)
+    - [Vault Server](docker-compose.ymla) for storing user configurations and historical data
+    - [Additional Module](https://github.com/obervinov/vault-package ) to interact with the storage API
+    - [Vault Policy](tests/vault/policy.hcl) with access rights to the Vault Server
 
 - It includes a `Users` class that provides the following functionalities:
 
