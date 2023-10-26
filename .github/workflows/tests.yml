@@ -53,9 +53,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest pytest-order pytest-ordering
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-      - name: Set PYTHONPATH
-        run: export PYTHONPATH=${PYTHONPATH}:${GITHUB_WORKSPACE}
+          pip install -e ${PYTHONPATH}:${GITHUB_WORKSPACE}
 
       - name: Test with pytest
         run: |
