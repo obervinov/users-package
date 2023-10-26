@@ -38,7 +38,7 @@ def pytest_configure(config):
 
 @pytest.fixture(name="prepare_environment", scope='session')
 def fixture_prepare_environment():
-    """Returns the vault url"""
+    """Prepare a local environment or ci environment and return the URL of the Vault server"""
     # prepare vault for local environment
     if not os.getenv("CI"):
         command = (
@@ -80,7 +80,7 @@ def fixture_policy_path():
 
 @pytest.fixture(name="vault", scope='session')
 def fixture_vault(prepare_environment, name, policy_path):
-    """Prepare a storage instance for py tests and return the client"""
+    """Prepare a temporary Vault instance and return the Vault client"""
     configurator = VaultClient(
                 url=prepare_environment,
                 name=name,
@@ -113,8 +113,7 @@ def fixture_timestamp_pattern():
 
 @pytest.fixture(name="users_attributes", scope='function')
 def fixture_users_attributes(vault):
-    """Returns user_auth instance with vault and prepare test data with users attributes"""
-
+    """Fill in the configuration with test user attributes"""
     # Test user1
     # - allowed all permissions
     # - limited request
@@ -124,7 +123,7 @@ def fixture_users_attributes(vault):
         'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
     }
     # Test user2
-    # - allowed function1 and function2
+    # - allowed role1 and role2
     # - limited request
     test_user2 = {
         'status': 'allowed',
@@ -132,7 +131,7 @@ def fixture_users_attributes(vault):
         'requests': {'requests_per_day': 30, 'requests_per_hour': 5, 'random_shift_minutes': 15}
     }
     # Test user3
-    # - not forbidden functions, just hello message
+    # - haven't roles
     # - hard limited request
     test_user3 = {
         'status': 'allowed',
@@ -140,43 +139,43 @@ def fixture_users_attributes(vault):
         'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 60}
     }
     # Test user4
-    # - forbidden to use the bot
+    # - forbidden user
     test_user4 = {
         'status': 'denied',
         'roles': [],
         'requests': {}
     }
-    # Test user5 for additional cases in ratelimits controller
+    # Test user5 for additional cases in rate limits controller
     test_user5 = {
         'status': 'allowed',
         'roles': ['financial_role'],
         'requests': {'requests_per_day': 30, 'requests_per_hour': 3, 'random_shift_minutes': 15}
     }
-    # Test user6 for additional cases in ratelimits controller
+    # Test user6 for additional cases in rate limits controller
     test_user6 = {
         'status': 'allowed',
         'roles': ['financial_role'],
         'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
     }
-    # Test user6 for additional cases in ratelimits controller
+    # Test user6 for additional cases in rate limits controller
     test_user7 = {
         'status': 'allowed',
         'roles': ['financial_role'],
         'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
     }
-    # Test user8 for additional cases in ratelimits controller
+    # Test user8 for additional cases in rate limits controller
     test_user8 = {
         'status': 'allowed',
         'roles': ['financial_role'],
         'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
     }
-    # Test user9 for additional cases in ratelimits controller
+    # Test user9 for additional cases in rate limits controller
     test_user9 = {
         'status': 'allowed',
         'roles': ['financial_role'],
         'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
     }
-    # Test user10 for additional cases in ratelimits controller
+    # Test user10 for additional cases in rate limits controller
     test_user10 = {
         'status': 'allowed',
         'roles': ['financial_role'],
@@ -246,10 +245,10 @@ def fixture_users_attributes(vault):
 
 @pytest.fixture(name="users_data", scope='function')
 def fixture_users_data(vault):
-    """Fills in text user information with rate limits counters"""
-    # Test user1: detect and setup rate limits timestamps (for both)
+    """Fill in the test historical user data with request counters, applied rate limits timers."""
+    # Test user1: detect and setup rate limits timestamp
     # - request limit exceeded
-    # - restrictions on requests don't apply
+    # - restrictions on requests have not yet been applied
     test_user1 = {
         'requests_counters': {'requests_per_day': 11, 'requests_per_hour': 2},
         'rate_limits': {'end_time': None}
@@ -261,44 +260,50 @@ def fixture_users_data(vault):
         'requests_counters': {'requests_per_day': 0, 'requests_per_hour': 0},
         'rate_limits': {'end_time': None}
     }
-    # Test user3: work with 'requests_per_day' timestamp
-    # - request limit exceeded
+    # Test user3: exist rate limit timestamp
+    # - the request limit has been reset to zero
     # - restrictions on requests apply
     test_user3 = {
         'requests_counters': {'requests_per_day': 0, 'requests_per_hour': 0},
         'rate_limits': {'end_time': f"{datetime.now() + timedelta(days=1)}"}
     }
-    # Test user5: work with 'requests_per_day' timestamp
-    # - request limit exceeded
+
+    # Test user4: EMPTY
+
+    # Test user5: exist rate limit timestamp
+    # - the request limit has been reset to zero
     # - restrictions on requests apply
     test_user5 = {
         'requests_counters': {'requests_per_day': 0, 'requests_per_hour': 0},
         'rate_limits': {'end_time': f"{datetime.now() + timedelta(hours=1)}"}
     }
+
+    # Test user6: EMPTY
+
     # Test user7: detect and setup rate limits timestamps (for requests_per_day)
     # - request limit exceeded
-    # - restrictions on requests don't apply
+    # - restrictions on requests have not yet been applied
     test_user7 = {
         'requests_counters': {'requests_per_day': 10, 'requests_per_hour': 0},
         'rate_limits': {'end_time': None}
     }
     # Test user8: detect and setup rate limits timestamps (for requests_per_hour)
     # - request limit exceeded
-    # - restrictions on requests don't apply
+    # - restrictions on requests have not yet been applied
     test_user8 = {
         'requests_counters': {'requests_per_day': 1, 'requests_per_hour': 1},
         'rate_limits': {'end_time': None}
     }
-    # Test user9: detect and setup rate limits timestamps (for both)
+    # Test user9: detect and setup rate limits timestamps (for both: requests_per_day and requests_per_hour)
     # - request limit exceeded
-    # - restrictions on requests don't apply
+    # - restrictions on requests have not yet been applied
     test_user9 = {
         'requests_counters': {'requests_per_day': 10, 'requests_per_hour': 1},
         'rate_limits': {'end_time': None}
     }
     # Test user10: reset expired rate limit
-    # - the speed limit timer has expired
     # - the counter is reset to zero
+    # - the speed limit timer has expired
     test_user10 = {
         'requests_counters': {'requests_per_day': 0, 'requests_per_hour': 0},
         'rate_limits': {'end_time': str(datetime.now() - timedelta(hours=1))}
@@ -351,9 +356,6 @@ def fixture_users_data(vault):
             key=key,
             value=value
         )
-    return Users(
-        vault=vault
-    )
 
 
 @pytest.fixture(name="users", scope='function')
