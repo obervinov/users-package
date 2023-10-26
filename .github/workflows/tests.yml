@@ -16,45 +16,6 @@ jobs:
     uses: obervinov/_templates/.github/workflows/verify.package.yml@v1.0.5
   verify-changelog:
     uses: obervinov/_templates/.github/workflows/verify.changelog.yml@v1.0.5
-  #pytest:
-    # yamllint disable-line rule:line-length
-    #uses: obervinov/_templates/.github/workflows/test.pytest-with-vault.yml@v1.0.5
   pytest:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10", "3.11"]
-    services:
-      vault:
-        image: ghcr.io/obervinov/tools/vault:v1.13.2
-        ports:
-          - 8200:8200
-        env:
-          VAULT_LOCAL_CONFIG: '{"backend": {"file": {"path": "/vault/data"}}, "default_lease_ttl": "1h", "max_lease_ttl": "720h", "listener": {"tcp": {"address": "0.0.0.0:8200", "tls_disable": "1"}}'
-          VAULT_API_ADDR: http://0.0.0.0:8200
-        options: >-
-          --cap-add=IPC_LOCK
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Create virtual environment
-        run: python -m venv venv
-
-      - name: Activate virtual environment
-        run: source venv/bin/activate
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest pytest-order pytest-ordering
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install -e ${PYTHONPATH}:${GITHUB_WORKSPACE}/users/.
-
-      - name: Test with pytest
-        run: |
-          pytest --verbose
+    # yamllint disable-line rule:line-length
+    uses: obervinov/_templates/.github/workflows/test.pytest-with-vault.yml@v1.0.5
