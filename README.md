@@ -206,10 +206,10 @@ user_info = users.user_access_check(
   role_id="admin_role"
 )
 # check permissions, roles, and rate limits
-if user_info["access"] == "allowed":
+if user_info["access"] == users.user_status_allow:
     print("Hi, you can use the bot!")
 
-    if user_info["permissions"] == "allowed":
+    if user_info["permissions"] == users.user_status_allow:
         if user_info["rate_limits"]["end_time"]:
             print(f"You have sent too many requests, the limit is applied until {user_info['rate_limits']['end_time']}")
         else:
@@ -249,10 +249,10 @@ user_info = users.user_access_check(
   role_id="admin_role"
 )
 # check permissions, roles, and rate limits
-if user_info["access"] == "allowed":
+if user_info["access"] == users.user_status_allow:
     print("Hi, you can use the bot!")
 
-    if user_info["permissions"] == "allowed":
+    if user_info["permissions"] == users.user_status_allow:
         print("You have admin's rights")
     else:
         print("You do not have access rights to this function")
@@ -281,7 +281,7 @@ vault_client = VaultClient(
 users = Users(vault=vault_client)
 
 # check access to the bot
-if users.authentication(user_id='user1') == 'allowed':
+if users.authentication(user_id='user1') == users.user_status_allow:
     print("You can use this bot")
 
 # check access to the bot
