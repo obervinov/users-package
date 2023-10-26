@@ -28,7 +28,7 @@ This Python module is created to simplify user management in Telegram bots, prov
   - **Authentication**: The module allows you to check if a specified user ID has access to the bot.
 
     - Arguments:
-      - `user_id (str)`: The user's ID.
+      - `user_id (str)`: Required user ID.
 
     - Example:
       ```python
@@ -39,11 +39,11 @@ This Python module is created to simplify user management in Telegram bots, prov
       - `self.user_status_allow` if access is granted.
       - `self.user_status_deny` if access is denied.
 
-  - **Authorization**: You can verify if a user has a specified role.
+  - **Authorization**: Verify if a user has a specified role.
 
     - Arguments:
-      - `user_id (str)`: The user's ID.
-      - `role_id (str)`: The required role ID for the specified user.
+      - `user_id (str)`: Required user ID.
+      - `role_id (str)`: Required role ID for the specified user ID.
 
     - Example:
       ```python
@@ -57,7 +57,7 @@ This Python module is created to simplify user management in Telegram bots, prov
   - **Rate Limiting Controller**: This feature tracks user requests and applies rate limits as needed.
 
     - Arguments:
-      - `user_id (str)`: The user's ID.
+      - `user_id (str)`: Required user ID.
       - `consider_request (bool)`: Specifies whether the method should include the current request in the request counters.
 
     - Example:
