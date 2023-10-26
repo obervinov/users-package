@@ -3,11 +3,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## v2.0.0 - 2023-10-25
+## v2.0.0 - 2023-10-26
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v1.0.5...v2.0.0 by @obervinov in https://github.com/obervinov/users-package/pull/24
-#### 🐛 Bug Fixes
-* 
 #### 💥 Breaking Changes
 * (Expand access rights and user attributes)[https://github.com/obervinov/users-package/issues/21]
 * (Deprecate outdated class and methods users:v1)[https://github.com/obervinov/users-package/issues/26]

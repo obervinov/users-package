@@ -13,6 +13,7 @@ from vault import VaultClient
 if os.getenv("CI"):
     from users.users import Users
 else:
+    # pylint: disable=E0611
     from users import Users
 
 
