@@ -7,7 +7,7 @@ import pytest
 @pytest.mark.order(1)
 def test_check_authn_allow_users(users):
     """
-    Check the function for the user who is allowed access to the bot
+    Check the function for the user who is allow access to the bot
     """
     assert users.authentication(user_id='testUser1') == users.user_status_allow
     assert users.authentication(user_id='testUser2') == users.user_status_allow
