@@ -98,9 +98,15 @@ It supports user configurations to define system access rights, roles, and reque
 ### Users Configuration
 - **path to the secret**: `configuration/users/{user_id}`
 - **keys and Values**:
-  - `status`: The status of user access, which can be either `self.user_status_allow` or `self.user_status_deny`.
+  - `status`: The status of user access, which can be either
+      - `self.user_status_allow`
+      - `self.user_status_deny`
   - `roles`: A list of roles associated with the user ID, e.g., `['role1', 'role2']`.
-  - `requests`: Limits on the number of requests per_day and per_hour, and a random_shift_time (additional, random shift in minutes from 0 to the specified number) in minutes, e.g.:
+  - `requests`: Limits on the number of requests
+      - `requests_per_day`
+      - `requests_per_hour`
+      - `random_shift_time` (additional, random shift in minutes from 0 to the specified number) in minutes
+
     ```json
     {
         "requests_per_day": 10,
@@ -108,6 +114,7 @@ It supports user configurations to define system access rights, roles, and reque
         "random_shift_minutes": 15
     }
     ```
+
 - **example of a secret with configuration**:
 ```json
 {
@@ -123,7 +130,9 @@ It supports user configurations to define system access rights, roles, and reque
 ### Users Data and Historical Records
 - **path to the secret**: `data/users/{user_id}`
 - **keys and values**:
-  - `requests_counters`: Historical data with statistics on user requests. It includes counters for the number of requests per_day and per_hour, e.g.:
+  - `requests_counters`: Historical data with statistics on user requests. It includes counters for the number of requests
+      - `requests_per_day`
+      - `requests_per_hour`
 
     ```json
     {
@@ -133,10 +142,13 @@ It supports user configurations to define system access rights, roles, and reque
     ```
 
   - `rate_limits`: Information about rate limits, including the end time of the rate limit. It can have two values:
-    - `'end_time'` with a timestamp, e.g., `{'end_time': '2023-08-07 10:39:00.000000'}`
-    - `'end_time'` set to `None` if no rate limits are applied, e.g., `{'end_time': None}`
+    - `{'end_time': '2023-08-07 10:39:00.000000'}`
+    - `{'end_time': None}`
 
-  - `authorization`: Details about the authorization process, including the time, status `self.user_status_allow` or `self.user_status_deny`, and the user's role ID, for example:
+  - `authorization`: Details about the authorization process, including the time, status
+      - `self.user_status_allow`
+      - `self.user_status_deny`
+      - `role ID`
 
     ```json
     {
@@ -146,7 +158,9 @@ It supports user configurations to define system access rights, roles, and reque
     }
     ```
 
-  - `authentication`: Records of the authentication process, indicating the time and status `self.user_status_allow` or `self.user_status_deny`, like this:
+  - `authentication`: Records of the authentication process, indicating the time and status
+      - `self.user_status_allow`
+      - `self.user_status_deny`
 
     ```json
     {
@@ -157,14 +171,22 @@ It supports user configurations to define system access rights, roles, and reque
 - **example of a secret with historical data**:
 ```json
 {
-    "status": "allowed",
-    "roles": ["admin_role", "additional_role"],
-    "requests": {
-        "requests_per_day": 10,
-        "requests_per_hour": 1,
-        "random_shift_minutes": 15
+    "requests_counters": {
+        "requests_per_day": 9,
+        "requests_per_hour": 1
+    },
+    "rate_limits": { "end_time": "None" },
+    "authorization": {
+        "time": "2023-08-07 10:39:00.000000",
+        "status": "allowed",
+        "role": "role1"
+    },
+    "authentication": {
+        "time": "2023-08-07 10:39:00.000000",
+        "status": "allowed"
     }
 }
+```
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/stack2.png" width="20" title="install"> Installing
 ```bash
@@ -177,7 +199,7 @@ pip3 install git+https://github.com/obervinov/users-package.git@v2.0.0#egg=users
 ```
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/config.png" width="25" title="usage"> Additional usage example
-Interaction Model 1: Using a Unified Entrypoint (Method: user_access_check())
+Interaction Model 1: Using a Unified Entrypoint (Method: `user_access_check()`)
 ```mermaid
 sequenceDiagram
     participant User
@@ -308,7 +330,7 @@ if users.authentication(user_id='user1') == users.user_status_allow:
 if users.authorization(
   user_id='user1',
   role_id='admin_role'
-) == 'allowed':
+) == users.user_status_allow:
     print("You have admin's permissions")
 
 # check access to the bot
