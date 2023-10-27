@@ -5,7 +5,7 @@ import pytest
 
 
 @pytest.mark.order(4)
-def test_check_authz_exist_role(users):
+def test_check_authz_exist_roles(users):
     """
     Check the function for the user who is allowed access to the exist role.
     """
@@ -15,7 +15,7 @@ def test_check_authz_exist_role(users):
 
 
 @pytest.mark.order(5)
-def test_check_authz_doesnt_exist_role(users):
+def test_check_authz_doesnt_exist_roles(users):
     """
     Check the function for the user who is denied access to the role.
     """

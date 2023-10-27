@@ -5,7 +5,7 @@ import pytest
 
 
 @pytest.mark.order(1)
-def test_check_authn_allow_user(users):
+def test_check_authn_allow_users(users):
     """
     Check the function for the user who is allowed access to the bot
     """
@@ -15,7 +15,7 @@ def test_check_authn_allow_user(users):
 
 
 @pytest.mark.order(2)
-def test_check_authn_deny_user(users):
+def test_check_authn_deny_users(users):
     """
     Check the function for the user who is forbidden access to the bot
     """
@@ -23,7 +23,7 @@ def test_check_authn_deny_user(users):
 
 
 @pytest.mark.order(3)
-def test_check_authn_doesnt_exist_user(users):
+def test_check_authn_doesnt_exist_users(users):
     """
     Check the function for a user who does not exist in the configuration (random user)
     """
