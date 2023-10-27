@@ -39,7 +39,7 @@ This Python module is created to simplify user management in Telegram bots, prov
       - `self.user_status_allow` if access is granted.
       - `self.user_status_deny` if access is denied.
 
-  - **Authorization**: Verify if a user has a specified role.
+  - **Authorization**: The module allows you to check whether the specified identifier has a specified role in the configuration.
 
     - Arguments:
       - `user_id (str)`: Required user ID.
