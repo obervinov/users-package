@@ -101,7 +101,6 @@ It supports user configurations to define system access rights, roles, and reque
   - `status`: The status of user access, which can be either `self.user_status_allow` or `self.user_status_deny`.
   - `roles`: A list of roles associated with the user ID, e.g., `['role1', 'role2']`.
   - `requests`: Limits on the number of requests per_day and per_hour, and a random_shift_time (additional, random shift in minutes from 0 to the specified number) in minutes. For example:
-
     ```json
     {
         "requests_per_day": 10,
@@ -110,6 +109,18 @@ It supports user configurations to define system access rights, roles, and reque
     }
     ```
 
+Full example:
+```json
+{
+    "status": "allowed",
+    "roles": ['admin_role', 'additional_role'],
+    "requests": {
+        "requests_per_day": 10,
+        "requests_per_hour": 1,
+        "random_shift_minutes": 15
+    }
+}
+```
 ### Users Data and Historical Records
 - **path to the secret**: `data/users/{user_id}`
 - **keys and values**:
