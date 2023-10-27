@@ -98,9 +98,9 @@ It supports user configurations to define system access rights, roles, and reque
 ### Users Configuration
 - **path to the secret**: `configuration/users/{user_id}`
 - **keys and Values**:
-  - `status`: The status of user access, which can be either `self.user_status_allow` 'allowed' or `self.user_status_deny` 'denied'.
+  - `status`: The status of user access, which can be either `self.user_status_allow` _allowed_ or `self.user_status_deny` _denied_.
   - `roles`: A list of roles associated with the user ID, e.g., `['role1', 'role2']`.
-  - `requests`: Limits on the number of requests `per_day` and `per_hour`, and a `random_shift_time` (additional, random shift in minutes from 0 to the specified number) in minutes. For example:
+  - `requests`: Limits on the number of requests per_day and per_hour, and a random_shift_time (additional, random shift in minutes from 0 to the specified number) in minutes. For example:
 
     ```json
     {
@@ -123,10 +123,10 @@ It supports user configurations to define system access rights, roles, and reque
     ```
 
   - `rate_limits`: Information about rate limits, including the end time of the rate limit. It can have two values:
-    - `'end_time'` with a timestamp, e.g., `'end_time': '2023-08-07 10:39:00.000000'`
-    - `'end_time'` set to `None` if no rate limits are applied.
+    - `'end_time'` with a timestamp, e.g., `{'end_time': '2023-08-07 10:39:00.000000'}`
+    - `'end_time'` set to `None` if no rate limits are applied, e.g., `{'end_time': None}`
 
-  - `authorization`: Details about the authorization process, including the time, status ('allowed' or 'denied'), and the user's role, for example:
+  - `authorization`: Details about the authorization process, including the time, status `self.user_status_allow` _allowed_ or `self.user_status_deny` _denied_, and the user's role ID, for example:
 
     ```json
     {
@@ -136,7 +136,7 @@ It supports user configurations to define system access rights, roles, and reque
     }
     ```
 
-  - `authentication`: Records of the authentication process, indicating the time and status ('allowed' or 'denied'), like this:
+  - `authentication`: Records of the authentication process, indicating the time and status `self.user_status_allow` _allowed_ or `self.user_status_deny` _denied_, like this:
 
     ```json
     {
