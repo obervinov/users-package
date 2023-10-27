@@ -9,11 +9,11 @@ import requests
 import pytest
 # pylint: disable=E0401
 from vault import VaultClient
-
+# pylint: disable=E0611
 if os.getenv("CI"):
     from users.users import Users
+# pylint: disable=E0611
 else:
-    # pylint: disable=E0611
     from users import Users
 
 

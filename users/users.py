@@ -42,7 +42,7 @@ class Users:
         self.rate_limits = rate_limits
         self.user_status_allow = "allowed"
         self.user_status_deny = "denied"
-        self.vault_configuration_path = "configuration/users"
+        self.vault_config_path = "configuration/users"
         self.vault_data_path = "data/users"
 
     def user_access_check(
@@ -128,7 +128,7 @@ class Users:
         """
         try:
             status = self.vault.read_secret(
-                path=f"{self.vault_configuration_path}/{user_id}",
+                path=f"{self.vault_config_path}/{user_id}",
                 key='status'
             )
         # pylint: disable=W0718
@@ -177,7 +177,7 @@ class Users:
         """
         try:
             if role_id in self.vault.read_secret(
-                path=f"{self.vault_configuration_path}/{user_id}",
+                path=f"{self.vault_config_path}/{user_id}",
                 key='roles'
             ):
                 status = self.user_status_allow
@@ -242,7 +242,7 @@ class Users:
 
         # Read configuration and history counters
         requests_configuration = self.vault.read_secret(
-            path=f"{self.vault_configuration_path}/{user_id}",
+            path=f"{self.vault_config_path}/{user_id}",
             key='requests'
         )
         try:
