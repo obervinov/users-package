@@ -13,7 +13,7 @@ def test_check_entrypoint_doesnt_exist_user(users):
     """
     user = 'testUser99'
     assert users.user_access_check(user_id=user) == {
-                'access': 'denied'
+                'access': users.user_status_deny
     }
 
 
@@ -25,8 +25,8 @@ def test_check_entrypoint_rl_disabled(users_without_rl):
     """
     user = 'testUser9'
     assert users_without_rl.user_access_check(user_id=user, role_id='financial_role') == {
-                'access': 'allowed',
-                'permissions': 'allowed'
+                'access': users_without_rl.user_status_allow,
+                'permissions': users_without_rl.user_status_allow
     }
 
 
@@ -38,8 +38,8 @@ def test_check_entrypoint_authn_allowed(users):
     """
     user = 'testUser2'
     assert users.user_access_check(user_id=user, role_id='financial_role') == {
-                'access': 'allowed',
-                'permissions': 'allowed',
+                'access': users.user_status_allow,
+                'permissions': users.user_status_allow,
                 'rate_limits': {'end_time': None}
     }
 
@@ -52,7 +52,7 @@ def test_check_entrypoint_authn_denied(users):
     """
     user = 'testUser4'
     assert users.user_access_check(user_id=user) == {
-                'access': 'denied'
+                'access': users.user_status_deny
     }
 
 
@@ -64,8 +64,8 @@ def test_check_entrypoint_authz_allowed(users):
     """
     user = 'testUser2'
     assert users.user_access_check(user_id=user, role_id='financial_role') == {
-                'access': 'allowed',
-                'permissions': 'allowed',
+                'access': users.user_status_allow,
+                'permissions': users.user_status_allow,
                 'rate_limits': {'end_time': None}
     }
 
@@ -78,8 +78,8 @@ def test_check_entrypoint_authz_denied(users):
     """
     user = 'testUser2'
     assert users.user_access_check(user_id=user, role_id='admin_role') == {
-                'access': 'allowed',
-                'permissions': 'denied'
+                'access': users.user_status_allow,
+                'permissions': users.user_status_deny
     }
 
 
@@ -92,8 +92,8 @@ def test_check_entrypoint_rl_applied(users, timestamp_pattern):
     user = 'testUser5'
     result = users.user_access_check(user_id=user, role_id='financial_role')
 
-    assert result['access'] == 'allowed'
-    assert result['permissions'] == 'allowed'
+    assert result['access'] == users.user_status_allow
+    assert result['permissions'] == users.user_status_allow
 
     end_time = result['rate_limits']['end_time']
     assert re.match(timestamp_pattern, end_time) is not None
@@ -107,7 +107,7 @@ def test_check_entrypoint_rl_not_applied(users):
     """
     user = 'testUser2'
     assert users.user_access_check(user_id=user, role_id='financial_role') == {
-                'access': 'allowed',
-                'permissions': 'allowed',
+                'access': users.user_status_allow,
+                'permissions': users.user_status_allow,
                 'rate_limits': {'end_time': None}
     }
