@@ -98,7 +98,7 @@ It supports user configurations to define system access rights, roles, and reque
 ### Users Configuration
 - **path to the secret**: `configuration/users/{user_id}`
 - **keys and Values**:
-  - `status`: The status of user access, which can be either `self.user_status_allow ('allowed')` or `self.user_status_deny ('denied')`.
+  - `status`: The status of user access, which can be either `self.user_status_allow` 'allowed' or `self.user_status_deny` 'denied'.
   - `roles`: A list of roles associated with the user ID, e.g., `['role1', 'role2']`.
   - `requests`: Limits on the number of requests `per_day` and `per_hour`, and a `random_shift_time` (additional, random shift in minutes from 0 to the specified number) in minutes. For example:
 
