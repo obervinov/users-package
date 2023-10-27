@@ -100,7 +100,7 @@ It supports user configurations to define system access rights, roles, and reque
 - **keys and Values**:
   - `status`: The status of user access, which can be either `self.user_status_allow` or `self.user_status_deny`.
   - `roles`: A list of roles associated with the user ID, e.g., `['role1', 'role2']`.
-  - `requests`: Limits on the number of requests per_day and per_hour, and a random_shift_time (additional, random shift in minutes from 0 to the specified number) in minutes. For example:
+  - `requests`: Limits on the number of requests per_day and per_hour, and a random_shift_time (additional, random shift in minutes from 0 to the specified number) in minutes, e.g.:
     ```json
     {
         "requests_per_day": 10,
@@ -108,12 +108,11 @@ It supports user configurations to define system access rights, roles, and reque
         "random_shift_minutes": 15
     }
     ```
-
-Full example:
+- **example of a secret with configuration**:
 ```json
 {
     "status": "allowed",
-    "roles": ['admin_role', 'additional_role'],
+    "roles": ["admin_role", "additional_role"],
     "requests": {
         "requests_per_day": 10,
         "requests_per_hour": 1,
@@ -124,7 +123,7 @@ Full example:
 ### Users Data and Historical Records
 - **path to the secret**: `data/users/{user_id}`
 - **keys and values**:
-  - `requests_counters`: Historical data with statistics on user requests. It includes counters for the number of requests per day and per hour, e.g.:
+  - `requests_counters`: Historical data with statistics on user requests. It includes counters for the number of requests per_day and per_hour, e.g.:
 
     ```json
     {
@@ -155,6 +154,17 @@ Full example:
         "status": "allowed"
     }
     ```
+- **example of a secret with historical data**:
+```json
+{
+    "status": "allowed",
+    "roles": ["admin_role", "additional_role"],
+    "requests": {
+        "requests_per_day": 10,
+        "requests_per_hour": 1,
+        "random_shift_minutes": 15
+    }
+}
 
 ## <img src="https://github.com/obervinov/_templates/blob/main/icons/stack2.png" width="20" title="install"> Installing
 ```bash
