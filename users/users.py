@@ -1,49 +1,213 @@
 """
-This module contains classes and methods for implementing simple user authorization
-and management of user attributes in Telegram bots.
+This python module is a simple implementation of user management functionality for telegram bots, such as:
+authentication, authorization and request limiting.
 """
-import random
-from datetime import datetime, timedelta
+from datetime import datetime
 from logger import log
+from vault import VaultClient
+from constants import VAULT_CONFIG_PATH, VAULT_DATA_PATH, USER_STATUS_ALLOW, USER_STATUS_DENY
+from ratelimits import RateLimiter
 
 
 class Users:
     """
-    This module contains classes and methods for implementing simple
-    user authentication, authorization, request rate limiting,
-    and management of user attributes in Telegram bots.
+    This class provides authentication, authorization, and user attribute management
+    for Telegram bots.
+
+    Args:
+        :param vault (any): Configuration for initializing the Vault client.
+            - (object) VaultClient instance for interacting with the Vault API.
+            - (dict) Configuration for initializing a VaultClient instance in this class.
+
+        :param rate_limits (bool): Enable rate limit functionality.
+
+    Returns:
+        None
+
+    Attributes:
+        vault (any): The initialized VaultClient instance or None if initialization failed.
+        rate_limits (bool): Enable or disable rate limit functionality.
+        user_status_allow (str): A constant representing allowed user status.
+        user_status_deny (str): A constant representing denied user status.
+        vault_config_path (str): Path to the configuration data in Vault.
+        vault_data_path (str): Path to the data in Vault.
+
+    Examples:
+        >>> users_without_ratelimits = Users(vault=vault_client, rate_limits=False)
+
+        >>> users_with_ratelimits = Users(vault=vault_client)
+
+        >>> vault_config = {
+                "name": "my_project",
+                "url": "https://vault.example.com",
+                "approle": {
+                    "id": "my_approle",
+                    "secret-id": "my_secret"
+                }
+           }
+        >>> users_with_dict_vault = Users(vault=vault_config)
     """
 
     def __init__(
         self,
-        vault: object = None,
+        vault: any = None,
         rate_limits: bool = True
     ) -> None:
         """
-        Method to create a new Users instance.
+        Create a new Users instance.
 
         Args:
-            :param vault (object): Vault instance for interacting with the Vault API.
+            :param vault (any): Configuration for initializing the vault client.
+                :param vault (object): VaultClient instance for interacting with the Vault API.
+                :param vault (dict): Configuration for initializing a VaultClient instance in this class.
+                    - name (str): Name of the individual mount point of your project.
+                    - url (str): URL to the vault server.
+                    - approle (dict): Configuration for the AppRole authentication method.
+                        - id (str): The identifier of the AppRole.
+                        - secret-id (str): Secret ID for the AppRole.
+
             :param rate_limits (bool): Enable rate limit functionality.
 
         Returns:
             None
 
-        Examples:
-            >>> users_without_ratelimits = Users(
-                    vault=vault_client,
-                    rate_limits=False
-                )
-            >>> users_with_ratelimits = Users(
-                    vault=vault_client
-                )
+        See the class docstring for more details and examples.
         """
-        self.vault = vault
+        if isinstance(vault, VaultClient):
+            self._vault = vault
+        elif isinstance(vault, dict):
+            self._vault = VaultClient(
+                name=vault.get('name', None),
+                url=vault.get('url', None),
+                approle=vault.get('approle', None)
+            )
+        else:
+            log.error(
+                '[class.%s] wrong vault parameters in Users(vault=%s), see doc-string',
+                __class__.__name__,
+                vault
+            )
+            self._vault = None
+
         self.rate_limits = rate_limits
-        self.user_status_allow = "allowed"
-        self.user_status_deny = "denied"
-        self.vault_config_path = "configuration/users"
-        self.vault_data_path = "data/users"
+        self._user_status_allow = USER_STATUS_ALLOW
+        self._user_status_deny = USER_STATUS_DENY
+        self._vault_config_path = VAULT_CONFIG_PATH
+        self._vault_data_path = VAULT_DATA_PATH
+
+    @property
+    def vault(self):
+        """
+        Getter for the 'vault' attribute.
+
+        Returns:
+            (any): The 'vault' attribute.
+        """
+        return self._vault
+
+    @vault.setter
+    def vault(self, vault: any):
+        """
+        Setter for the 'vault' attribute.
+
+        Args:
+            vault (any): Configuration for initializing the Vault client.
+        """
+        if isinstance(vault, VaultClient):
+            self._vault = vault
+        elif isinstance(vault, dict):
+            self._vault = VaultClient(
+                name=vault.get('name', None),
+                url=vault.get('url', None),
+                approle=vault.get('approle', None)
+            )
+        else:
+            log.error(
+                '[class.%s] wrong vault parameters in Users(vault=%s), see doc-string',
+                __class__.__name__,
+                vault
+            )
+            self._vault = None
+
+    @property
+    def user_status_allow(self):
+        """
+        Getter for the 'user_status_allow' attribute.
+
+        Returns:
+            (str): The 'user_status_allow' attribute.
+        """
+        return self._user_status_allow
+
+    @user_status_allow.setter
+    def user_status_allow(self, user_status_allow: str):
+        """
+        Setter for the 'user_status_allow' attribute.
+
+        Args:
+            user_status_allow (str): User status for allowed access.
+        """
+        self._user_status_allow = user_status_allow
+
+    @property
+    def user_status_deny(self):
+        """
+        Getter for the 'user_status_deny' attribute.
+
+        Returns:
+            (str): The 'user_status_deny' attribute.
+        """
+        return self._user_status_deny
+
+    @user_status_deny.setter
+    def user_status_deny(self, user_status_deny: str):
+        """
+        Setter for the 'user_status_deny' attribute.
+
+        Args:
+            user_status_deny (str): User status for denied access.
+        """
+        self._user_status_deny = user_status_deny
+
+    @property
+    def vault_config_path(self):
+        """
+        Getter for the 'vault_config_path' attribute.
+
+        Returns:
+            (str): The 'vault_config_path' attribute.
+        """
+        return self._vault_config_path
+
+    @vault_config_path.setter
+    def vault_config_path(self, vault_config_path: str):
+        """
+        Setter for the 'vault_config_path' attribute.
+
+        Args:
+            vault_config_path (str): Path to the configuration data in Vault.
+        """
+        self._vault_config_path = vault_config_path
+
+    @property
+    def vault_data_path(self):
+        """
+        Getter for the 'vault_data_path' attribute.
+
+        Returns:
+            (str): The 'vault_data_path' attribute.
+        """
+        return self._vault_data_path
+
+    @vault_data_path.setter
+    def vault_data_path(self, vault_data_path: str):
+        """
+        Setter for the 'vault_data_path' attribute.
+
+        Args:
+            vault_data_path (str): Path to the data in Vault.
+        """
+        self._vault_data_path = vault_data_path
 
     def user_access_check(
         self,
@@ -59,35 +223,43 @@ class Users:
 
         Returns:
             (dict) {
-                'access': self.user_status_allow / self.user_status_deny
+            'access': self.user_status_allow / self.user_status_deny
             }
-              or
+            or
             (dict) {
-                'access': self.user_status_allow / self.user_status_deny,
-                'permissions': self.user_status_allow / self.user_status_deny
+            'access': self.user_status_allow / self.user_status_deny,
+            'permissions': self.user_status_allow / self.user_status_deny
             }
-              or
+            or
             (dict) {
-                'access': self.user_status_allow / self.user_status_deny,
-                'permissions': self.user_status_allow / self.user_status_deny,
-                'rate_limits': {
-                    'end_time': '2023-08-06 11:47:09.440933'
-                }
+            'access': self.user_status_allow / self.user_status_deny,
+            'permissions': self.user_status_allow / self.user_status_deny,
+            'rate_limits': {
+                'end_time': '2023-08-06 11:47:09.440933'
             }
-              or
+            }
+            or
             (dict) {
-                'access': self.user_status_allow / self.user_status_deny,
-                'permissions': self.user_status_allow / self.user_status_deny,
-                'rate_limits': {
-                    'end_time': None,
-                }
+            'access': self.user_status_allow / self.user_status_deny,
+            'permissions': self.user_status_allow / self.user_status_deny,
+            'rate_limits': {
+                'end_time': None,
+            }
             }
 
         Examples:
             >>> user_info = users.user_access_check(
-                user_id='user1',
-                role_id='admin_role'
-            )
+                    user_id='user1',
+                    role_id='admin_role'
+                )
+
+        This method serves as the main entry point for user access control.
+        It first performs user authentication and then,
+        if the user is authenticated and a role ID is provided,
+        it checks for user authorization. If rate limits are enabled,
+        it also verifies request rate limits for the user.
+        The function returns a dictionary containing information about access, permissions, and rate limits
+        if applicable.
         """
         user_info = {}
 
@@ -100,9 +272,11 @@ class Users:
                 role_id=role_id
             )
             if user_info['permissions'] == self.user_status_allow and self.rate_limits:
-                user_info['rate_limits'] = self.rl_controller(
+                rl_controller = RateLimiter(
+                    vault=self.vault,
                     user_id=user_id
                 )
+                user_info['rate_limits'] = rl_controller.determine_rate_limit()
 
         return user_info
 
@@ -205,169 +379,3 @@ class Users:
             }
         )
         return status
-
-    def rl_controller(
-        self,
-        user_id: str = None,
-        consider_request: bool = True
-    ) -> dict:
-        """
-        The method takes into account user requests and, depending on the counter,
-        applies or does not apply rate limits.
-
-        Args:
-            :param user_id (str): Required user ID.
-            :param consider_request (bool): Specifies whether the method should include
-                                            the current request in the request counters.
-
-        Examples:
-          >>> rl_controller(
-                user_id='user1'
-              )
-          >>> rl_controller(
-                user_id='user1',
-                consider_request=False
-              )
-
-        Returns:
-            (dict) {'end_time': None}
-                or
-            (dict) {'end_time': '2023-08-06 11:47:09.440933'}
-        """
-        if not consider_request:
-            log.warning(
-                '[class.%s] Consider request disabled',
-                __class__.__name__,
-            )
-
-        # Read configuration and history counters
-        requests_configuration = self.vault.read_secret(
-            path=f"{self.vault_config_path}/{user_id}",
-            key='requests'
-        )
-        try:
-            requests_counters = self.vault.read_secret(
-                path=f"{self.vault_data_path}/{user_id}",
-                key='requests_counters'
-            )
-        # pylint: disable=W0718
-        # will be fixed after the solution https://github.com/obervinov/vault-package/issues/31
-        except Exception:
-            requests_counters = {'requests_per_day': 0, 'requests_per_hour': 0}
-
-        try:
-            requests_ratelimits = self.vault.read_secret(
-                path=f"{self.vault_data_path}/{user_id}",
-                key='rate_limits'
-            )
-        # pylint: disable=W0718
-        # will be fixed after the solution https://github.com/obervinov/vault-package/issues/31
-        except Exception:
-            requests_ratelimits = {'end_time': None}
-
-        # Determine the status of the request limit
-        # If rate limits already applied
-        if requests_ratelimits['end_time']:
-            if datetime.now() >= datetime.strptime(
-                requests_ratelimits['end_time'], '%Y-%m-%d %H:%M:%S.%f'
-            ):
-                log.info(
-                    '[class.%s] Date rate limit expired, reset for user ID %s',
-                    __class__.__name__,
-                    user_id
-                )
-                requests_ratelimits['end_time'] = None
-                self.vault.write_secret(
-                    path=f"{self.vault_data_path}/{user_id}",
-                    key='rate_limits',
-                    value={
-                        'end_time': requests_ratelimits['end_time']
-                    }
-                )
-            else:
-                log.warning(
-                    '[class.%s] A speed limit has been detected for user ID %s '
-                    'that has already been applied and has not expired yet',
-                    __class__.__name__,
-                    user_id
-                )
-            rate_limits = requests_ratelimits
-
-        # If rate limits need to apply
-        elif (
-            requests_configuration['requests_per_day'] <= requests_counters['requests_per_day'] or
-            requests_configuration['requests_per_hour'] <= requests_counters['requests_per_hour']
-        ):
-            if requests_configuration['requests_per_day'] <= requests_counters['requests_per_day']:
-                log.warning(
-                    '[class.%s] The request limits are exhausted (per_day), '
-                    'the rate limit will be applied for user ID %s',
-                    __class__.__name__,
-                    user_id
-                )
-                requests_ratelimits['end_time'] = str(datetime.now() + timedelta(days=1))
-                requests_counters['requests_per_day'] = 0
-                requests_counters['requests_per_hour'] = requests_counters['requests_per_hour'] + 1
-            elif requests_configuration['requests_per_hour'] <= requests_counters['requests_per_hour']:
-                log.warning(
-                    '[class.%s] The request limits are exhausted (per_hour), '
-                    'the rate limit will be applied for user ID %s',
-                    __class__.__name__,
-                    user_id
-                )
-                shift_minutes = random.randint(1, requests_configuration['random_shift_minutes'])
-                requests_ratelimits['end_time'] = str(
-                    datetime.now() + timedelta(
-                        hours=1,
-                        minutes=shift_minutes
-                    )
-                )
-                requests_counters['requests_per_hour'] = 0
-                requests_counters['requests_per_day'] = requests_counters['requests_per_day'] + 1
-            self.vault.write_secret(
-                path=f"{self.vault_data_path}/{user_id}",
-                key='requests_counters',
-                value=requests_counters
-            )
-            self.vault.write_secret(
-                path=f"{self.vault_data_path}/{user_id}",
-                key='rate_limits',
-                value=requests_ratelimits
-            )
-            rate_limits = requests_ratelimits
-
-        # If no rate limits need to be applied
-        elif (
-            requests_configuration['requests_per_day'] > requests_counters['requests_per_day'] and
-            requests_configuration['requests_per_hour'] > requests_counters['requests_per_hour'] and
-            consider_request
-        ):
-            log.info(
-                '[class.%s] The limits have not been exhausted, '
-                'the limits on the number of requests are not applied for user ID %s',
-                __class__.__name__,
-                user_id
-            )
-            requests_counters['requests_per_day'] = requests_counters['requests_per_day'] + 1
-            requests_counters['requests_per_hour'] = requests_counters['requests_per_hour'] + 1
-            self.vault.write_secret(
-                path=f"{self.vault_data_path}/{user_id}",
-                key='requests_counters',
-                value=requests_counters
-            )
-            rate_limits = {'end_time': None}
-        else:
-            log.error(
-                '[class.%s] Failed to apply rate limit for %s\n'
-                'Counters: %s \n'
-                'Ratelimits: %s \n'
-                'Configuration: %s',
-                __class__.__name__,
-                user_id,
-                requests_counters,
-                requests_ratelimits,
-                requests_configuration
-            )
-            rate_limits = None
-
-        return rate_limits

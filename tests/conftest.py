@@ -32,8 +32,8 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "order: Set the execution order of tests")
 
 
-@pytest.fixture(name="prepare_environment", scope='session')
-def fixture_prepare_environment():
+@pytest.fixture(name="vault_url", scope='session')
+def fixture_vault_url():
     """Prepare a local environment or ci environment and return the URL of the Vault server"""
     # prepare vault for local environment
     if not os.getenv("CI"):
@@ -74,11 +74,11 @@ def fixture_policy_path():
     return "tests/vault/policy.hcl"
 
 
-@pytest.fixture(name="vault", scope='session')
-def fixture_vault(prepare_environment, name, policy_path):
+@pytest.fixture(name="vault_approle", scope='session')
+def fixture_vault_approle(vault_url, name, policy_path):
     """Prepare a temporary Vault instance and return the Vault client"""
     configurator = VaultClient(
-                url=prepare_environment,
+                url=vault_url,
                 name=name,
                 new=True
     )
@@ -89,16 +89,31 @@ def fixture_vault(prepare_environment, name, policy_path):
             name=name,
             path=policy_path
         )
-    approle = configurator.create_approle(
+    return configurator.create_approle(
         name=name,
         path=namespace,
         policy=policy
     )
+
+
+@pytest.fixture(name="vault_instance", scope='session')
+def fixture_vault_instance(vault_url, vault_approle, name):
+    """Returns an initialized vault instance"""
     return VaultClient(
-            url=prepare_environment,
-            name=name,
-            approle=approle
+        url=vault_url,
+        name=name,
+        approle=vault_approle
     )
+
+
+@pytest.fixture(name="vault_configuration", scope='session')
+def fixture_vault_configuration(vault_url, vault_approle, name):
+    """Returns a dictionary for initializing the vault instance via the Users class"""
+    return {
+        'name': name,
+        'url': vault_url,
+        'approle': vault_approle
+    }
 
 
 @pytest.fixture(name="timestamp_pattern", scope='session')
@@ -108,7 +123,7 @@ def fixture_timestamp_pattern():
 
 
 @pytest.fixture(name="users_attributes", scope='function')
-def fixture_users_attributes(vault):
+def fixture_users_attributes(vault_instance):
     """Fill in the configuration with test user attributes"""
     # Test user1
     # - allowed all permissions
@@ -178,61 +193,61 @@ def fixture_users_attributes(vault):
         'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
     }
     for key, value in test_user1.items():
-        _ = vault.write_secret(
+        _ = vault_instance.write_secret(
             path='configuration/users/testUser1',
             key=key,
             value=value
         )
     for key, value in test_user2.items():
-        _ = vault.write_secret(
+        _ = vault_instance.write_secret(
             path='configuration/users/testUser2',
             key=key,
             value=value
         )
     for key, value in test_user3.items():
-        _ = vault.write_secret(
+        _ = vault_instance.write_secret(
             path='configuration/users/testUser3',
             key=key,
             value=value
         )
     for key, value in test_user4.items():
-        _ = vault.write_secret(
+        _ = vault_instance.write_secret(
             path='configuration/users/testUser4',
             key=key,
             value=value
         )
     for key, value in test_user5.items():
-        _ = vault.write_secret(
+        _ = vault_instance.write_secret(
             path='configuration/users/testUser5',
             key=key,
             value=value
         )
     for key, value in test_user6.items():
-        _ = vault.write_secret(
+        _ = vault_instance.write_secret(
             path='configuration/users/testUser6',
             key=key,
             value=value
         )
     for key, value in test_user7.items():
-        _ = vault.write_secret(
+        _ = vault_instance.write_secret(
             path='configuration/users/testUser7',
             key=key,
             value=value
         )
     for key, value in test_user8.items():
-        _ = vault.write_secret(
+        _ = vault_instance.write_secret(
             path='configuration/users/testUser8',
             key=key,
             value=value
         )
     for key, value in test_user9.items():
-        _ = vault.write_secret(
+        _ = vault_instance.write_secret(
             path='configuration/users/testUser9',
             key=key,
             value=value
         )
     for key, value in test_user10.items():
-        _ = vault.write_secret(
+        _ = vault_instance.write_secret(
             path='configuration/users/testUser10',
             key=key,
             value=value
@@ -240,7 +255,7 @@ def fixture_users_attributes(vault):
 
 
 @pytest.fixture(name="users_data", scope='function')
-def fixture_users_data(vault):
+def fixture_users_data(vault_instance):
     """Fill in the test historical user data with request counters, applied rate limits timers."""
     # Test user1: detect and setup rate limits timestamp
     # - request limit exceeded
@@ -305,49 +320,49 @@ def fixture_users_data(vault):
         'rate_limits': {'end_time': str(datetime.now() - timedelta(hours=1))}
     }
     for key, value in test_user1.items():
-        _ = vault.write_secret(
+        _ = vault_instance.write_secret(
             path='data/users/testUser1',
             key=key,
             value=value
         )
     for key, value in test_user2.items():
-        _ = vault.write_secret(
+        _ = vault_instance.write_secret(
             path='data/users/testUser2',
             key=key,
             value=value
         )
     for key, value in test_user3.items():
-        _ = vault.write_secret(
+        _ = vault_instance.write_secret(
             path='data/users/testUser3',
             key=key,
             value=value
         )
     for key, value in test_user5.items():
-        _ = vault.write_secret(
+        _ = vault_instance.write_secret(
             path='data/users/testUser5',
             key=key,
             value=value
         )
     for key, value in test_user7.items():
-        _ = vault.write_secret(
+        _ = vault_instance.write_secret(
             path='data/users/testUser7',
             key=key,
             value=value
         )
     for key, value in test_user8.items():
-        _ = vault.write_secret(
+        _ = vault_instance.write_secret(
             path='data/users/testUser8',
             key=key,
             value=value
         )
     for key, value in test_user9.items():
-        _ = vault.write_secret(
+        _ = vault_instance.write_secret(
             path='data/users/testUser9',
             key=key,
             value=value
         )
     for key, value in test_user10.items():
-        _ = vault.write_secret(
+        _ = vault_instance.write_secret(
             path='data/users/testUser10',
             key=key,
             value=value
@@ -355,21 +370,21 @@ def fixture_users_data(vault):
 
 
 @pytest.fixture(name="users", scope='function')
-def fixture_users(vault, users_attributes, users_data):
+def fixture_users(vault_instance, users_attributes, users_data):
     """Returns an instance of the Users class with the rate limit controller enabled"""
     _ = users_attributes
     _ = users_data
     return Users(
-        vault=vault
+        vault=vault_instance
     )
 
 
 @pytest.fixture(name="users_without_rl", scope='function')
-def fixture_users_without_rl(vault, users_attributes, users_data):
+def fixture_users_without_rl(vault_instance, users_attributes, users_data):
     """Returns an instance of the Users class with the rate limit controller disabled"""
     _ = users_attributes
     _ = users_data
     return Users(
-        vault=vault,
+        vault=vault_instance,
         rate_limits=False
     )
