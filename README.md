@@ -23,14 +23,14 @@ This Python module is designed to simplify user management in Telegram bots, pro
     - [Additional Module](https://github.com/obervinov/vault-package ) to interact with the Vault API
     - [Vault Policy](tests/vault/policy.hcl) with access rights to the Vault Server
 
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/build.png" width="25" title="build"> Environment variables
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="25" title="envs"> Environment variables
 | Variable  | Description | Default value |
 | ------------- | ------------- | ------------- |
 | `VAULT_ADDR`  | The address at which the vault server will be available to the bot | `None` |
 | `VAULT_APPROLE_ID` | [Approle id created during vault setup](https://developer.hashicorp.com/vault/docs/auth/approle) | `None` |
 | `VAULT_APPROLE_SECRETID`  | [Approle secret id created during vault setup](https://developer.hashicorp.com/vault/docs/auth/approle) | `None` |
 
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="25" title="constants"> Description of module Constants
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="23" title="constants"> Description of module Constants
 
 This module contains constant values
 
