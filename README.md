@@ -9,12 +9,12 @@
 ![GitHub issues](https://img.shields.io/github/issues/obervinov/users-package?style=for-the-badge)
 ![GitHub repo size](https://img.shields.io/github/repo-size/obervinov/users-package?style=for-the-badge)
 
-## <img src="https://github.com/obervinov/_templates/blob/main/icons/book.png" width="25" title="about"> About this project
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/book.png" width="25" title="about"> About this project
 **Project Description**
 
-This Python module is created to simplify user management in Telegram bots, providing essential functionality for tasks such as user authentication, authorization, and enforcing speed limits, ensuring efficient management of user attributes and access rights.
+This Python module is designed to simplify user management in Telegram bots, providing the necessary functionality for tasks such as user authentication, authorization and compliance with speed limits, ensuring effective management of user attributes and access rights.
 
-**Key Features and Usage**
+**Key Features**
 
 - This module is designed primarily for Telegram bots but can be adapted for various projects that require user management, role-based access control, and request rate limiting.
 
@@ -23,9 +23,16 @@ This Python module is created to simplify user management in Telegram bots, prov
     - [Additional Module](https://github.com/obervinov/vault-package ) to interact with the Vault API
     - [Vault Policy](tests/vault/policy.hcl) with access rights to the Vault Server
 
-## <img src="https://github.com/obervinov/_templates/blob/main/icons/stack2.png" width="25" title="constants"> Description of module Constants
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/build.png" width="25" title="build"> Environment variables
+| Variable  | Description | Default value |
+| ------------- | ------------- | ------------- |
+| `VAULT_ADDR`  | The address at which the vault server will be available to the bot | `None` |
+| `VAULT_APPROLE_ID` | [Approle id created during vault setup](https://developer.hashicorp.com/vault/docs/auth/approle) | `None` |
+| `VAULT_APPROLE_SECRETID`  | [Approle secret id created during vault setup](https://developer.hashicorp.com/vault/docs/auth/approle) | `None` |
 
-This module contains constant values used in the application.
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="25" title="constants"> Description of module Constants
+
+This module contains constant values
 
 | Constant Name       | Description                                       | Default Value   |
 |---------------------|---------------------------------------------------|-----------------|
@@ -35,7 +42,7 @@ This module contains constant values used in the application.
 | `USER_STATUS_DENY`  | User access status for denied access.             | `"denied"`      |
 
 
-## <img src="https://github.com/obervinov/_templates/blob/main/icons/build.png" width="25" title="class"> Users class
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/build.png" width="25" title="class"> Users class
 ### Class Initialization
 
 This class, `Users`, provides authentication, authorization, and user attribute management for Telegram bots. You can initialize it with various options.
@@ -164,7 +171,7 @@ The `authorization` method checks whether the user has the specified role.
 | `vault_data_path`   | Setter for the 'vault_data_path' attribute.                        | `vault_data_path (str)`: Path to the data in Vault.      | `users_instance.vault_data_path = 'custom_path'`           | N/A                                                    | N/A                                                                         | N/A                                                                             |
 
 
-## <img src="https://github.com/obervinov/_templates/blob/main/icons/build.png" width="25" title="class"> RateLimiter class
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/build.png" width="25" title="class"> RateLimiter class
 ### Class Initialization
 
 The `RateLimiter` class provides rate limiting functionality for Telegram bot requests. It is used to control the rate at which requests are allowed for a specific user.
@@ -302,7 +309,7 @@ The `no_active_rate_limit` method handles the case when no rate limits are appli
 
 
 
-## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="data-structure"> Structure of configuration and statistics data in vault
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/requirements.png" width="25" title="data-structure"> Structure of configuration and statistics data in vault
 This project uses a Vault server with the KV2 engine to store and retrieve configuration data.
 It supports user configurations to define system access rights, roles, and request restrictions.
 
@@ -399,7 +406,7 @@ It supports user configurations to define system access rights, roles, and reque
 }
 ```
 
-## <img src="https://github.com/obervinov/_templates/blob/main/icons/stack2.png" width="20" title="install"> Installing
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="20" title="install"> Installing
 ```bash
 # Install current version
 pip3 install git+https://github.com/obervinov/users-package.git#egg=users
@@ -409,7 +416,7 @@ pip3 install git+https://github.com/obervinov/users-package.git@main#egg=users
 pip3 install git+https://github.com/obervinov/users-package.git@v2.0.0#egg=users
 ```
 
-## <img src="https://github.com/obervinov/_templates/blob/main/icons/config.png" width="25" title="usage"> Additional usage example
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/config.png" width="25" title="usage"> Additional usage example
 Interaction Model 1: Using a Unified Entrypoint (Method: `user_access_check()`)
 ```mermaid
 sequenceDiagram
@@ -551,7 +558,7 @@ if user_info['rate_limits']['end_time']:
 ```
 
 
-## <img src="https://github.com/obervinov/_templates/blob/main/icons/github-actions.png" width="25" title="github-actions"> GitHub Actions
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/github-actions.png" width="25" title="github-actions"> GitHub Actions
 | Name  | Version |
 | ------------------------ | ----------- |
 | GitHub Actions Templates | [v1.0.5](https://github.com/obervinov/_templates/tree/v1.0.5) |
