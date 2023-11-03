@@ -37,13 +37,13 @@ def test_check_rl_counters_increase(vault_instance):
     """
     user_id = 'testUser2'
 
-   # increase the request counter by 1
+    # increase the request counter by 1
     rl_controller = RateLimiter(
         vault=vault_instance,
         user_id=user_id
     )
     _ = rl_controller.determine_rate_limit()
-    
+
     # increase the request counter by 1 and get user info
     rl_controller = RateLimiter(
         vault=vault_instance,
@@ -68,18 +68,18 @@ def test_check_rl_timestamps(vault_instance, timestamp_pattern):
         'testUser3',
         'testUser5'
     ]
-    for user in users_cases:
+    for user_id in users_cases:
         rl_controller = RateLimiter(
             vault=vault_instance,
-            user_id=user
+            user_id=user_id
         )
         result = rl_controller.determine_rate_limit()
         end_time = result.get('end_time', None)
-        assert end_time is not None, f"end_time is not present in the result for {user}"
+        assert end_time is not None, f"end_time is not present in the result for {user_id}"
         assert re.match(
             timestamp_pattern,
             end_time
-        ), f"end_time '{end_time}' does not match the expected pattern for {user}"
+        ), f"end_time '{end_time}' does not match the expected pattern for {user_id}"
 
 
 @pytest.mark.order(9)
@@ -93,18 +93,18 @@ def test_check_rl_apply(vault_instance, timestamp_pattern):
         'testUser8',
         'testUser9'
     ]
-    for user in users_cases:
+    for user_id in users_cases:
         rl_controller = RateLimiter(
             vault=vault_instance,
-            user_id=user
+            user_id=user_id
         )
         result = rl_controller.determine_rate_limit()
         end_time = result.get('end_time', None)
-        assert end_time is not None, f"end_time is not present in the result for {user}"
+        assert end_time is not None, f"end_time is not present in the result for {user_id}"
         assert re.match(
             timestamp_pattern,
             end_time
-        ), f"end_time '{end_time}' does not match the expected pattern for {user}"
+        ), f"end_time '{end_time}' does not match the expected pattern for {user_id}"
 
 
 @pytest.mark.order(10)
@@ -120,4 +120,4 @@ def test_check_rl_reset(vault_instance):
     )
     result = rl_controller.determine_rate_limit()
     end_time = result.get('end_time', None)
-    assert end_time is None, f"end_time is not None in the result for {user}"
+    assert end_time is None, f"end_time is not None in the result for {user_id}"

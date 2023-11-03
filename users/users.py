@@ -248,7 +248,7 @@ class Users:
             }
 
         Examples:
-            >>> user_info = users.user_access_check(
+            >>> user_access_check(
                     user_id='user1',
                     role_id='admin_role'
                 )

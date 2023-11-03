@@ -179,12 +179,21 @@ class RateLimiter:
         """
         self._vault_data_path = vault_data_path
 
-    def determine_rate_limit(self) -> dict:
+    def determine_rate_limit(self) -> dict | None:
         """
         Determine the rate limit status for the user.
 
         Returns:
-            (dict): Rate limit information for the user.
+            (dict | None): Rate limit information for the user.
+            {
+              "end_time": "2023-08-07 10:39:00.000000"
+            }
+                or
+            {
+              "end_time": None
+            }
+                or
+            None
         """
         # If rate limits already applied
         if self.request_ratelimits['end_time']:
@@ -215,6 +224,15 @@ class RateLimiter:
 
         Returns:
             (dict | None): Rate limit information for the user, or None if not active.
+            {
+              "end_time": "2023-08-07 10:39:00.000000"
+            }
+                or
+            {
+              "end_time": None
+            }
+                or
+            None
         """
         if self.request_ratelimits['end_time'] is None:
             return None
@@ -252,6 +270,11 @@ class RateLimiter:
 
         Returns:
             (dict | None): Rate limit information for the user, or None if not applicable.
+            {
+              "end_time": "2023-08-07 10:39:00.000000"
+            }
+                or
+            None
         """
         if self.requests_configuration['requests_per_day'] <= self.requests_counters['requests_per_day']:
             log.warning(
@@ -308,12 +331,15 @@ class RateLimiter:
         )
         return self.request_ratelimits
 
-    def no_active_rate_limit(self) -> dict | None:
+    def no_active_rate_limit(self) -> dict:
         """
         Handle the case when no rate limits are applicable.
 
         Returns:
-            (dict | None): Rate limit information for the user, or None if no limits needed.
+            (dict): Rate limit information for the user, or None if no limits needed.
+            {
+                'end_time': None
+            }
         """
         log.info(
             '[class.%s] The limits have not been exhausted, '
