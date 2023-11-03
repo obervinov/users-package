@@ -187,7 +187,7 @@ The `RateLimiter` class provides the speed limit functionality for requests to t
 
 - **Examples:**
 
-  - Initialize with a `VaultClient`` instance:
+  - Initialize with a `VaultClient` instance:
     ```python
     limiter = RateLimiter(vault=vault_client, user_id='User1')
     ```
