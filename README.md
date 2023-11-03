@@ -68,7 +68,7 @@ The `Users` class provides authentication, authorization and management of user 
     users_with_ratelimits = Users(vault=vault_client)
     ```
 
-  - Initialize with a Vault configuration dictionary:
+  - Initialize with a Vault configuration `dictionary`:
     ```python
     vault_config = {
         "name": "my_project",
@@ -147,11 +147,11 @@ The `authorization` method checks whether the user has the specified role.
 | Data Type | Attribute           | Purpose                                                      | Default Value           |
 |-----------|---------------------|--------------------------------------------------------------|-------------------------|
 | `object`  | `vault`             | Vault instance for interacting with the Vault API.           | `None`                  |
-| `bool`    | `rate_limits`       | Enable request rate limit feature.                           | `True`                  |
+| `bool`    | `rate_limits`       | Enable request rate limit functionality.                     | `True`                  |
 | `str`     | `user_status_allow` | User access status: allowed.                                 | `"allowed"`             |
 | `str`     | `user_status_deny`  | User access status: denied.                                  | `"denied"`              |
-| `str`     | `vault_config_path` | The prefix of the configuration path in the repository.      | `"configuration/users"` |
-| `str`     | `vault_data_path`   | The prefix of the path of historical data in the repository. | `"data/users"`          |
+| `str`     | `vault_config_path` | The prefix of the configuration path in the Vault.           | `"configuration/users"` |
+| `str`     | `vault_data_path`   | The prefix of the path of historical data in the Vault.      | `"data/users"`          |
 
 
 ## Description of class methods
@@ -177,22 +177,22 @@ The `authorization` method checks whether the user has the specified role.
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/build.png" width="25" title="class"> RateLimiter class
 ### Class Initialization
 
-The `RateLimiter` class provides rate limiting functionality for Telegram bot requests. It is used to control the rate at which requests are allowed for a specific user.
+The `RateLimiter` class provides the speed limit functionality for requests to the Telegram bot. It is used to control the rate at which requests are resolved for a specific user.
 
 - `vault (any)`: Configuration for initializing the Vault client.
-  - `(object) VaultClient instance`: For interacting with the Vault API.
-  - `(dict) Configuration`: For initializing a VaultClient instance in this class.
+  - `(VaultClient)`: an already initialized instance for interacting with the Vault API.
+  - `(dict)`: configuration for initializing a VaultClient instance in this class.
 
-- `user_id (str)`: The user ID for which rate limits are applied.
+- `user_id (str)`: User ID for checking speed limits.
 
 - **Examples:**
 
-  - Initialize with a VaultClient instance and a user ID:
+  - Initialize with a `VaultClient`` instance:
     ```python
     limiter = RateLimiter(vault=vault_client, user_id='User1')
     ```
 
-  - Initialize with a configuration dictionary and a user ID:
+  - Initialize with a Vault configuration `dictionary`:
     ```python
     vault_config = {
         "name": "my_project",

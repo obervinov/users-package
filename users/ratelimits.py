@@ -11,13 +11,14 @@ from users.constants import VAULT_CONFIG_PATH, VAULT_DATA_PATH
 
 class RateLimiter:
     """
-    RateLimiter class provides rate limiting functionality for Telegram bot requests.
+    RateLimiter class provides rate limiting functionality for requests to the Telegram bot.
 
     Args:
         :param vault (any): Configuration for initializing the Vault client.
             - (object) VaultClient instance for interacting with the Vault API.
             - (dict) Configuration for initializing a VaultClient instance in this class.
-        :param user_id (str): The user ID for which rate limits are applied.
+
+        :param user_id (str): User ID for checking speed limits.
 
     Returns:
         None
@@ -45,7 +46,8 @@ class RateLimiter:
             :param vault (any): Configuration for initializing the Vault client.
                 - (object) VaultClient instance for interacting with the Vault API.
                 - (dict) Configuration for initializing a VaultClient instance in this class.
-            :param user_id (str): The user ID for which rate limits are applied.
+
+            :param user_id (str): User ID for checking speed limits.
 
         Returns:
             None
