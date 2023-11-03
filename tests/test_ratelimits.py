@@ -3,7 +3,7 @@ A test that checks the user request limit control function.
 """
 import re
 import pytest
-from ratelimits import RateLimiter
+from users.ratelimits import RateLimiter
 
 
 @pytest.mark.order(6)

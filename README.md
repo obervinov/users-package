@@ -51,24 +51,24 @@ This module contains constant values
 The `Users` class provides authentication, authorization and management of user attributes for Telegram bots. You can initialize it using various options
 
 - `vault (any)`: Configuration for initializing the Vault client.
-  - `(object)` VaultClient instance for interacting with the Vault API.
-  - `(dict)` Configuration for initializing a VaultClient instance in this class.
+  - `(VaultClient)`: an already initialized instance for interacting with the Vault API.
+  - `(dict)`: configuration for initializing a VaultClient instance in this class.
 
 - `rate_limits (bool)`: Enable rate limit functionality.
 
 - **Examples:**
 
-  - Initialize with a VaultClient instance:
+  - Initialize with a `VaultClient` and without `rate_limits`:
     ```python
     users_without_ratelimits = Users(vault=vault_client, rate_limits=False)
     ```
 
-  - Initialize with rate limiting enabled:
+  - Initialize with a `VaultClient` and with `rate_limits`:
     ```python
     users_with_ratelimits = Users(vault=vault_client)
     ```
 
-  - Initialize with a configuration dictionary:
+  - Initialize with a Vault configuration dictionary:
     ```python
     vault_config = {
         "name": "my_project",
