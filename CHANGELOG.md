@@ -3,17 +3,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## v2.0.0 - 2023-10-27
+## v2.0.0 - 2023-11-03
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v1.0.5...v2.0.0 by @obervinov in https://github.com/obervinov/users-package/pull/24
 #### 📚 Documentation
 * (Users:v2 expand access rights and user attributes)[https://github.com/obervinov/users-package/issues/21]
+* (Improvements to the Vault dependency )[https://github.com/obervinov/users-package/issues/27]
 #### 💥 Breaking Changes
 * (Users:v2 expand access rights and user attributes)[https://github.com/obervinov/users-package/issues/21]
 * (Deprecate outdated class and methods users:v1)[https://github.com/obervinov/users-package/issues/26]
 #### 🚀 Features
 * (Update template workflow to v1.0.5)[https://github.com/obervinov/users-package/issues/23]
 * (Users:v2 expand access rights and user attributes)[https://github.com/obervinov/users-package/issues/21]
+* (Improvements to the Vault dependency )[https://github.com/obervinov/users-package/issues/27]
 
 
 ## v1.0.5 - 2023-06-21

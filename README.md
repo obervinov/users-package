@@ -48,11 +48,11 @@ This module contains constant values
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/build.png" width="25" title="class"> Users class
 ### Class Initialization
 
-The "Users" class provides authentication, authorization and management of user attributes for Telegram bots. You can initialize it using various options
+The `Users` class provides authentication, authorization and management of user attributes for Telegram bots. You can initialize it using various options
 
 - `vault (any)`: Configuration for initializing the Vault client.
-  - `(object) VaultClient instance`: For interacting with the Vault API.
-  - `(dict) Configuration`: For initializing a VaultClient instance in this class.
+  - `(object)` VaultClient instance for interacting with the Vault API.
+  - `(dict)` Configuration for initializing a VaultClient instance in this class.
 
 - `rate_limits (bool)`: Enable rate limit functionality.
 
