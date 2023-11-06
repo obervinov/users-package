@@ -219,7 +219,7 @@ The `determine_rate_limit` method is the main entry point for checking restricti
   ```
 
 - **Returns:**
-  - Dictionary with a `timestamp` of the end of restrictions on requests or `No` if speed limits are not applied.
+  - Dictionary with a `timestamp` of the end of restrictions on requests or `None` if rate limit is not applied.
     ```python
       (dict | None)
       {"end_time": "2023-08-07 10:39:00.000000"}
@@ -266,7 +266,7 @@ The `apply_rate_limit` method is used if the request limit counter is full and i
 
 ### No Active Rate Limit
 
-The `no_active_rate_limit` method handles the case when the speed limits are not applied and you just need to increase the request counter.
+The `no_active_rate_limit` method handles the case when the rate limit is not applied and you just need to increase the request counter.
 - **Arguments:**
   - None
 
@@ -276,7 +276,7 @@ The `no_active_rate_limit` method handles the case when the speed limits are not
   ```
 
 - **Returns:**
-  - Always returns a dictionary with None.
+  - Always returns a dictionary with `None`.
     ```python
       (dict)
       {"end_time": None}
@@ -286,8 +286,8 @@ The `no_active_rate_limit` method handles the case when the speed limits are not
 | Data Type | Attribute                | Purpose                                                                  | Default Value                   |
 |-----------|--------------------------|--------------------------------------------------------------------------|---------------------------------|
 | `any`     | `vault`                  | The initialized VaultClient instance or `None` if initialization failed. | N/A                             |
-| `str`     | `vault_config_path`      | Path to the configuration data in Vault.                                 | Value from `VAULT_CONFIG_PATH`  |
-| `str`     | `vault_data_path`        | Path to the data in Vault.                                               | Value from `VAULT_DATA_PATH`    |
+| `str`     | `vault_config_path`      | Path to the configuration data in Vault.                                 | `"configuration/users"`         |
+| `str`     | `vault_data_path`        | Path to the data in Vault.                                               | `"data/users"`                  |
 | `dict`    | `requests_configuration` | Configuration for rate limits from Vault.                                | Value from Vault Secret         |
 | `dict`    | `requests_counters`      | Counters for user's requests.                                            | Value from Vault Secret         |
 | `dict`    | `request_ratelimits`     | Rate limit information for the user.                                     | Value from Vault Secret         |
