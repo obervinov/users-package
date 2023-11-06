@@ -71,12 +71,12 @@ The `Users` class provides authentication, authorization and management of user 
   - Initialize with Vault `configuration dictionary`:
     ```python
     vault_config = {
-        "name": "my_project",
-        "url": "https://vault.example.com",
-        "approle": {
-            "id": "my_approle",
-            "secret-id": "my_secret"
-        }
+      "name": "my_project",
+      "url": "https://vault.example.com",
+      "approle": {
+          "id": "my_approle",
+          "secret-id": "my_secret"
+      }
     }
     users_with_dict_vault = Users(vault=vault_config)
     ```
@@ -98,14 +98,14 @@ The `user_access_check` method is the main entry point for authentication, autho
 
 - **Returns:**
   - A dictionary with access status, permissions, and rate limit information.
-    ```
-      {
-        'access': self.user_status_allow / self.user_status_deny,
-        'permissions': self.user_status_allow / self.user_status_deny,
-        'rate_limits': {
-            'end_time': '2023-08-06 11:47:09.440933'
-        }
+    ```python
+    {
+      'access': self.user_status_allow / self.user_status_deny,
+      'permissions': self.user_status_allow / self.user_status_deny,
+      'rate_limits': {
+          'end_time': '2023-08-06 11:47:09.440933'
       }
+    }
     ```
 For more details, see the method docstring.
 
@@ -195,12 +195,12 @@ The `RateLimiter` class provides the speed limit functionality for requests to t
   - Initialize with a Vault configuration `dictionary`:
     ```python
     vault_config = {
-        "name": "my_project",
-        "url": "https://vault.example.com",
-        "approle": {
-            "id": "my_approle",
-            "secret-id": "my_secret"
-        }
+      "name": "my_project",
+      "url": "https://vault.example.com",
+      "approle": {
+          "id": "my_approle",
+          "secret-id": "my_secret"
+      }
     }
     limiter = RateLimiter(vault=vault_config, user_id='User1')
     ```
@@ -221,8 +221,8 @@ The `determine_rate_limit` method is the main entry point for checking restricti
 - **Returns:**
   - Dictionary with a `timestamp` of the end of restrictions on requests or `None` if rate limit is not applied.
     ```python
-      (dict | None)
-      {"end_time": "2023-08-07 10:39:00.000000"}
+    (dict | None)
+    {"end_time": "2023-08-07 10:39:00.000000"}
     ```
 For more details, see the method docstring.
 
@@ -294,19 +294,19 @@ The `no_active_rate_limit` method handles the case when the rate limit is not ap
 
 
 ### Description of Class Methods
-| Method Name         | Description                                                        | Arguments                                                                                                           | Usage Examples                                                                | Returns Examples                                                              |
-|---------------------|--------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| `__init__`          | Creates a new RateLimiter instance.                                 | `vault (any)`: Configuration for initializing the Vault client. `user_id (str)`: The user ID for which rate limits are applied. | `RateLimiter(vault=vault_client, user_id='12345')`                            | N/A                                                                          |
-| `vault`             | Getter for the 'vault' attribute.                                  | N/A                                                                                                                 | `vault = limiter.vault`                                                     | VaultClient instance or `None`                                                |
-| `vault`             | Setter for the 'vault' attribute.                                  | `vault (any)`: Configuration for initializing the Vault client.                                                   | `limiter.vault = vault_client`                                                | N/A                                                                          |
-| `vault_config_path` | Getter for the 'vault_config_path' attribute.                      | N/A                                                                                                                 | `path = limiter.vault_config_path`                                          | `str` (Path to the configuration data in Vault)                                 |
-| `vault_config_path` | Setter for the 'vault_config_path' attribute.                      | `vault_config_path (str)`: Path to the configuration data in Vault.                                                  | `limiter.vault_config_path = 'custom_path'`                                | N/A                                                                          |
-| `vault_data_path`   | Getter for the 'vault_data_path' attribute.                        | N/A                                                                                                                 | `path = limiter.vault_data_path`                                            | `str` (Path to the data in Vault)                                               |
-| `vault_data_path`   | Setter for the 'vault_data_path' attribute.                        | `vault_data_path (str)`: Path to the data in Vault.                                                              | `limiter.vault_data_path = 'custom_path'`                                    | N/A                                                                          |
-| `determine_rate_limit` | Determine the rate limit status for the user.                    | N/A                                                                                                                 | `rate_limits = limiter.determine_rate_limit()`                               | `dict` (Rate limit information for the user) or `None`                        |
-| `active_rate_limit` | Check and handle active rate limits for the user.                   | N/A                                                                                                                 | `rate_limits = limiter.active_rate_limit()`                                   | `dict` (Rate limit information for the user) or `None`                        |
-| `apply_rate_limit`  | Apply rate limits to the user and update counters.                  | N/A                                                                                                                 | `rate_limits = limiter.apply_rate_limit()`                                    | `dict` (Rate limit information for the user) or `None`                        |
-| `no_active_rate_limit` | Handle the case when no rate limits are applicable.              | N/A                                                                                                                 | `rate_limits = limiter.no_active_rate_limit()`                               | `dict` (Rate limit information for the user) or `None`                        |
+| Method Name       | Description                                                       | Arguments                                          | Usage Examples                                            | Returns Examples                                      | Configuration Path                                                            | History Path                                                                   |
+|-------------------|-------------------------------------------------------------------|---------------------------------------------------|----------------------------------------------------------|--------------------------------------------------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| `__init__`          | Creates a new RateLimiter instance.                                 | `vault (any)`: Configuration for initializing the Vault client. `user_id (str)`: The user ID for which rate limits are applied. | `RateLimiter(vault=vault_client, user_id='12345')`                            | N/A                                                                          | `{self.vault_config_path}/{user_id}:requests` reads requests configuration in Vault to determine rate limit parameters. | `{self.vault_data_path}/{user_id}:requests_counters` and `{self.vault_data_path}/{user_id}:rate_limits` reads requests historical data in Vault to determine rate limits state. |
+| `vault`             | Getter for the 'vault' attribute.                                  | N/A                                                                                                                 | `vault = limiter.vault`                                                     | VaultClient instance or `None`                                                | N/A | N/A |
+| `vault`             | Setter for the 'vault' attribute.                                  | `vault (any)`: Configuration for initializing the Vault client.                                                   | `limiter.vault = vault_client`                                                | N/A                                                                          | N/A | N/A |
+| `vault_config_path` | Getter for the 'vault_config_path' attribute.                      | N/A                                                                                                                 | `path = limiter.vault_config_path`                                          | `str` (Path to the configuration data in Vault)                                 | N/A | N/A |
+| `vault_config_path` | Setter for the 'vault_config_path' attribute.                      | `vault_config_path (str)`: Path to the configuration data in Vault.                                                  | `limiter.vault_config_path = 'custom_path'`                                | N/A                                                                          | N/A | N/A |
+| `vault_data_path`   | Getter for the 'vault_data_path' attribute.                        | N/A                                                                                                                 | `path = limiter.vault_data_path`                                            | `str` (Path to the data in Vault)                                               | N/A | N/A |
+| `vault_data_path`   | Setter for the 'vault_data_path' attribute.                        | `vault_data_path (str)`: Path to the data in Vault.                                                              | `limiter.vault_data_path = 'custom_path'`                                    | N/A                                                                          | N/A | N/A |
+| `determine_rate_limit` | Determine the rate limit status for the specified user ID.                    | N/A                                                                                                                 | `rate_limits = limiter.determine_rate_limit()`                               | `dict` (Rate limit timestamp for the user ID) or `None`                        | N/A | N/A |
+| `active_rate_limit` | Check and handle active rate limits for the user.                   | N/A                                                                                                                 | `rate_limits = limiter.active_rate_limit()`                                   | `dict` (Rate limit timestamp for the user ID) or `None` (if rate limit has been reset)                        | N/A | `{self.vault_data_path}/{user_id}:rate_limits`  writes or delete rate limit timestamp in Vault. | 
+| `apply_rate_limit`  | Apply rate limits to the user ID and reset request counters.                  | N/A                                                                                                                 | `rate_limits = limiter.apply_rate_limit()`                                    | `dict` (Rate limit timestamp for the user ID) or `None`                         | N/A | `{self.vault_data_path}/{user_id}:rate_limits`  writes rate limit timestamp and `{self.vault_data_path}/{user_id}:requests_counters` reset request counters in Vault. | 
+| `no_active_rate_limit` | Handle the case when no rate limits are applicable.              | N/A                                                                                                                 | `rate_limits = limiter.no_active_rate_limit()`                               | `(dict) {'end_time': None}`                        | N/A |`{self.vault_data_path}/{user_id}:requests_counters` writes +1 counter to request counters in Vault. | 
 
 
 
@@ -328,22 +328,22 @@ It supports user configurations to define system access rights, roles, and reque
 
     ```json
     {
-        "requests_per_day": 10,
-        "requests_per_hour": 1,
-        "random_shift_minutes": 15
+      "requests_per_day": 10,
+      "requests_per_hour": 1,
+      "random_shift_minutes": 15
     }
     ```
 
 - **example of a secret with configuration**:
 ```json
 {
-    "status": "allowed",
-    "roles": ["admin_role", "additional_role"],
-    "requests": {
-        "requests_per_day": 10,
-        "requests_per_hour": 1,
-        "random_shift_minutes": 15
-    }
+  "status": "allowed",
+  "roles": ["admin_role", "additional_role"],
+  "requests": {
+    "requests_per_day": 10,
+    "requests_per_hour": 1,
+    "random_shift_minutes": 15
+  }
 }
 ```
 ### Users Data and Historical Records
@@ -355,8 +355,8 @@ It supports user configurations to define system access rights, roles, and reque
 
     ```json
     {
-        "requests_per_day": 9,
-        "requests_per_hour": 1
+      "requests_per_day": 9,
+      "requests_per_hour": 1
     }
     ```
 
@@ -365,47 +365,51 @@ It supports user configurations to define system access rights, roles, and reque
     - `{'end_time': None}`
 
   - `authorization`: Details about the authorization process, including the time, status
-      - `self.user_status_allow`
-      - `self.user_status_deny`
+      - `timestamp`
+      - `self.user_status_allow` or `self.user_status_deny`
       - `role ID`
 
     ```json
     {
-        "time": "2023-08-07 10:39:00.000000",
-        "status": "allowed",
-        "role": "role1"
+      "time": "2023-08-07 10:39:00.000000",
+      "status": "allowed",
+      "role": "role1"
     }
     ```
 
   - `authentication`: Records of the authentication process, indicating the time and status
-      - `self.user_status_allow`
-      - `self.user_status_deny`
+      - `timestamp`
+      - `self.user_status_allow` or `self.user_status_deny`
 
     ```json
     {
-        "time": "2023-08-07 10:39:00.000000",
-        "status": "allowed"
+      "time": "2023-08-07 10:39:00.000000",
+      "status": "allowed"
     }
     ```
 - **example of a secret with historical data**:
-```json
-{
+    ```json
     "requests_counters": {
-        "requests_per_day": 9,
-        "requests_per_hour": 1
-    },
-    "rate_limits": { "end_time": "None" },
-    "authorization": {
-        "time": "2023-08-07 10:39:00.000000",
-        "status": "allowed",
-        "role": "role1"
-    },
-    "authentication": {
-        "time": "2023-08-07 10:39:00.000000",
-        "status": "allowed"
+      "requests_per_day": 9,
+      "requests_per_hour": 1
     }
-}
-```
+    ```
+    ```json
+    "rate_limits": {"end_time": "None"}
+    ```
+    ```json
+    "authorization": {
+      "time": "2023-08-07 10:39:00.000000",
+      "status": "allowed",
+      "role": "role1"
+    }
+    ```
+    ```json
+    "authentication": {
+      "time": "2023-08-07 10:39:00.000000",
+      "status": "allowed"
+    }
+    ```
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="20" title="install"> Installing
 ```bash
@@ -440,6 +444,14 @@ sequenceDiagram
     Users-->>User: Return permissions status
     User->>Users: Call rl_controller(user_id)
     Users-->>User: Return rate limits information
+```
+```mermaid
+sequenceDiagram
+    participant User
+    participant RateLimiter
+    User->>RateLimiter: Create RateLimiter instance with user_id
+    User->>RateLimiter: Call determine_rate_limit()
+    RateLimiter-->>User: Return rate limit timestamp for user_id (or None)
 ```
 
 Example 1 - With Entrypoint and Rate Limits:
@@ -554,7 +566,11 @@ if users.authorization(
 
 # check access to the bot
 user_info = users.rl_controller(user_id='user1')
-if user_info['rate_limits']['end_time']:
+limiter = RateLimiter(
+  vault=vault_client,
+  user_id=user_id
+)
+if limiter.determine_rate_limit()['end_time']:
     print(f"You have sent too many requests, the limit is applied until {user_info['rate_limits']['end_time']}")
 ```
 
