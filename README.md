@@ -177,7 +177,7 @@ The `authorization` method checks whether the user has the specified role.
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/build.png" width="25" title="class"> RateLimiter class
 ### Class Initialization
 
-The `RateLimiter` class provides the speed limit functionality for requests to the Telegram bot. It is used to control the rate at which requests are resolved for a specific user.
+The `RateLimiter` class provides the speed limit functionality for requests to the Telegram bot in the context of a specific user.
 
 - `vault (any)`: Configuration for initializing the Vault client.
   - `(VaultClient)`: an already initialized instance for interacting with the Vault API.
@@ -209,7 +209,7 @@ For more details and examples, see the class docstring.
 
 ### Rate Limit Determination
 
-The `determine_rate_limit` method is used to determine the rate limit status for the user. It returns information about whether rate limits are active or need to be applied.
+The `determine_rate_limit` method is used to determine the speed limit status for the user. It returns information about whether the speed limits are active.
 
 - **Arguments:**
   - None
@@ -220,7 +220,7 @@ The `determine_rate_limit` method is used to determine the rate limit status for
   ```
 
 - **Returns:**
-  - A dictionary with rate limit information, or `None` if no rate limits are applicable.
+  - A dictionary with speed limit information for the user or `None` if the speed limit time has already expired.
     ```python
       (dict | None)
       {"end_time": "2023-08-07 10:39:00.000000"}

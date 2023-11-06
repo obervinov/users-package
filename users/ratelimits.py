@@ -226,7 +226,7 @@ class RateLimiter:
         Check and handle active rate limits for the user.
 
         Returns:
-            (dict | None): Rate limit information for the user, or None if not active.
+            (dict | None): Rate limit information for the user or None if the time has already expired.
             {
               "end_time": "2023-08-07 10:39:00.000000"
             }
