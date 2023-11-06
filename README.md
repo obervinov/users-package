@@ -58,17 +58,17 @@ The `Users` class provides authentication, authorization and management of user 
 
 - **Examples:**
 
-  - Initialize with a `VaultClient` and without `rate_limits`:
+  - Initialize with `VaultClient` and without `rate_limits`:
     ```python
     users_without_ratelimits = Users(vault=vault_client, rate_limits=False)
     ```
 
-  - Initialize with a `VaultClient` and with `rate_limits`:
+  - Initialize with `VaultClient` and with `rate_limits`:
     ```python
     users_with_ratelimits = Users(vault=vault_client)
     ```
 
-  - Initialize with a Vault configuration `dictionary`:
+  - Initialize with Vault `configuration dictionary`:
     ```python
     vault_config = {
         "name": "my_project",
@@ -85,7 +85,7 @@ For more details and examples, see the class docstring.
 
 ### User Access Check
 
-The `user_access_check` method is the main entry point for authentication, authorization, and request rate limit verification. It returns a dictionary containing information about access, permissions, and rate limits if applicable.
+The `user_access_check` method is the main entry point for authentication, authorization, and request rate limit verification. It is used to control the request rate (limits) for a specific user.
 
 - **Arguments:**
   - `user_id (str)`: Required user ID.
