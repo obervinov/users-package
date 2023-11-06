@@ -209,8 +209,7 @@ For more details and examples, see the class docstring.
 
 ### Rate Limit Determination
 
-The `determine_rate_limit` method is used to determine the speed limit status for the user. It returns information about whether the speed limits are active.
-
+The `determine_rate_limit` method is the main entry point for checking restrictions on requests to the bot for the specified user. It returns information about whether the request rate limits are active.
 - **Arguments:**
   - None
 
@@ -220,7 +219,7 @@ The `determine_rate_limit` method is used to determine the speed limit status fo
   ```
 
 - **Returns:**
-  - A dictionary with rate limit information, or `None` if no rate limits are applicable.
+  - Dictionary with a `timestamp` of the end of restrictions on requests or `No` if speed limits are not applied.
     ```python
       (dict | None)
       {"end_time": "2023-08-07 10:39:00.000000"}
@@ -229,7 +228,7 @@ For more details, see the method docstring.
 
 ### Active Rate Limit
 
-The `active_rate_limit` method checks and handles active rate limits for the user.
+The `active_rate_limit` method is used for a situation when restrictions on requests are already applied and the `user ID` has a `timestamp` of the end of restrictions. The method checks whether it is time to reset the request rate limit.
 
 - **Arguments:**
   - None
@@ -240,7 +239,7 @@ The `active_rate_limit` method checks and handles active rate limits for the use
   ```
 
 - **Returns:**
-  - A dictionary with rate limit information for the user or `None` if the speed limit time has already expired.
+  - A dictionary with a `timestamp` - if it has not expired yet and the restrictions on requests continue, or `None` - if the time for limiting requests has expired and you need to reset the restrictions.
     ```python
       (dict | None)
       {"end_time": "2023-08-07 10:39:00.000000"}
@@ -248,7 +247,7 @@ The `active_rate_limit` method checks and handles active rate limits for the use
 
 ### Apply Rate Limit
 
-The `apply_rate_limit` method applies rate limits to the user.
+The `apply_rate_limit` method is used if the request limit counter is full and it is necessary to apply request limits for the specified user.
 
 - **Arguments:**
   - None
@@ -259,7 +258,7 @@ The `apply_rate_limit` method applies rate limits to the user.
   ```
 
 - **Returns:**
-  - A dictionary with information about the rate limit for the user after the restrictions are applied.
+  - Dictionary with the `end time` of restrictions on requests for the specified user.
     ```python
       (dict | None)
       {"end_time": "2023-08-07 10:39:00.000000"}
@@ -267,8 +266,7 @@ The `apply_rate_limit` method applies rate limits to the user.
 
 ### No Active Rate Limit
 
-The `no_active_rate_limit` method handles the case when the speed limits are not applied and you just need to increase the counter.
-
+The `no_active_rate_limit` method handles the case when the speed limits are not applied and you just need to increase the request counter.
 - **Arguments:**
   - None
 
@@ -278,7 +276,7 @@ The `no_active_rate_limit` method handles the case when the speed limits are not
   ```
 
 - **Returns:**
-  - A dictionary with information about the absence of rate limits.
+  - Always returns a dictionary with None.
     ```python
       (dict)
       {"end_time": None}
