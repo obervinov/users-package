@@ -220,7 +220,7 @@ The `determine_rate_limit` method is used to determine the speed limit status fo
   ```
 
 - **Returns:**
-  - A dictionary with speed limit information for the user or `None` if the speed limit time has already expired.
+  - A dictionary with rate limit information, or `None` if no rate limits are applicable.
     ```python
       (dict | None)
       {"end_time": "2023-08-07 10:39:00.000000"}
@@ -240,7 +240,7 @@ The `active_rate_limit` method checks and handles active rate limits for the use
   ```
 
 - **Returns:**
-  - A dictionary with rate limit information for the user, or `None` if not active.
+  - A dictionary with rate limit information for the user or `None` if the speed limit time has already expired.
     ```python
       (dict | None)
       {"end_time": "2023-08-07 10:39:00.000000"}
@@ -248,7 +248,7 @@ The `active_rate_limit` method checks and handles active rate limits for the use
 
 ### Apply Rate Limit
 
-The `apply_rate_limit` method applies rate limits to the user and updates counters.
+The `apply_rate_limit` method applies rate limits to the user.
 
 - **Arguments:**
   - None
@@ -259,7 +259,7 @@ The `apply_rate_limit` method applies rate limits to the user and updates counte
   ```
 
 - **Returns:**
-  - A dictionary with rate limit information for the user, or `None` if not applicable.
+  - A dictionary with information about the rate limit for the user after the restrictions are applied.
     ```python
       (dict | None)
       {"end_time": "2023-08-07 10:39:00.000000"}
@@ -267,7 +267,7 @@ The `apply_rate_limit` method applies rate limits to the user and updates counte
 
 ### No Active Rate Limit
 
-The `no_active_rate_limit` method handles the case when no rate limits are applicable.
+The `no_active_rate_limit` method handles the case when the speed limits are not applied and you just need to increase the counter.
 
 - **Arguments:**
   - None
@@ -278,7 +278,7 @@ The `no_active_rate_limit` method handles the case when no rate limits are appli
   ```
 
 - **Returns:**
-  - A dictionary with rate limit information for the user, or `None` if no limits are needed.
+  - A dictionary with information about the absence of rate limits.
     ```python
       (dict)
       {"end_time": None}
