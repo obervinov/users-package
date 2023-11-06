@@ -470,7 +470,7 @@ vault_client = VaultClient(
   }
 )
 
-# create an instance of the class with rate limits
+# create the Users instance of the class with rate limits
 users = Users(vault=vault_client)
 
 # use the main entrypoint
@@ -510,7 +510,7 @@ vault_client = VaultClient(
   }
 )
 
-# create an instance of the class without rate limits
+# create the Users instance of the class without rate limits
 users = Users(
   vault=vault_client,
   rate_limits=False
@@ -550,25 +550,24 @@ vault_client = VaultClient(
   }
 )
 
-# create an instance of the class with rate limits
+# create the Users instance of the class
 users = Users(vault=vault_client)
 
 # check access to the bot
 if users.authentication(user_id='user1') == users.user_status_allow:
     print("You can use this bot")
 
-# check access to the bot
+# check user role
 if users.authorization(
   user_id='user1',
   role_id='admin_role'
 ) == users.user_status_allow:
     print("You have admin's permissions")
 
-# check access to the bot
-user_info = users.rl_controller(user_id='user1')
+# check rate limit for user_id
 limiter = RateLimiter(
   vault=vault_client,
-  user_id=user_id
+  user_id='user1'
 )
 if limiter.determine_rate_limit()['end_time']:
     print(f"You have sent too many requests, the limit is applied until {user_info['rate_limits']['end_time']}")
