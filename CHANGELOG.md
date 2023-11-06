@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## v2.0.0 - 2023-11-03
+## v2.0.0 - 2023-11-06
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v1.0.5...v2.0.0 by @obervinov in https://github.com/obervinov/users-package/pull/24
 #### 📚 Documentation
