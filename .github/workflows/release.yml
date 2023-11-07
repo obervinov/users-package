@@ -1,12 +1,14 @@
+---
 name: Create GitHub Release
 
+# yamllint disable-line rule:truthy
 on:
   workflow_run:
     workflows: ["Tests and Checks"]
     branches: [main]
-    types: 
+    types:
       - completed
 
 jobs:
   create-release:
-    uses: obervinov/_templates/.github/workflows/create.release.yml@v1.0.4
+    uses: obervinov/_templates/.github/workflows/create.release.yml@v1.0.5

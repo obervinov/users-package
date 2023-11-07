@@ -1,0 +1,17 @@
+# manifest for the development process with the local version of the vault
+---
+version: '3'
+services:
+    vault-server:
+        image: hashicorp/vault:1.15.0
+        container_name: vault
+        command: ["server"]
+        environment:
+            # yamllint disable-line rule:line-length
+            - 'VAULT_LOCAL_CONFIG={"backend": {"file": {"path": "/vault/data"}}, "default_lease_ttl": "1h", "max_lease_ttl": "720h", "listener": {"tcp": {"address": "0.0.0.0:8200", "tls_disable": "1"}}'
+            - VAULT_API_ADDR=http://0.0.0.0:8200
+            - VAULT_PORT=8200
+        ports:
+            - "0.0.0.0:8200:8200"
+        cap_add:
+            - IPC_LOCK

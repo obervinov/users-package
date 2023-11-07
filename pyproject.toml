@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "users"
-version = "1.0.5"
-description = "This module contains classes and functions for implementing the simplest authorization for telegram bots."
+version = "2.0.0"
+description = "This python module is a simple implementation of user management functionality for telegram bots, such as: authentication, authorization and request limiting."
 license = {text = "MIT"}
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [
   { name="Bervinov Oleg", email="obervinov@pm.me" },
 ]
@@ -17,11 +17,6 @@ maintainers = [
 ]
 classifiers = [
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: Implementation :: CPython",

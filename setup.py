@@ -10,11 +10,11 @@ with open('CHANGELOG.md', 'r', encoding='utf8') as changelog:
 
 setup(
     name='users',
-    version='1.0.5',
+    version='2.0.0',
     license='MIT',
     description=(
-        "This module contains classes and functions for implementing"
-        "the simplest authorization for telegram bots"
+        "This python module is a simple implementation of user management functionality for telegram bots,"
+        "such as: authentication, authorization and request limiting."
     ),
     py_modules=["users"],
     package_dir={'': 'users'},
@@ -26,12 +26,16 @@ setup(
     include_package_data=True,
     classifiers=[
         "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.10",
         "Operating System :: OS Independent",
         "Intended Audience :: Developers",
         "Topic :: Software Development"
     ],
-    keywords=['users', 'authentication'],
+    keywords=[
+        'users', 'authentication', 'authorization', 'rate-limits',
+        'permissions', 'telegram-bots', 'attributes'
+    ],
     install_requires=[
         'logger @ git+https://github.com/obervinov/logger-package.git@v1.0.1',
         'vault @ git+https://github.com/obervinov/vault-package.git@v2.0.1',
