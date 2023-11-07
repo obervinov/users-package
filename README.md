@@ -442,8 +442,6 @@ sequenceDiagram
     Users-->>User: Return access status
     User->>Users: Call authorization(user_id, role_id)
     Users-->>User: Return permissions status
-    User->>Users: Call rl_controller(user_id)
-    Users-->>User: Return rate limits information
 ```
 ```mermaid
 sequenceDiagram

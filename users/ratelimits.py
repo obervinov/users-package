@@ -1,6 +1,6 @@
 # pylint: disable=R0801
 """
-This module contains classes and methods for implementing simple request rate limits in Telegram bots.
+This module provides the rate limit functionality for requests to the Telegram bot.
 """
 import random
 from datetime import datetime, timedelta
@@ -11,14 +11,15 @@ from users.constants import VAULT_CONFIG_PATH, VAULT_DATA_PATH
 
 class RateLimiter:
     """
-    RateLimiter class provides rate limiting functionality for requests to the Telegram bot.
+    The RateLimiter class provides the rate limit functionality for requests
+    to the Telegram bot in the context of a specific user.
 
     Args:
         :param vault (any): Configuration for initializing the Vault client.
             - (object) VaultClient instance for interacting with the Vault API.
             - (dict) Configuration for initializing a VaultClient instance in this class.
 
-        :param user_id (str): User ID for checking speed limits.
+        :param user_id (str): User ID for checking rate limits.
 
     Returns:
         None
@@ -26,13 +27,13 @@ class RateLimiter:
     Attributes:
         _vault (any): The initialized VaultClient instance or None if initialization failed.
         vault_config_path (str): Path to the configuration data in Vault.
-        vault_data_path (str): Path to the data in Vault.
+        vault_data_path (str): Path to the historical data in Vault.
         requests_configuration (dict): Configuration for rate limits from Vault.
         requests_counters (dict): Counters for user's requests.
         request_ratelimits (dict): Rate limit information for the user.
 
     Examples:
-        >>> limiter = RateLimiter(vault=vault_client, user_id='12345')
+        >>> limiter = RateLimiter(vault=vault_client, user_id='User1')
     """
     def __init__(
         self,
@@ -47,7 +48,7 @@ class RateLimiter:
                 - (object) VaultClient instance for interacting with the Vault API.
                 - (dict) Configuration for initializing a VaultClient instance in this class.
 
-            :param user_id (str): User ID for checking speed limits.
+            :param user_id (str): User ID for checking rate limits.
 
         Returns:
             None
@@ -73,6 +74,7 @@ class RateLimiter:
         self.user_id = user_id
         self._vault_config_path = VAULT_CONFIG_PATH
         self._vault_data_path = VAULT_DATA_PATH
+
         self.requests_configuration = self.vault.read_secret(
             path=f"{self.vault_config_path}/{self.user_id}",
             key='requests'
@@ -116,21 +118,7 @@ class RateLimiter:
         Args:
             vault (any): Configuration for initializing the Vault client.
         """
-        if isinstance(vault, VaultClient):
-            self._vault = vault
-        elif isinstance(vault, dict):
-            self._vault = VaultClient(
-                name=vault.get('name', None),
-                url=vault.get('url', None),
-                approle=vault.get('approle', None)
-            )
-        else:
-            log.error(
-                '[class.%s] wrong vault parameters in Users(vault=%s), see doc-string',
-                __class__.__name__,
-                vault
-            )
-            self._vault = None
+        self._vault = vault
 
     @property
     def vault_config_path(
@@ -184,10 +172,13 @@ class RateLimiter:
 
     def determine_rate_limit(self) -> dict | None:
         """
-        Determine the rate limit status for the user.
+        Determine the rate limit status for the user ID.
+
+        Args:
+            None
 
         Returns:
-            (dict | None): Rate limit information for the user.
+            (dict | None): Rate limit timestamp for the user ID.
             {
               "end_time": "2023-08-07 10:39:00.000000"
             }
@@ -209,13 +200,14 @@ class RateLimiter:
         ):
             rate_limits = self.apply_rate_limit()
 
-        # If no rate limits need to be applied
+        # If no rate limits, just +1 to request counters
         elif (
             self.requests_configuration['requests_per_day'] > self.requests_counters['requests_per_day'] and
             self.requests_configuration['requests_per_hour'] > self.requests_counters['requests_per_hour']
         ):
             rate_limits = self.no_active_rate_limit()
 
+        # If something went wrong
         else:
             rate_limits = None
 
@@ -223,10 +215,13 @@ class RateLimiter:
 
     def active_rate_limit(self) -> dict | None:
         """
-        Check and handle active rate limits for the user.
+        Check and handle active rate limits for the user ID.
+
+        Args:
+            None
 
         Returns:
-            (dict | None): Rate limit information for the user or None if the time has already expired.
+            (dict | None): Rate limit timestamp for the user ID or None if the time has already expired.
             {
               "end_time": "2023-08-07 10:39:00.000000"
             }
@@ -240,10 +235,7 @@ class RateLimiter:
         if self.request_ratelimits['end_time'] is None:
             return None
 
-        current_time = datetime.now()
-        end_time = self.request_ratelimits['end_time']
-
-        if current_time >= datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S.%f'):
+        if datetime.now() >= datetime.strptime(self.request_ratelimits['end_time'], '%Y-%m-%d %H:%M:%S.%f'):
             log.info(
                 '[class.%s] Date rate limit expired, reset for user ID %s',
                 __class__.__name__,
@@ -269,10 +261,13 @@ class RateLimiter:
 
     def apply_rate_limit(self) -> dict | None:
         """
-        Apply rate limits to the user and update counters.
+        Apply rate limits to the user ID and reset counters.
+
+        Args:
+            None
 
         Returns:
-            (dict | None): Rate limit information for the user, or None if not applicable.
+            (dict | None): Rate limit timestamp for the user ID, or None if not applicable.
             {
               "end_time": "2023-08-07 10:39:00.000000"
             }
@@ -336,10 +331,13 @@ class RateLimiter:
 
     def no_active_rate_limit(self) -> dict:
         """
-        Handle the case when no rate limits are applicable.
+        Handles the case when the rate limit is not applied and you just need to increase the request counter.
+
+        Args:
+            None
 
         Returns:
-            (dict): Rate limit information for the user, or None if no limits needed.
+            (dict): Always returns a dictionary with `None`
             {
                 'end_time': None
             }
