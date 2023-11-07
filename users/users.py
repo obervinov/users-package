@@ -1,3 +1,4 @@
+# pylint: disable=R0801
 """
 This python module is a implementation of user management functionality for telegram bots, such as:
 authentication, authorization and request limiting.

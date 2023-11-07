@@ -1,3 +1,4 @@
+# pylint: disable=R0801
 """
 This module provides the rate limit functionality for requests to the Telegram bot.
 """
