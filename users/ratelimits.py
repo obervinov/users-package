@@ -1,4 +1,3 @@
-# pylint: disable=R0801
 """
 This module provides the rate limit functionality for requests to the Telegram bot.
 """
@@ -25,7 +24,7 @@ class RateLimiter:
         None
 
     Attributes:
-        _vault (any): The initialized VaultClient instance or None if initialization failed.
+        vault (any): The initialized VaultClient instance or None if initialization failed.
         vault_config_path (str): Path to the configuration data in Vault.
         vault_data_path (str): Path to the historical data in Vault.
         requests_configuration (dict): Configuration for rate limits from Vault.
@@ -176,6 +175,9 @@ class RateLimiter:
 
         Args:
             None
+
+        Examples:
+            >>> rl_status = limiter.determine_rate_limit()
 
         Returns:
             (dict | None): Rate limit timestamp for the user ID.

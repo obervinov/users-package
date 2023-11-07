@@ -1,6 +1,5 @@
-# pylint: disable=R0801
 """
-This python module is a simple implementation of user management functionality for telegram bots, such as:
+This python module is a implementation of user management functionality for telegram bots, such as:
 authentication, authorization and request limiting.
 """
 from datetime import datetime
@@ -31,7 +30,7 @@ class Users:
         user_status_allow (str): A constant representing allowed user status.
         user_status_deny (str): A constant representing denied user status.
         vault_config_path (str): Path to the configuration data in Vault.
-        vault_data_path (str): Path to the data in Vault.
+        vault_data_path (str): Path to the historical data in Vault.
 
     Examples:
         >>> users_without_ratelimits = Users(vault=vault_client, rate_limits=False)
@@ -58,14 +57,9 @@ class Users:
         Create a new Users instance.
 
         Args:
-            :param vault (any): Configuration for initializing the vault client.
-                :param vault (object): VaultClient instance for interacting with the Vault API.
-                :param vault (dict): Configuration for initializing a VaultClient instance in this class.
-                    - name (str): Name of the individual mount point of your project.
-                    - url (str): URL to the vault server.
-                    - approle (dict): Configuration for the AppRole authentication method.
-                        - id (str): The identifier of the AppRole.
-                        - secret-id (str): Secret ID for the AppRole.
+            :param vault (any): Configuration for initializing the Vault client.
+                - (object) VaultClient instance for interacting with the Vault API.
+                - (dict) Configuration for initializing a VaultClient instance in this class.
 
             :param rate_limits (bool): Enable rate limit functionality.
 
@@ -114,21 +108,7 @@ class Users:
         Args:
             vault (any): Configuration for initializing the Vault client.
         """
-        if isinstance(vault, VaultClient):
-            self._vault = vault
-        elif isinstance(vault, dict):
-            self._vault = VaultClient(
-                name=vault.get('name', None),
-                url=vault.get('url', None),
-                approle=vault.get('approle', None)
-            )
-        else:
-            log.error(
-                '[class.%s] wrong vault parameters in Users(vault=%s), see doc-string',
-                __class__.__name__,
-                vault
-            )
-            self._vault = None
+        self._vault = vault
 
     @property
     def user_status_allow(self):
@@ -224,28 +204,28 @@ class Users:
 
         Returns:
             (dict) {
-            'access': self.user_status_allow / self.user_status_deny
+                'access': self.user_status_allow / self.user_status_deny
             }
-            or
+                or
             (dict) {
-            'access': self.user_status_allow / self.user_status_deny,
-            'permissions': self.user_status_allow / self.user_status_deny
+                'access': self.user_status_allow / self.user_status_deny,
+                'permissions': self.user_status_allow / self.user_status_deny
             }
-            or
+                or
             (dict) {
-            'access': self.user_status_allow / self.user_status_deny,
-            'permissions': self.user_status_allow / self.user_status_deny,
-            'rate_limits': {
-                'end_time': '2023-08-06 11:47:09.440933'
+                'access': self.user_status_allow / self.user_status_deny,
+                'permissions': self.user_status_allow / self.user_status_deny,
+                'rate_limits': {
+                    'end_time': '2023-08-06 11:47:09.440933'
+                }
             }
-            }
-            or
+                or
             (dict) {
-            'access': self.user_status_allow / self.user_status_deny,
-            'permissions': self.user_status_allow / self.user_status_deny,
-            'rate_limits': {
-                'end_time': None,
-            }
+                'access': self.user_status_allow / self.user_status_deny,
+                'permissions': self.user_status_allow / self.user_status_deny,
+                'rate_limits': {
+                    'end_time': None,
+                }
             }
 
         Examples:
@@ -293,7 +273,7 @@ class Users:
 
         Examples:
           >>> authentication(
-                user_id='user1'
+                user_id='User1'
               )
 
         Returns:
@@ -311,20 +291,42 @@ class Users:
         except Exception:
             status = self.user_status_deny
 
-        log.info(
-            '[class.%s] Access from user ID %s: %s',
-            __class__.__name__,
-            user_id,
-            status
-        )
-        self.vault.write_secret(
-            path=f"{self.vault_data_path}/{user_id}",
-            key='authentication',
-            value={
-                'time': str(datetime.now()),
-                'status': status
-            }
-        )
+        # verification of the status value
+        if status in self.user_status_allow or status in self.user_status_deny:
+            log.info(
+                '[class.%s] Access from user ID %s: %s',
+                __class__.__name__,
+                user_id,
+                status
+            )
+            self.vault.write_secret(
+                path=f"{self.vault_data_path}/{user_id}",
+                key='authentication',
+                value={
+                    'time': str(datetime.now()),
+                    'status': status
+                }
+            )
+        else:
+            log.error(
+                '[class.%s] Invalid configuration for %s status=%s '
+                'value can be %s or %s',
+                __class__.__name__,
+                user_id,
+                status,
+                self.user_status_allow,
+                self.user_status_deny
+            )
+            self.vault.write_secret(
+                path=f"{self.vault_data_path}/{user_id}",
+                key='authentication',
+                value={
+                    'time': str(datetime.now()),
+                    'status': self.user_status_deny
+                }
+            )
+            status = self.user_status_deny
+
         return status
 
     def authorization(
@@ -333,7 +335,7 @@ class Users:
         role_id: str = None
     ) -> str:
         """
-        Methods for checking whether the user has the specified role.
+        Checking whether the user has the specified role.
 
         Args:
             :param user_id (str): Required user ID.
@@ -364,10 +366,10 @@ class Users:
             status = self.user_status_deny
 
         log.info(
-            '[class.%s] User ID %s has the role %s: %s',
+            '[class.%s] Check role %s for user %s: %s',
             __class__.__name__,
-            user_id,
             role_id,
+            user_id,
             status
         )
         self.vault.write_secret(
