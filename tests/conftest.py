@@ -10,7 +10,7 @@ import pytest
 # pylint: disable=E0401
 from vault import VaultClient
 # pylint: disable=E0611
-from users.users import Users
+from users import Users
 
 
 def pytest_configure(config):

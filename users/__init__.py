@@ -1,5 +1,10 @@
+
 """
-This is just a special file that tells pip that your main module is in this folder
-No need to add anything here. Feel free to delete this line when you make your own package
-Leave it empty
+This module contains the implementation of the Users package, which provides functionality for managing users and rate limiting.
 """
+
+from .ratelimits import RateLimiter
+from .users import Users
+from .constants import VAULT_CONFIG_PATH, VAULT_DATA_PATH, USER_STATUS_ALLOW, USER_STATUS_DENY
+
+__all__ = ['RateLimiter', 'Users', 'VAULT_CONFIG_PATH', 'VAULT_DATA_PATH', 'USER_STATUS_ALLOW', 'USER_STATUS_DENY']
