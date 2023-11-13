@@ -6,8 +6,8 @@ authentication, authorization and request limiting.
 from datetime import datetime
 from logger import log
 from vault import VaultClient
-from constants import VAULT_CONFIG_PATH, VAULT_DATA_PATH, USER_STATUS_ALLOW, USER_STATUS_DENY
-from ratelimits import RateLimiter
+from users.constants import VAULT_CONFIG_PATH, VAULT_DATA_PATH, USER_STATUS_ALLOW, USER_STATUS_DENY
+from users.ratelimits import RateLimiter
 
 
 class Users:

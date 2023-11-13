@@ -6,7 +6,7 @@ import random
 from datetime import datetime, timedelta
 from logger import log
 from vault import VaultClient
-from constants import VAULT_CONFIG_PATH, VAULT_DATA_PATH
+from users.constants import VAULT_CONFIG_PATH, VAULT_DATA_PATH
 
 
 class RateLimiter:
