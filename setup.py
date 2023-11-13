@@ -10,7 +10,7 @@ with open('CHANGELOG.md', 'r', encoding='utf8') as changelog:
 
 setup(
     name='users',
-    version='2.0.0',
+    version='2.0.1',
     license='MIT',
     description=(
         "This python module is a simple implementation of user management functionality for telegram bots,"
