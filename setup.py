@@ -16,8 +16,8 @@ setup(
         "This python module is a simple implementation of user management functionality for telegram bots,"
         "such as: authentication, authorization and request limiting."
     ),
-    packages=find_packages(),
-    package_dir={'': 'users'},
+    packages=find_packages(include=['users', 'users.*'], exclude=['tests']),
+    package_dir={'': '.'},
     author='Oleg Bervinov',
     author_email='obervinov@pm.me',
     long_description=(f"{readme_content}""\n\n"f"{changelog_content}"),

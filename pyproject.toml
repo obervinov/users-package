@@ -2,34 +2,11 @@
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[project]
+[tool.poetry]
 name = "users"
 version = "2.0.1"
 description = "This python module is a simple implementation of user management functionality for telegram bots, such as: authentication, authorization and request limiting."
-license = {text = "MIT"}
-readme = "README.md"
-requires-python = ">=3.10"
-authors = [
-  { name="Bervinov Oleg", email="obervinov@pm.me" },
-]
-maintainers = [
-    { name="Bervinov Oleg", email="obervinov@pm.me" },
-]
-classifiers = [
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-]
-
-[project.urls]
-"Homepage" = "https://github.com/obervinov/users-package"
-"Repository" = "https://github.com/obervinov/users-package"
-"Bug Tracker" = "https://github.com/obervinov/users-package/issues"
-"Documentation" = "https://github.com/obervinov/users-package/blob/main/README.md"
-"Changelog" = "https://github.com/obervinov/users-package/blob/main/CHANGELOG.md"
+authors = ["Bervinov Oleg <obervinov@pm.me>"]
 
 [tool.poetry.dependencies]
 python = "^3.6.2"
