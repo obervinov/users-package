@@ -1,7 +1,7 @@
 """
 This module is necessary to distribute and install the written module via pip
 """
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open('README.md', 'r', encoding='utf8') as readme:
     readme_content = readme.read()
@@ -16,7 +16,7 @@ setup(
         "This python module is a simple implementation of user management functionality for telegram bots,"
         "such as: authentication, authorization and request limiting."
     ),
-    py_modules=["users"],
+    packages=find_packages(),
     package_dir={'': 'users'},
     author='Oleg Bervinov',
     author_email='obervinov@pm.me',
