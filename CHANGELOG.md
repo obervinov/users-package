@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## v2.0.1 - 2023-11-13
 ### What's Changed
-**Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.0...v2.0.1 by @obervinov in https://github.com/obervinov/users-package/pull/
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.0...v2.0.1 by @obervinov in https://github.com/obervinov/users-package/pull/31
 #### 📚 Documentation
 * [Fix wrong links format by release/v2.0.0 in CHANGELOG.md ](https://github.com/obervinov/users-package/issues/28)
 #### 🐛 Bug Fixes
