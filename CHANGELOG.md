@@ -3,13 +3,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## v2.0.1 - 2023-11-13
+## v2.0.1 - 2023-11-17
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.0...v2.0.1 by @obervinov in https://github.com/obervinov/users-package/pull/31
 #### 📚 Documentation
 * [Fix wrong links format by release/v2.0.0 in CHANGELOG.md ](https://github.com/obervinov/users-package/issues/28)
 #### 🐛 Bug Fixes
 * [Fix bug with import constants](https://github.com/obervinov/users-package/issues/30)
+* [Incorrect calculation of rate_limit if it is already applied and you need to calculate the timer for additional messages](https://github.com/obervinov/users-package/issues/32)
 
 
 ## v2.0.0 - 2023-11-07

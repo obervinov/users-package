@@ -3,6 +3,7 @@
 This module provides the rate limit functionality for requests to the Telegram bot.
 """
 import random
+import math
 from datetime import datetime, timedelta
 from logger import log
 from vault import VaultClient
@@ -192,6 +193,10 @@ class RateLimiter:
                 or
             None
         """
+        # update the request counters based on the configured rate limits
+        # and the time elapsed since the first response
+        _ = self.timer_watcher()
+
         # If rate limits already applied
         if self.request_ratelimits['end_time']:
             rate_limits = self.active_rate_limit()
@@ -252,12 +257,37 @@ class RateLimiter:
                     'end_time': self.request_ratelimits['end_time']
                 }
             )
+            self.requests_counters['requests_per_day'] = 0
+            self.requests_counters['requests_per_hour'] = 0
+            self.vault.write_secret(
+                path=f"{self.vault_data_path}/{self.user_id}",
+                key='rate_limits',
+                value=self.request_ratelimits
+            )
         else:
             log.warning(
                 '[class.%s] A speed limit has been detected for user ID %s '
                 'that has already been applied and has not expired yet',
                 __class__.__name__,
                 self.user_id
+            )
+            # calculate the multiplier on the rate limit if requests continue to arrive after the application of rate_limit
+            # in order to distributethe remaining requests in the same way based on the configuration
+            restriction_multiplier_hours = math.ceil(
+                self.requests_counters['requests_per_hour'] // self.requests_configuration['requests_per_hour']
+            )
+            first_timestamp = self.request_ratelimits['end_time']
+            shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
+
+            self.request_ratelimits['end_time'] = first_timestamp + timedelta(
+                hours=restriction_multiplier_hours,
+                minutes=shift_minutes
+            )
+
+            self.vault.write_secret(
+                path=f"{self.vault_data_path}/{self.user_id}",
+                key='rate_limits',
+                value=self.request_ratelimits
             )
 
         return self.request_ratelimits
@@ -286,7 +316,6 @@ class RateLimiter:
             )
             end_time = str(datetime.now() + timedelta(days=1))
             self.request_ratelimits['end_time'] = end_time
-            self.requests_counters['requests_per_day'] = 0
             self.requests_counters['requests_per_hour'] = self.requests_counters['requests_per_hour'] + 1
             log.info(
                 '[class.%s] Rate limit for user ID %s set to expire at %s',
@@ -310,7 +339,6 @@ class RateLimiter:
                 )
             )
             self.request_ratelimits['end_time'] = end_time
-            self.requests_counters['requests_per_hour'] = 0
             self.requests_counters['requests_per_day'] = self.requests_counters['requests_per_day'] + 1
 
             log.info(
@@ -363,4 +391,48 @@ class RateLimiter:
 
         return {
             'end_time': None
+        }
+
+    def timer_watcher(self) -> dict | None:
+        """
+        Update the request counters based on the configured rate limits and the time elapsed since the first request.
+
+        Args:
+            None
+
+        Returns:
+            A dictionary containing the updated request counters.
+
+        Examples:
+            >>> ratelimits = RateLimits()
+            >>> ratelimits.timer_watcher()
+            {'per_hour': 10, 'per_day': 100, 'first_request_time': datetime.datetime(2022, 1, 1, 0, 0)}
+
+        """
+        if self.request_ratelimits['first_request_time'] is None:
+            self.request_ratelimits['first_request_time'] = datetime.now()
+
+        else:
+            shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
+
+            if (
+                datetime.now() >= self.request_ratelimits['first_request_time'] + timedelta(hours=1, minutes=shift_minutes)
+                and
+                self.requests_counters['per_hour'] != 0
+            ):
+                self.requests_counters['per_hour'] = self.requests_counters['per_hour'] - self.requests_configuration['per_hour']
+                self.request_ratelimits['first_request_time'] = datetime.now()
+
+            if (
+                datetime.now() >= self.request_ratelimits['first_request_time'] + timedelta(days=1)
+                and
+                self.requests_counters['per_day'] != 0
+            ):
+                self.requests_counters['per_day'] = self.requests_counters['per_day'] - self.requests_configuration['per_day']
+                self.request_ratelimits['first_request_time'] = datetime.now()
+
+        return {
+            'per_hour': self.requests_counters['per_hour'],
+            'per_day': self.requests_counters['per_day'],
+            'first_request_time': self.request_ratelimits['first_request_time']
         }

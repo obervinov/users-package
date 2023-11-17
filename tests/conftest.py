@@ -39,7 +39,6 @@ def fixture_vault_url():
     if not os.getenv("CI"):
         command = (
             "docker compose -f docker-compose.yml down && "
-            "docker volume rm $(docker volume ls -q) && "
             "docker compose -f docker-compose.yml up -d"
         )
         with subprocess.Popen(command, shell=True):
