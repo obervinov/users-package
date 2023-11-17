@@ -195,7 +195,7 @@ class RateLimiter:
         """
         # update the request counters based on the configured rate limits
         # and the time elapsed since the first response
-        _ = self.timer_watcher()
+        _ = self.counters_watcher()
 
         # If rate limits already applied
         if self.request_ratelimits['end_time']:
@@ -219,7 +219,9 @@ class RateLimiter:
         else:
             rate_limits = None
 
-        return rate_limits
+        return {
+            'end_time': rate_limits['end_time'] if rate_limits else None
+        }
 
     def active_rate_limit(self) -> dict | None:
         """
@@ -391,7 +393,7 @@ class RateLimiter:
             'end_time': None
         }
 
-    def timer_watcher(self) -> dict | None:
+    def counters_watcher(self) -> dict | None:
         """
         Update the request counters based on the configured rate limits and the time elapsed since the first request.
 
@@ -403,7 +405,7 @@ class RateLimiter:
 
         Examples:
             >>> ratelimits = RateLimits()
-            >>> ratelimits.timer_watcher()
+            >>> ratelimits.counters_watcher()
             {'per_hour': 10, 'per_day': 100, 'first_request_time': datetime.datetime(2022, 1, 1, 0, 0)}
 
         """

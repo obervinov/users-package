@@ -121,3 +121,66 @@ def test_check_rl_reset(vault_instance):
     result = rl_controller.determine_rate_limit()
     end_time = result.get('end_time', None)
     assert end_time is None, f"end_time is not None in the result for {user_id}"
+
+
+@pytest.mark.order(11)
+def test_check_rl_counters_watcher_timestamp(vault_instance, timestamp_pattern):
+    """
+    The function checks how the setting of the timestamp of the first request in the counters works.
+    """
+    user_id = 'testUser10'
+    rl_controller = RateLimiter(
+        vault=vault_instance,
+        user_id=user_id
+    )
+    result = rl_controller.determine_rate_limit()
+    end_time = result.get('end_time', None)
+    first_request_time = result.get('first_request_time', None)
+
+    assert end_time is not None, f"end_time is not present in the result for {user_id}"
+    assert re.match(
+        timestamp_pattern,
+        end_time
+    ), f"end_time '{end_time}' does not match the expected pattern for {user_id}"
+
+    assert first_request_time is not None, f"end_time is not present in the result for {user_id}"
+    assert re.match(
+        timestamp_pattern,
+        first_request_time
+    ), f"end_time '{first_request_time}' does not match the expected pattern for {user_id}"  
+
+
+@pytest.mark.order(12)
+def test_check_rl_counters_watcher_decrease_per_hour(vault_instance):
+    """
+    The function checks how updating and resetting counters works over time (by hour).
+    """
+    user_id = 'testUser11'
+    rl_controller = RateLimiter(
+        vault=vault_instance,
+        user_id=user_id
+    )
+    _ = rl_controller.determine_rate_limit()
+
+    assert vault_instance.read_secret(
+        path=f"data/users/{user_id}",
+        key="requests_counters"
+    ) == {'requests_per_day': 3, 'requests_per_hour': 2}
+
+
+@pytest.mark.order(13)
+def test_check_rl_counters_watcher_decrease_per_day(vault_instance):
+    """
+    The function checks how updating and resetting counters works over time (by day).
+    """
+    user_id = 'testUser12'
+    rl_controller = RateLimiter(
+        vault=vault_instance,
+        user_id=user_id
+    )
+    _ = rl_controller.determine_rate_limit()
+
+    assert vault_instance.read_secret(
+        path=f"data/users/{user_id}",
+        key="requests_counters"
+    ) == {'requests_per_day': 2, 'requests_per_hour': 1}

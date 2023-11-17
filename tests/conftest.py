@@ -191,6 +191,18 @@ def fixture_users_attributes(vault_instance):
         'roles': ['financial_role'],
         'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
     }
+    # Test user11 for additional cases in rate limits controller (timer_watcher)
+    test_user11 = {
+        'status': 'allowed',
+        'roles': ['financial_role'],
+        'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
+    }
+    # Test user12 for additional cases in rate limits controller (timer_watcher)
+    test_user12 = {
+        'status': 'allowed',
+        'roles': ['financial_role'],
+        'requests': {'requests_per_day': 30, 'requests_per_hour': 3, 'random_shift_minutes': 15}
+    }
     for key, value in test_user1.items():
         _ = vault_instance.write_secret(
             path='configuration/users/testUser1',
@@ -251,7 +263,18 @@ def fixture_users_attributes(vault_instance):
             key=key,
             value=value
         )
-
+    for key, value in test_user11.items():
+        _ = vault_instance.write_secret(
+            path='configuration/users/testUser11',
+            key=key,
+            value=value
+        )
+    for key, value in test_user12.items():
+        _ = vault_instance.write_secret(
+            path='configuration/users/testUser12',
+            key=key,
+            value=value
+        )
 
 @pytest.fixture(name="users_data", scope='function')
 def fixture_users_data(vault_instance):
@@ -261,62 +284,76 @@ def fixture_users_data(vault_instance):
     # - restrictions on requests have not yet been applied
     test_user1 = {
         'requests_counters': {'requests_per_day': 11, 'requests_per_hour': 2},
-        'rate_limits': {'end_time': None}
+        'rate_limits': {'end_time': None, 'first_request_time': None}
     }
     # Test user2: requests counters
     # - the request limit has not been exceeded
     # - restrictions on requests don't apply
     test_user2 = {
         'requests_counters': {'requests_per_day': 0, 'requests_per_hour': 0},
-        'rate_limits': {'end_time': None}
+        'rate_limits': {'end_time': None, 'first_request_time': None}
     }
     # Test user3: exist rate limit timestamp
     # - the request limit has been reset to zero
     # - restrictions on requests apply
     test_user3 = {
         'requests_counters': {'requests_per_day': 0, 'requests_per_hour': 0},
-        'rate_limits': {'end_time': f"{datetime.now() + timedelta(days=1)}"}
+        'rate_limits': {'end_time': f"{datetime.now() + timedelta(days=1)}", 'first_request_time': None}
     }
 
-    # Test user4: EMPTY
+    # Test user4: EMPTY (because configuration is forbidden access)
 
     # Test user5: exist rate limit timestamp
     # - the request limit has been reset to zero
     # - restrictions on requests apply
     test_user5 = {
         'requests_counters': {'requests_per_day': 0, 'requests_per_hour': 0},
-        'rate_limits': {'end_time': f"{datetime.now() + timedelta(hours=1)}"}
+        'rate_limits': {'end_time': f"{datetime.now() + timedelta(hours=1)}", 'first_request_time': None}
     }
 
-    # Test user6: EMPTY
+    # Test user6: EMPTY (because configuration is forbidden access)
 
     # Test user7: detect and setup rate limits timestamps (for requests_per_day)
     # - request limit exceeded
     # - restrictions on requests have not yet been applied
     test_user7 = {
         'requests_counters': {'requests_per_day': 10, 'requests_per_hour': 0},
-        'rate_limits': {'end_time': None}
+        'rate_limits': {'end_time': None, 'first_request_time': None}
     }
     # Test user8: detect and setup rate limits timestamps (for requests_per_hour)
     # - request limit exceeded
     # - restrictions on requests have not yet been applied
     test_user8 = {
         'requests_counters': {'requests_per_day': 1, 'requests_per_hour': 1},
-        'rate_limits': {'end_time': None}
+        'rate_limits': {'end_time': None, 'first_request_time': None}
     }
     # Test user9: detect and setup rate limits timestamps (for both: requests_per_day and requests_per_hour)
     # - request limit exceeded
     # - restrictions on requests have not yet been applied
     test_user9 = {
         'requests_counters': {'requests_per_day': 10, 'requests_per_hour': 1},
-        'rate_limits': {'end_time': None}
+        'rate_limits': {'end_time': None, 'first_request_time': None}
     }
     # Test user10: reset expired rate limit
     # - the counter is reset to zero
     # - the speed limit timer has expired
     test_user10 = {
         'requests_counters': {'requests_per_day': 0, 'requests_per_hour': 0},
-        'rate_limits': {'end_time': str(datetime.now() - timedelta(hours=1))}
+        'rate_limits': {'end_time': str(datetime.now() - timedelta(hours=1)), 'first_request_time': None}
+    }
+    # Test user11: reset expired rate limit
+    # - the counter is reset to zero
+    # - the speed limit timer has expired
+    test_user11 = {
+        'requests_counters': {'requests_per_day': 3, 'requests_per_hour': 3},
+        'rate_limits': {'end_time': None, 'first_request_time': str(datetime.now() - timedelta(hours=1, minutes=16))}
+    }
+    # Test user12: reset expired rate limit
+    # - the counter is reset to zero
+    # - the speed limit timer has expired
+    test_user12 = {
+        'requests_counters': {'requests_per_day': 32, 'requests_per_hour': 1},
+        'rate_limits': {'end_time': None, 'first_request_time': str(datetime.now() - timedelta(days=1))}
     }
     for key, value in test_user1.items():
         _ = vault_instance.write_secret(
@@ -363,6 +400,18 @@ def fixture_users_data(vault_instance):
     for key, value in test_user10.items():
         _ = vault_instance.write_secret(
             path='data/users/testUser10',
+            key=key,
+            value=value
+        )
+    for key, value in test_user11.items():
+        _ = vault_instance.write_secret(
+            path='data/users/testUser11',
+            key=key,
+            value=value
+        )
+    for key, value in test_user12.items():
+        _ = vault_instance.write_secret(
+            path='data/users/testUser12',
             key=key,
             value=value
         )
