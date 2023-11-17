@@ -147,7 +147,7 @@ def test_check_rl_counters_watcher_timestamp(vault_instance, timestamp_pattern):
     assert re.match(
         timestamp_pattern,
         first_request_time
-    ), f"end_time '{first_request_time}' does not match the expected pattern for {user_id}"  
+    ), f"end_time '{first_request_time}' does not match the expected pattern for {user_id}"
 
 
 @pytest.mark.order(12)

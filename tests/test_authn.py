@@ -27,6 +27,6 @@ def test_check_authn_doesnt_exist_users(users):
     """
     Check the function for a user who does not exist in the configuration (random user)
     """
-    assert users.authentication(user_id='testUser11') == users.user_status_deny
-    assert users.authentication(user_id='testUser12') == users.user_status_deny
+    assert users.authentication(user_id='testUser91') == users.user_status_deny
+    assert users.authentication(user_id='testUser91') == users.user_status_deny
     assert users.authentication(user_id='123456789') == users.user_status_deny

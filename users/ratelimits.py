@@ -418,21 +418,21 @@ class RateLimiter:
             if (
                 datetime.now() >= self.request_ratelimits['first_request_time'] + timedelta(hours=1, minutes=shift_minutes)
                 and
-                self.requests_counters['per_hour'] != 0
+                self.requests_counters['requests_per_hour'] != 0
             ):
-                self.requests_counters['per_hour'] = self.requests_counters['per_hour'] - self.requests_configuration['per_hour']
+                self.requests_counters['requests_per_hour'] = self.requests_counters['requests_per_hour'] - self.requests_configuration['requests_per_hour']
                 self.request_ratelimits['first_request_time'] = datetime.now()
 
             if (
                 datetime.now() >= self.request_ratelimits['first_request_time'] + timedelta(days=1)
                 and
-                self.requests_counters['per_day'] != 0
+                self.requests_counters['requests_per_day'] != 0
             ):
-                self.requests_counters['per_day'] = self.requests_counters['per_day'] - self.requests_configuration['per_day']
+                self.requests_counters['requests_per_day'] = self.requests_counters['requests_per_day'] - self.requests_configuration['requests_per_day']
                 self.request_ratelimits['first_request_time'] = datetime.now()
 
         return {
-            'per_hour': self.requests_counters['per_hour'],
-            'per_day': self.requests_counters['per_day'],
+            'per_hour': self.requests_counters['requests_per_hour'],
+            'per_day': self.requests_counters['requests_per_day'],
             'first_request_time': self.request_ratelimits['first_request_time']
         }
