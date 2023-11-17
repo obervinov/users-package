@@ -99,7 +99,7 @@ class RateLimiter:
         # pylint: disable=W0718
         # will be fixed after the solution https://github.com/obervinov/vault-package/issues/31
         except Exception:
-            self.request_ratelimits = {'end_time': None}
+            self.request_ratelimits = {'end_time': None, 'first_request_time': None}
 
     @property
     def vault(self):
@@ -257,8 +257,6 @@ class RateLimiter:
                     'end_time': self.request_ratelimits['end_time']
                 }
             )
-            self.requests_counters['requests_per_day'] = 0
-            self.requests_counters['requests_per_hour'] = 0
             self.vault.write_secret(
                 path=f"{self.vault_data_path}/{self.user_id}",
                 key='rate_limits',
