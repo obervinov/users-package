@@ -297,7 +297,7 @@ class RateLimiter:
                 self.user_id
             )
             # calculate the multiplier on the rate limit if requests continue to arrive after the application of rate_limit
-            # in order to distributethe remaining requests in the same way based on the configuration
+            # in order to distribute the remaining requests in the same way based on the configuration
             restriction_multiplier_hours = math.ceil(
                 self.requests_counters['requests_per_hour'] // self.requests_configuration['requests_per_hour']
             )
