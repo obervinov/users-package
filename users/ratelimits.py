@@ -193,9 +193,19 @@ class RateLimiter:
                 or
             None
         """
+        log.debug(
+            'Before determining the rate limit status\n'
+            'Counters: %s\n'
+            'RateLimits: %s\n'
+            'Config: %s\n',
+            self.requests_counters,
+            self.request_ratelimits,
+            self.requests_configuration
+        )
+
         # update the request counters based on the configured rate limits
         # and the time elapsed since the first response
-        _ = self.counters_watcher()
+        watcher = self.counters_watching()
 
         # If rate limits already applied
         if self.request_ratelimits['end_time']:
@@ -218,6 +228,18 @@ class RateLimiter:
         # If something went wrong
         else:
             rate_limits = None
+
+        log.debug(
+            'After determining the rate limit status\n'
+            'Watcher: %s\n'
+            'Counters: %s\n'
+            'RateLimits: %s\n'
+            'Config: %s\n',
+            watcher,
+            self.requests_counters,
+            self.request_ratelimits,
+            self.requests_configuration
+        )
 
         return {
             'end_time': rate_limits['end_time'] if rate_limits else None
@@ -245,7 +267,10 @@ class RateLimiter:
         if self.request_ratelimits['end_time'] is None:
             return None
 
-        if datetime.now() >= datetime.strptime(self.request_ratelimits['end_time'], '%Y-%m-%d %H:%M:%S.%f'):
+        if datetime.now() >= datetime.strptime(
+            self.request_ratelimits['end_time'],
+            '%Y-%m-%d %H:%M:%S.%f'
+        ):
             log.info(
                 '[class.%s] Date rate limit expired, reset for user ID %s',
                 __class__.__name__,
@@ -276,14 +301,18 @@ class RateLimiter:
             restriction_multiplier_hours = math.ceil(
                 self.requests_counters['requests_per_hour'] // self.requests_configuration['requests_per_hour']
             )
-            first_timestamp = self.request_ratelimits['end_time']
+            first_timestamp = datetime.strptime(
+                self.request_ratelimits['end_time'],
+                '%Y-%m-%d %H:%M:%S.%f'
+            )
             shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
 
-            self.request_ratelimits['end_time'] = first_timestamp + timedelta(
-                hours=restriction_multiplier_hours,
-                minutes=shift_minutes
+            self.request_ratelimits['end_time'] = str(
+                first_timestamp + timedelta(
+                    hours=restriction_multiplier_hours,
+                    minutes=shift_minutes
+                )
             )
-
             self.vault.write_secret(
                 path=f"{self.vault_data_path}/{self.user_id}",
                 key='rate_limits',
@@ -316,7 +345,8 @@ class RateLimiter:
             )
             end_time = str(datetime.now() + timedelta(days=1))
             self.request_ratelimits['end_time'] = end_time
-            self.requests_counters['requests_per_hour'] = self.requests_counters['requests_per_hour'] + 1
+            self.requests_counters['requests_per_hour'] += 1
+            self.requests_counters['requests_per_day'] += 1
             log.info(
                 '[class.%s] Rate limit for user ID %s set to expire at %s',
                 __class__.__name__,
@@ -339,8 +369,8 @@ class RateLimiter:
                 )
             )
             self.request_ratelimits['end_time'] = end_time
-            self.requests_counters['requests_per_day'] = self.requests_counters['requests_per_day'] + 1
-
+            self.requests_counters['requests_per_day'] += 1
+            self.requests_counters['requests_per_hour'] += 1
             log.info(
                 '[class.%s] Rate limit for user ID %s set to expire at %s',
                 __class__.__name__,
@@ -358,6 +388,7 @@ class RateLimiter:
             key='rate_limits',
             value=self.request_ratelimits
         )
+
         return self.request_ratelimits
 
     def no_active_rate_limit(self) -> dict:
@@ -393,7 +424,7 @@ class RateLimiter:
             'end_time': None
         }
 
-    def counters_watcher(self) -> dict | None:
+    def counters_watching(self) -> dict | None:
         """
         Update the request counters based on the configured rate limits and the time elapsed since the first request.
 
@@ -405,34 +436,64 @@ class RateLimiter:
 
         Examples:
             >>> ratelimits = RateLimits()
-            >>> ratelimits.counters_watcher()
-            {'per_hour': 10, 'per_day': 100, 'first_request_time': datetime.datetime(2022, 1, 1, 0, 0)}
+            >>> ratelimits.counters_watching()
+            {'per_hour': 10, 'per_day': 100, 'first_request_time': '2023-11-18 18:19:13.458355'}
 
         """
-        if self.request_ratelimits['first_request_time'] is None:
-            self.request_ratelimits['first_request_time'] = datetime.now()
+        log.info(
+            '[class.%s] Updating request counters for user ID %s',
+            __class__.__name__,
+            self.user_id
+        )
+
+        if self.request_ratelimits.get('first_request_time', None) is None:
+            self.request_ratelimits['first_request_time'] = str(datetime.now())
 
         else:
             shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
 
             if (
-                datetime.now() >= self.request_ratelimits['first_request_time'] + timedelta(hours=1, minutes=shift_minutes)
+                datetime.now() >= datetime.strptime(
+                    self.request_ratelimits['first_request_time'],
+                    '%Y-%m-%d %H:%M:%S.%f'
+                ) + timedelta(hours=1, minutes=shift_minutes)
                 and
                 self.requests_counters['requests_per_hour'] != 0
             ):
-                self.requests_counters['requests_per_hour'] = self.requests_counters['requests_per_hour'] - self.requests_configuration['requests_per_hour']
-                self.request_ratelimits['first_request_time'] = datetime.now()
+                if (self.requests_counters['requests_per_hour'] - self.requests_configuration['requests_per_hour']) <= 0:
+                    self.requests_counters['requests_per_hour'] = 0
+                else:
+                    self.requests_counters['requests_per_hour'] -= self.requests_configuration['requests_per_hour']
 
             if (
-                datetime.now() >= self.request_ratelimits['first_request_time'] + timedelta(days=1)
+                datetime.now() >= datetime.strptime(
+                    self.request_ratelimits['first_request_time'],
+                    '%Y-%m-%d %H:%M:%S.%f'
+                ) + timedelta(days=1)
                 and
                 self.requests_counters['requests_per_day'] != 0
             ):
-                self.requests_counters['requests_per_day'] = self.requests_counters['requests_per_day'] - self.requests_configuration['requests_per_day']
-                self.request_ratelimits['first_request_time'] = datetime.now()
+                if (self.requests_counters['requests_per_day'] - self.requests_configuration['requests_per_day']) <= 0:
+                    self.requests_counters['requests_per_day'] = 0
+                else:
+                    self.requests_counters['requests_per_day'] -= self.requests_configuration['requests_per_day']
 
-        return {
+            self.request_ratelimits['first_request_time'] = str(datetime.now())
+            self.vault.write_secret(
+                path=f"{self.vault_data_path}/{self.user_id}",
+                key='request_ratelimits',
+                value=self.request_ratelimits
+            )
+
+        response = {
             'per_hour': self.requests_counters['requests_per_hour'],
             'per_day': self.requests_counters['requests_per_day'],
             'first_request_time': self.request_ratelimits['first_request_time']
         }
+        log.info(
+            '[class.%s] Counters updated for user ID %s\n%s',
+            __class__.__name__,
+            self.user_id,
+            response
+        )
+        return response

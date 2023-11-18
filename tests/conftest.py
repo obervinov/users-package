@@ -38,7 +38,8 @@ def fixture_vault_url():
     # prepare vault for local environment
     if not os.getenv("CI"):
         command = (
-            "docker compose -f docker-compose.yml down && "
+            "vault=$(docker ps -a | grep vault | awk '{print $1}') && "
+            "[ -n '$vault' ] && docker container rm -f $vault && "
             "docker compose -f docker-compose.yml up -d"
         )
         with subprocess.Popen(command, shell=True):
@@ -276,6 +277,7 @@ def fixture_users_attributes(vault_instance):
             value=value
         )
 
+
 @pytest.fixture(name="users_data", scope='function')
 def fixture_users_data(vault_instance):
     """Fill in the test historical user data with request counters, applied rate limits timers."""
@@ -353,7 +355,7 @@ def fixture_users_data(vault_instance):
     # - the speed limit timer has expired
     test_user12 = {
         'requests_counters': {'requests_per_day': 32, 'requests_per_hour': 1},
-        'rate_limits': {'end_time': None, 'first_request_time': str(datetime.now() - timedelta(days=1))}
+        'rate_limits': {'end_time': None, 'first_request_time': str(datetime.now() - timedelta(days=2))}
     }
     for key, value in test_user1.items():
         _ = vault_instance.write_secret(

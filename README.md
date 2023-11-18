@@ -284,13 +284,13 @@ The `no_active_rate_limit` method handles the case when the rate limit is not ap
 
 ### Monitoring the request counter reset timer
 
-The `counters_watcher` method monitors the request counters based on the timestamp of the first (`per_hour` or `per_day`) request and recalculates them as time passes. Thus, it provides the offset of the counter when the rate_limit is not exceeded a day or an hour has already passed.
+The `counters_watching` method monitors the request counters based on the timestamp of the first (`per_hour` or `per_day`) request and recalculates them as time passes. Thus, it provides the offset of the counter when the rate_limit is not exceeded a day or an hour has already passed.
 - **Arguments:**
   - None
 
 - **Example:**
   ```python
-  counters_watcher()
+  counters_watching()
   ```
 
 - **Returns:**
@@ -328,7 +328,7 @@ The `counters_watcher` method monitors the request counters based on the timesta
 | `active_rate_limit` | Check and handle active rate limits for the user.                   | N/A                                                                                                                 | `rate_limits = limiter.active_rate_limit()`                                   | `dict` (Rate limit timestamp for the user ID) or `None` (if rate limit has been reset)                        | N/A | `{self.vault_data_path}/{user_id}:rate_limits`  writes or delete rate limit timestamp in Vault. | 
 | `apply_rate_limit`  | Apply rate limits to the user ID and reset request counters.                  | N/A                                                                                                                 | `rate_limits = limiter.apply_rate_limit()`                                    | `dict` (Rate limit timestamp for the user ID) or `None`                         | N/A | `{self.vault_data_path}/{user_id}:rate_limits`  writes rate limit timestamp and `{self.vault_data_path}/{user_id}:requests_counters` reset request counters in Vault. | 
 | `no_active_rate_limit` | Handle the case when no rate limits are applicable.              | N/A                                                                                                                 | `rate_limits = limiter.no_active_rate_limit()`                               | `(dict) {'end_time': None}`                        | N/A |`{self.vault_data_path}/{user_id}:requests_counters` writes +1 counter to request counters in Vault. | 
-| `counters_watcher()` | Update the request counters based on the configured rate limits and the time elapsed since the first request.              | N/A                                                                                                                 | `current_counters = limiter.counters_watcher()`                               | `(dict) {'per_hour': 10, 'per_day': 100, 'first_request_time': datetime.datetime(2022, 1, 1, 0, 0)}`                        | N/A |`{self.vault_data_path}/{user_id}:rate_limits` updates the counter for the request counters in the Vault. | 
+| `counters_watching()` | Update the request counters based on the configured rate limits and the time elapsed since the first request.              | N/A                                                                                                                 | `current_counters = limiter.counters_watching()`                               | `(dict) {'per_hour': 10, 'per_day': 100, 'first_request_time': datetime.datetime(2022, 1, 1, 0, 0)}`                        | N/A |`{self.vault_data_path}/{user_id}:rate_limits` updates the counter for the request counters in the Vault. | 
 
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/requirements.png" width="25" title="data-structure"> Structure of configuration and statistics data in vault
