@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.0...v2.0.1 by @obervinov in https://github.com/obervinov/users-package/pull/31
 #### 📚 Documentation
-* [Fix wrong links format by release/v2.0.0 in CHANGELOG.md ](https://github.com/obervinov/users-package/issues/28)
+* [Fix wrong links format by release/v2.0.0 in CHANGELOG.md](https://github.com/obervinov/users-package/issues/28)
 #### 🐛 Bug Fixes
 * [Fix bug with import constants](https://github.com/obervinov/users-package/issues/30)
 * [Incorrect calculation of rate_limit if it is already applied and you need to calculate the timer for additional messages](https://github.com/obervinov/users-package/issues/32)
