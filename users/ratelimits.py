@@ -491,7 +491,7 @@ class RateLimiter:
             'first_request_time': self.request_ratelimits['first_request_time']
         }
         log.info(
-            '[class.%s] Counters updated for user ID %s\n%s',
+            '[class.%s] Counters updated for user ID %s: %s',
             __class__.__name__,
             self.user_id,
             response
