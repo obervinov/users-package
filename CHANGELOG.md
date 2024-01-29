@@ -5,12 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## v2.0.2 - 2024-01-29
 ### What's Changed
-**Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.1...v2.0.2 by @obervinov in https://github.com/obervinov/users-package/pull/32
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.1...v2.0.2 by @obervinov in https://github.com/obervinov/users-package/pull/35
 #### 📚 Documentation
-* [Fix wrong links format by release/v2.0.0 in CHANGELOG.md](https://github.com/obervinov/users-package/issues/28)
+* [Fix extensions in workflows](https://github.com/obervinov/users-package/pull/35)
 #### 🐛 Bug Fixes
-* [Fix bug with import constants](https://github.com/obervinov/users-package/issues/30)
-* [Incorrect calculation of rate_limit if it is already applied and you need to calculate the timer for additional messages](https://github.com/obervinov/users-package/issues/32)
+* [Fix extensions in workflows](https://github.com/obervinov/users-package/pull/35)
 
 
 ## v2.0.1 - 2024-01-29
