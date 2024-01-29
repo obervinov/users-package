@@ -1,37 +1,26 @@
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[project]
+[tool.poetry]
 name = "users"
-version = "2.0.0"
+version = "2.0.1"
 description = "This python module is a simple implementation of user management functionality for telegram bots, such as: authentication, authorization and request limiting."
-license = {text = "MIT"}
+authors = ["Bervinov Oleg <obervinov@pm.me>"]
+maintainers = ["Bervinov Oleg <obervinov@pm.me>"]
+license = "MIT"
 readme = "README.md"
-requires-python = ">=3.10"
-authors = [
-  { name="Bervinov Oleg", email="obervinov@pm.me" },
-]
-maintainers = [
-    { name="Bervinov Oleg", email="obervinov@pm.me" },
-]
-classifiers = [
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-]
+packages = [{include = "users"}]
+homepage = "https://github.com/obervinov/users-package"
+repository = "https://github.com/obervinov/users-package"
+documentation = "https://github.com/obervinov/users-package/blob/main/README.md"
+keywords = ["users", "permissions", "authentication", "authorization", "telegram", "bot", "roles", "limiting", "rate", "limit", "rate-limit", "rate-limiting", "rate-limiting", "rate-limit"]
+include = ["CHANGELOG.md"]
 
-[project.urls]
-"Homepage" = "https://github.com/obervinov/users-package"
-"Repository" = "https://github.com/obervinov/users-package"
+[tool.poetry.urls]
 "Bug Tracker" = "https://github.com/obervinov/users-package/issues"
-"Documentation" = "https://github.com/obervinov/users-package/blob/main/README.md"
-"Changelog" = "https://github.com/obervinov/users-package/blob/main/CHANGELOG.md"
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
-logger = { git = "https://github.com/obervinov/logger-package.git", tag = "v1.0.1" }
-vault  = { git = "https://github.com/obervinov/vault-package.git", tag = "v2.0.1" }
+python = "^3.10"
+logger = { git = "https://github.com/obervinov/logger-package.git", tag = "v1.0.4" }
+vault  = { git = "https://github.com/obervinov/vault-package.git", tag = "v2.0.2" }
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

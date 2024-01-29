@@ -3,10 +3,11 @@
 This module provides the rate limit functionality for requests to the Telegram bot.
 """
 import random
+import math
 from datetime import datetime, timedelta
 from logger import log
 from vault import VaultClient
-from users.constants import VAULT_CONFIG_PATH, VAULT_DATA_PATH
+from .constants import VAULT_CONFIG_PATH, VAULT_DATA_PATH
 
 
 class RateLimiter:
@@ -98,7 +99,7 @@ class RateLimiter:
         # pylint: disable=W0718
         # will be fixed after the solution https://github.com/obervinov/vault-package/issues/31
         except Exception:
-            self.request_ratelimits = {'end_time': None}
+            self.request_ratelimits = {'end_time': None, 'first_request_time': None}
 
     @property
     def vault(self):
@@ -192,6 +193,20 @@ class RateLimiter:
                 or
             None
         """
+        log.debug(
+            'Before determining the rate limit status\n'
+            'Counters: %s\n'
+            'RateLimits: %s\n'
+            'Config: %s\n',
+            self.requests_counters,
+            self.request_ratelimits,
+            self.requests_configuration
+        )
+
+        # update the request counters based on the configured rate limits
+        # and the time elapsed since the first response
+        watcher = self.counters_watching()
+
         # If rate limits already applied
         if self.request_ratelimits['end_time']:
             rate_limits = self.active_rate_limit()
@@ -214,7 +229,21 @@ class RateLimiter:
         else:
             rate_limits = None
 
-        return rate_limits
+        log.debug(
+            'After determining the rate limit status\n'
+            'Watcher: %s\n'
+            'Counters: %s\n'
+            'RateLimits: %s\n'
+            'Config: %s\n',
+            watcher,
+            self.requests_counters,
+            self.request_ratelimits,
+            self.requests_configuration
+        )
+
+        return {
+            'end_time': rate_limits['end_time'] if rate_limits else None
+        }
 
     def active_rate_limit(self) -> dict | None:
         """
@@ -238,7 +267,10 @@ class RateLimiter:
         if self.request_ratelimits['end_time'] is None:
             return None
 
-        if datetime.now() >= datetime.strptime(self.request_ratelimits['end_time'], '%Y-%m-%d %H:%M:%S.%f'):
+        if datetime.now() >= datetime.strptime(
+            self.request_ratelimits['end_time'],
+            '%Y-%m-%d %H:%M:%S.%f'
+        ):
             log.info(
                 '[class.%s] Date rate limit expired, reset for user ID %s',
                 __class__.__name__,
@@ -252,12 +284,39 @@ class RateLimiter:
                     'end_time': self.request_ratelimits['end_time']
                 }
             )
+            self.vault.write_secret(
+                path=f"{self.vault_data_path}/{self.user_id}",
+                key='rate_limits',
+                value=self.request_ratelimits
+            )
         else:
             log.warning(
                 '[class.%s] A speed limit has been detected for user ID %s '
                 'that has already been applied and has not expired yet',
                 __class__.__name__,
                 self.user_id
+            )
+            # calculate the multiplier on the rate limit if requests continue to arrive after the application of rate_limit
+            # in order to distribute the remaining requests in the same way based on the configuration
+            restriction_multiplier_hours = math.ceil(
+                self.requests_counters['requests_per_hour'] // self.requests_configuration['requests_per_hour']
+            )
+            first_timestamp = datetime.strptime(
+                self.request_ratelimits['end_time'],
+                '%Y-%m-%d %H:%M:%S.%f'
+            )
+            shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
+
+            self.request_ratelimits['end_time'] = str(
+                first_timestamp + timedelta(
+                    hours=restriction_multiplier_hours,
+                    minutes=shift_minutes
+                )
+            )
+            self.vault.write_secret(
+                path=f"{self.vault_data_path}/{self.user_id}",
+                key='rate_limits',
+                value=self.request_ratelimits
             )
 
         return self.request_ratelimits
@@ -286,8 +345,8 @@ class RateLimiter:
             )
             end_time = str(datetime.now() + timedelta(days=1))
             self.request_ratelimits['end_time'] = end_time
-            self.requests_counters['requests_per_day'] = 0
-            self.requests_counters['requests_per_hour'] = self.requests_counters['requests_per_hour'] + 1
+            self.requests_counters['requests_per_hour'] += 1
+            self.requests_counters['requests_per_day'] += 1
             log.info(
                 '[class.%s] Rate limit for user ID %s set to expire at %s',
                 __class__.__name__,
@@ -310,9 +369,8 @@ class RateLimiter:
                 )
             )
             self.request_ratelimits['end_time'] = end_time
-            self.requests_counters['requests_per_hour'] = 0
-            self.requests_counters['requests_per_day'] = self.requests_counters['requests_per_day'] + 1
-
+            self.requests_counters['requests_per_day'] += 1
+            self.requests_counters['requests_per_hour'] += 1
             log.info(
                 '[class.%s] Rate limit for user ID %s set to expire at %s',
                 __class__.__name__,
@@ -330,6 +388,7 @@ class RateLimiter:
             key='rate_limits',
             value=self.request_ratelimits
         )
+
         return self.request_ratelimits
 
     def no_active_rate_limit(self) -> dict:
@@ -364,3 +423,77 @@ class RateLimiter:
         return {
             'end_time': None
         }
+
+    def counters_watching(self) -> dict | None:
+        """
+        Update the request counters based on the configured rate limits and the time elapsed since the first request.
+
+        Args:
+            None
+
+        Returns:
+            A dictionary containing the updated request counters.
+
+        Examples:
+            >>> ratelimits = RateLimits()
+            >>> ratelimits.counters_watching()
+            {'per_hour': 10, 'per_day': 100, 'first_request_time': '2023-11-18 18:19:13.458355'}
+
+        """
+        log.info(
+            '[class.%s] Updating request counters for user ID %s',
+            __class__.__name__,
+            self.user_id
+        )
+
+        if self.request_ratelimits.get('first_request_time', None) is None:
+            self.request_ratelimits['first_request_time'] = str(datetime.now())
+
+        else:
+            shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
+
+            if (
+                datetime.now() >= datetime.strptime(
+                    self.request_ratelimits['first_request_time'],
+                    '%Y-%m-%d %H:%M:%S.%f'
+                ) + timedelta(hours=1, minutes=shift_minutes)
+                and
+                self.requests_counters['requests_per_hour'] != 0
+            ):
+                if (self.requests_counters['requests_per_hour'] - self.requests_configuration['requests_per_hour']) <= 0:
+                    self.requests_counters['requests_per_hour'] = 0
+                else:
+                    self.requests_counters['requests_per_hour'] -= self.requests_configuration['requests_per_hour']
+
+            if (
+                datetime.now() >= datetime.strptime(
+                    self.request_ratelimits['first_request_time'],
+                    '%Y-%m-%d %H:%M:%S.%f'
+                ) + timedelta(days=1)
+                and
+                self.requests_counters['requests_per_day'] != 0
+            ):
+                if (self.requests_counters['requests_per_day'] - self.requests_configuration['requests_per_day']) <= 0:
+                    self.requests_counters['requests_per_day'] = 0
+                else:
+                    self.requests_counters['requests_per_day'] -= self.requests_configuration['requests_per_day']
+
+            self.request_ratelimits['first_request_time'] = str(datetime.now())
+            self.vault.write_secret(
+                path=f"{self.vault_data_path}/{self.user_id}",
+                key='request_ratelimits',
+                value=self.request_ratelimits
+            )
+
+        response = {
+            'per_hour': self.requests_counters['requests_per_hour'],
+            'per_day': self.requests_counters['requests_per_day'],
+            'first_request_time': self.request_ratelimits['first_request_time']
+        }
+        log.info(
+            '[class.%s] Counters updated for user ID %s: %s',
+            __class__.__name__,
+            self.user_id,
+            response
+        )
+        return response

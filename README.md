@@ -23,16 +23,6 @@ This Python module is designed to simplify user management in Telegram bots, pro
     - [Additional Module](https://github.com/obervinov/vault-package ) to interact with the Vault API
     - [Vault Policy](tests/vault/policy.hcl) with access rights to the Vault Server
 
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="21" title="envs"> Environment variables
-
-Supported environment variables
-
-| Variable  | Description | Default value |
-| ------------- | ------------- | ------------- |
-| `VAULT_ADDR`  | The address at which the vault server will be available to the module | `None` |
-| `VAULT_APPROLE_ID` | [Approle id created during vault setup](https://developer.hashicorp.com/vault/docs/auth/approle) | `None` |
-| `VAULT_APPROLE_SECRETID`  | [Approle secret id created during vault setup](https://developer.hashicorp.com/vault/docs/auth/approle) | `None` |
-
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="21" title="constants"> Description of module Constants
 
 This module contains constant values
@@ -282,6 +272,27 @@ The `no_active_rate_limit` method handles the case when the rate limit is not ap
       {"end_time": None}
     ```
 
+### Monitoring the request counter reset timer
+
+The `counters_watching` method monitors the request counters based on the timestamp of the first (`per_hour` or `per_day`) request and recalculates them as time passes. Thus, it provides the offset of the counter when the rate_limit is not exceeded a day or an hour has already passed.
+- **Arguments:**
+  - None
+
+- **Example:**
+  ```python
+  counters_watching()
+  ```
+
+- **Returns:**
+  - Always returns a dictionary.
+    ```python
+    (dict)
+    {
+      'per_hour': 1,
+      'per_day': 10,
+      'first_request_time': '2023-08-07 10:39:00.000000'
+    }
+    ```
 ### Description of Class Attributes
 | Data Type | Attribute                | Purpose                                                                  | Default Value                   |
 |-----------|--------------------------|--------------------------------------------------------------------------|---------------------------------|
@@ -307,7 +318,7 @@ The `no_active_rate_limit` method handles the case when the rate limit is not ap
 | `active_rate_limit` | Check and handle active rate limits for the user.                   | N/A                                                                                                                 | `rate_limits = limiter.active_rate_limit()`                                   | `dict` (Rate limit timestamp for the user ID) or `None` (if rate limit has been reset)                        | N/A | `{self.vault_data_path}/{user_id}:rate_limits`  writes or delete rate limit timestamp in Vault. | 
 | `apply_rate_limit`  | Apply rate limits to the user ID and reset request counters.                  | N/A                                                                                                                 | `rate_limits = limiter.apply_rate_limit()`                                    | `dict` (Rate limit timestamp for the user ID) or `None`                         | N/A | `{self.vault_data_path}/{user_id}:rate_limits`  writes rate limit timestamp and `{self.vault_data_path}/{user_id}:requests_counters` reset request counters in Vault. | 
 | `no_active_rate_limit` | Handle the case when no rate limits are applicable.              | N/A                                                                                                                 | `rate_limits = limiter.no_active_rate_limit()`                               | `(dict) {'end_time': None}`                        | N/A |`{self.vault_data_path}/{user_id}:requests_counters` writes +1 counter to request counters in Vault. | 
-
+| `counters_watching()` | Update the request counters based on the configured rate limits and the time elapsed since the first request.              | N/A                                                                                                                 | `current_counters = limiter.counters_watching()`                               | `(dict) {'per_hour': 10, 'per_day': 100, 'first_request_time': datetime.datetime(2022, 1, 1, 0, 0)}`                        | N/A |`{self.vault_data_path}/{user_id}:rate_limits` updates the counter for the request counters in the Vault. | 
 
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/requirements.png" width="25" title="data-structure"> Structure of configuration and statistics data in vault
@@ -353,17 +364,30 @@ It supports user configurations to define system access rights, roles, and reque
       - `requests_per_day`
       - `requests_per_hour`
 
-    ```json
-    {
-      "requests_per_day": 9,
-      "requests_per_hour": 1
-    }
-    ```
+      ```json
+      {
+        "requests_per_day": 9,
+        "requests_per_hour": 1
+      }
+      ```
 
-  - `rate_limits`: Information about rate limits, including the end time of the rate limit. It can have two values:
-    - `{'end_time': '2023-08-07 10:39:00.000000'}`
-    - `{'end_time': None}`
-
+  - `rate_limits`: Information about rate limits, including the
+      - `end_time` of the rate limit
+      - `first_request_time` of the first request (per day or hour).
+ 
+      ```json
+      {
+        "end_time": "2023-08-07 10:39:00.000000",
+        "first_request_time": "2023-08-08 10:39:00.000000"
+      }
+      ```
+      or
+      ```json
+      {
+        "end_time": None,
+        "first_request_time": None
+      }
+      ```
   - `authorization`: Details about the authorization process, including the time, status
       - `timestamp`
       - `self.user_status_allow` or `self.user_status_deny`
@@ -410,16 +434,6 @@ It supports user configurations to define system access rights, roles, and reque
       "status": "allowed"
     }
     ```
-
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="20" title="install"> Installing
-```bash
-# Install current version
-pip3 install git+https://github.com/obervinov/users-package.git#egg=users
-# Install version by branch
-pip3 install git+https://github.com/obervinov/users-package.git@main#egg=users
-# Install version by tag
-pip3 install git+https://github.com/obervinov/users-package.git@v2.0.0#egg=users
-```
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/config.png" width="25" title="usage"> Additional usage example
 Interaction Model 1: Using a Unified Entrypoint (Method: `user_access_check()`)
@@ -571,8 +585,27 @@ if limiter.determine_rate_limit()['end_time']:
     print(f"You have sent too many requests, the limit is applied until {user_info['rate_limits']['end_time']}")
 ```
 
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="20" title="install"> Installing
+```bash
+tee -a pyproject.toml <<EOF
+[tool.poetry]
+name = myproject"
+version = "1.0.0"
+description = ""
+
+[tool.poetry.dependencies]
+python = "^3.10"
+users = { git = "https://github.com/obervinov/users-package.git", tag = "v2.0.1" }
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+EOF
+
+poetry install
+```
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/github-actions.png" width="25" title="github-actions"> GitHub Actions
 | Name  | Version |
 | ------------------------ | ----------- |
-| GitHub Actions Templates | [v1.0.5](https://github.com/obervinov/_templates/tree/v1.0.5) |
+| GitHub Actions Templates | [v1.0.12](https://github.com/obervinov/_templates/tree/v1.0.12) |

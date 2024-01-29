@@ -1,12 +1,13 @@
 ---
-name: Release
+name: Tests and checks
 
 on:   # yamllint disable-line rule:truthy
-  pull_request:
+  push:
     branches:
-      - main
-    types:
-      - closed
+      - '*'
+      - '*/*'
+      - '**'
+      - '!main'
 
 jobs:
   changelog:
@@ -20,7 +21,3 @@ jobs:
 
   pyproject:
     uses: obervinov/_templates/.github/workflows/pyproject.yaml@v1.0.12
-
-  create-release:
-    uses: obervinov/_templates/.github/workflows/release.yaml@v1.0.12
-    needs: [changelog, pylint, pytest, pyproject]

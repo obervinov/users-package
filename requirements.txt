@@ -1,2 +1,0 @@
-logger @ git+https://github.com/obervinov/logger-package.git@v1.0.1
-vault @ git+https://github.com/obervinov/vault-package.git@v2.0.1

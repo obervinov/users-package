@@ -3,7 +3,7 @@ A test that verifies the user __init__ function.
 """
 import pytest
 # pylint: disable=E0611
-from users.users import Users
+from users import Users
 
 
 @pytest.mark.order(19)
