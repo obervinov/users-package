@@ -435,16 +435,6 @@ It supports user configurations to define system access rights, roles, and reque
     }
     ```
 
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="20" title="install"> Installing
-```bash
-# Install current version
-pip3 install git+https://github.com/obervinov/users-package.git#egg=users
-# Install version by branch
-pip3 install git+https://github.com/obervinov/users-package.git@main#egg=users
-# Install version by tag
-pip3 install git+https://github.com/obervinov/users-package.git@v2.0.0#egg=users
-```
-
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/config.png" width="25" title="usage"> Additional usage example
 Interaction Model 1: Using a Unified Entrypoint (Method: `user_access_check()`)
 ```mermaid
@@ -595,6 +585,25 @@ if limiter.determine_rate_limit()['end_time']:
     print(f"You have sent too many requests, the limit is applied until {user_info['rate_limits']['end_time']}")
 ```
 
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="20" title="install"> Installing
+```bash
+tee -a pyproject.toml <<EOF
+[tool.poetry]
+name = myproject"
+version = "1.0.0"
+description = ""
+
+[tool.poetry.dependencies]
+python = "^3.10"
+users = { git = "https://github.com/obervinov/users-package.git", tag = "v2.0.1" }
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+EOF
+
+poetry install
+```
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/github-actions.png" width="25" title="github-actions"> GitHub Actions
 | Name  | Version |
