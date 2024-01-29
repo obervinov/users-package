@@ -288,14 +288,7 @@ class Users:
         )
 
         # verification of the status value
-        if status in self.user_status_allow or status in self.user_status_deny:
-            log.info(
-                '[class.%s] Access from user ID %s: %s',
-                __class__.__name__,
-                user_id,
-                status
-            )
-        elif status is None:
+        if status is None:
             log.info(
                 '[class.%s] User ID %s not found in Vault configuration'
                 'and will be denied access',
@@ -303,6 +296,13 @@ class Users:
                 user_id
             )
             status = self.user_status_deny
+        elif status in self.user_status_allow or status in self.user_status_deny:
+            log.info(
+                '[class.%s] Access from user ID %s: %s',
+                __class__.__name__,
+                user_id,
+                status
+            )
         else:
             log.error(
                 '[class.%s] Invalid configuration for %s status=%s '
