@@ -282,15 +282,10 @@ class Users:
                 or
             (str) self.user_status_deny
         """
-        try:
-            status = self.vault.read_secret(
-                path=f"{self.vault_config_path}/{user_id}",
-                key='status'
-            )
-        # pylint: disable=W0718
-        # will be fixed after the solution https://github.com/obervinov/vault-package/issues/31
-        except Exception:
-            status = self.user_status_deny
+        status = self.vault.read_secret(
+            path=f"{self.vault_config_path}/{user_id}",
+            key='status'
+        )
 
         # verification of the status value
         if status in self.user_status_allow or status in self.user_status_deny:
@@ -300,14 +295,14 @@ class Users:
                 user_id,
                 status
             )
-            self.vault.write_secret(
-                path=f"{self.vault_data_path}/{user_id}",
-                key='authentication',
-                value={
-                    'time': str(datetime.now()),
-                    'status': status
-                }
+        elif status is None:
+            log.info(
+                '[class.%s] User ID %s not found in Vault configuration'
+                'and will be denied access',
+                __class__.__name__,
+                user_id
             )
+            status = self.user_status_deny
         else:
             log.error(
                 '[class.%s] Invalid configuration for %s status=%s '
@@ -318,15 +313,16 @@ class Users:
                 self.user_status_allow,
                 self.user_status_deny
             )
-            self.vault.write_secret(
-                path=f"{self.vault_data_path}/{user_id}",
-                key='authentication',
-                value={
-                    'time': str(datetime.now()),
-                    'status': self.user_status_deny
-                }
-            )
             status = self.user_status_deny
+
+        self.vault.write_secret(
+            path=f"{self.vault_data_path}/{user_id}",
+            key='authentication',
+            value={
+                'time': str(datetime.now()),
+                'status': status
+            }
+        )
 
         return status
 
