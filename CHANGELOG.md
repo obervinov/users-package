@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## v2.0.2 - 2024-01-29
+### What's Changed
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.1...v2.0.2 by @obervinov in https://github.com/obervinov/users-package/pull/35
+#### 📚 Documentation
+* [Fix extensions in workflows](https://github.com/obervinov/users-package/pull/35)
+#### 🐛 Bug Fixes
+* [Fix extensions in workflows](https://github.com/obervinov/users-package/pull/35)
+
+
 ## v2.0.1 - 2024-01-29
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.0...v2.0.1 by @obervinov in https://github.com/obervinov/users-package/pull/31

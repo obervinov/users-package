@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "users"
-version = "2.0.1"
+version = "2.0.2"
 description = "This python module is a simple implementation of user management functionality for telegram bots, such as: authentication, authorization and request limiting."
 authors = ["Bervinov Oleg <obervinov@pm.me>"]
 maintainers = ["Bervinov Oleg <obervinov@pm.me>"]
