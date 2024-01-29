@@ -1,14 +1,26 @@
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [tool.poetry]
 name = "users"
-version = "2.0.1"
+version = "2.1.0"
 description = "This python module is a simple implementation of user management functionality for telegram bots, such as: authentication, authorization and request limiting."
 authors = ["Bervinov Oleg <obervinov@pm.me>"]
+maintainers = ["Bervinov Oleg <obervinov@pm.me>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "users"}]
+homepage = "https://github.com/obervinov/users-package"
+repository = "https://github.com/obervinov/users-package"
+documentation = "https://github.com/obervinov/users-package/blob/main/README.md"
+keywords = ["users", "permissions", "authentication", "authorization", "telegram", "bot", "roles", "limiting", "rate", "limit", "rate-limit", "rate-limiting", "rate-limiting", "rate-limit"]
+include = ["CHANGELOG.md"]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/obervinov/users-package/issues"
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
-logger = { git = "https://github.com/obervinov/logger-package.git", tag = "v1.0.1" }
-vault  = { git = "https://github.com/obervinov/vault-package.git", tag = "v2.0.1" }
+python = "^3.10"
+logger = { git = "https://github.com/obervinov/logger-package.git", tag = "v1.0.4" }
+vault  = { git = "https://github.com/obervinov/vault-package.git", tag = "v2.0.2" }
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

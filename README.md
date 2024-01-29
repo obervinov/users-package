@@ -23,16 +23,6 @@ This Python module is designed to simplify user management in Telegram bots, pro
     - [Additional Module](https://github.com/obervinov/vault-package ) to interact with the Vault API
     - [Vault Policy](tests/vault/policy.hcl) with access rights to the Vault Server
 
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="21" title="envs"> Environment variables
-
-Supported environment variables
-
-| Variable  | Description | Default value |
-| ------------- | ------------- | ------------- |
-| `VAULT_ADDR`  | The address at which the vault server will be available to the module | `None` |
-| `VAULT_APPROLE_ID` | [Approle id created during vault setup](https://developer.hashicorp.com/vault/docs/auth/approle) | `None` |
-| `VAULT_APPROLE_SECRETID`  | [Approle secret id created during vault setup](https://developer.hashicorp.com/vault/docs/auth/approle) | `None` |
-
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="21" title="constants"> Description of module Constants
 
 This module contains constant values
@@ -609,4 +599,4 @@ if limiter.determine_rate_limit()['end_time']:
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/github-actions.png" width="25" title="github-actions"> GitHub Actions
 | Name  | Version |
 | ------------------------ | ----------- |
-| GitHub Actions Templates | [v1.0.5](https://github.com/obervinov/_templates/tree/v1.0.5) |
+| GitHub Actions Templates | [v1.0.12](https://github.com/obervinov/_templates/tree/v1.0.12) |

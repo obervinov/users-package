@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## v2.0.1 - 2023-11-19
+## v2.0.1 - 2024-01-29
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.0...v2.0.1 by @obervinov in https://github.com/obervinov/users-package/pull/31
 #### 📚 Documentation
@@ -11,6 +11,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 #### 🐛 Bug Fixes
 * [Fix bug with import constants](https://github.com/obervinov/users-package/issues/30)
 * [Incorrect calculation of rate_limit if it is already applied and you need to calculate the timer for additional messages](https://github.com/obervinov/users-package/issues/32)
+#### 🚀 Features
+* [Migration from pip to poetry](https://github.com/obervinov/users-package/issues/34)
+* [Dependency graph does not work correctly, sort it out and fix it network/dependencies](https://github.com/obervinov/users-package/issues/33)
 
 
 ## v2.0.0 - 2023-11-07
@@ -46,6 +49,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 #### 📚 Documentation
 * [Add a description to the links in CHANGELOG.md](https://github.com/obervinov/users-package/issues/16)
 
+
 ## v1.0.3 - 2023-05-31
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v1.0.2...v1.0.3 by @obervinov in https://github.com/obervinov/users-package/pull/9
@@ -59,6 +63,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 * [GitHub Actions workflow updates: 2023.05.22](https://github.com/obervinov/users-package/issues/6)
 #### 📚 Documentation
 * [Documentation updates: pr template](https://github.com/obervinov/users-package/issues/7)
+
 
 ## v1.0.2 - 2023-03-28
 ### What's Changed
@@ -81,6 +86,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 * updated [logger-package](https://github.com/obervinov/logger-package/tree/v1.0.1) version to `v1.0.1`
 * added [tests](https://github.com/obervinov/users-package/tree/v1.0.2/tests)
 
+
 ## v1.0.1 - 2023-02-28
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v1.0.0...v1.0.1 by @obervinov in https://github.com/obervinov/users-package/pull/1
@@ -98,7 +104,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 * added [PULL_REQUEST_TEMPLATE](https://github.com/obervinov/users-package/tree/v1.0.1/.github/PULL_REQUEST_TEMPLATE)
 * added [CODEOWNERS](https://github.com/obervinov/users-package/tree/v1.0.1/.github/CODEOWNERS)
 * added [dependabot.yml](https://github.com/obervinov/users-package/tree/v1.0.1/.github/dependabot.yml)
-
 
 
 ## v1.0.0 - 2022-11-05
