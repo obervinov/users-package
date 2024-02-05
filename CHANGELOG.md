@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## v2.0.3 - 2024-02-05
 ### What's Changed
-**Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.2...v2.0.3 by @obervinov in https://github.com/obervinov/users-package/pull/
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.2...v2.0.3 by @obervinov in https://github.com/obervinov/users-package/pull/36
 #### 🐛 Bug Fixes
 * Fix support python 3.9 in the package and workflows
 
