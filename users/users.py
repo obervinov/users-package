@@ -92,7 +92,7 @@ class Users:
         self._vault_data_path = VAULT_DATA_PATH
 
     @property
-    def vault(self):
+    def vault(self) -> any:
         """
         Getter for the 'vault' attribute.
 
@@ -112,7 +112,7 @@ class Users:
         self._vault = vault
 
     @property
-    def user_status_allow(self):
+    def user_status_allow(self) -> str:
         """
         Getter for the 'user_status_allow' attribute.
 
@@ -132,7 +132,7 @@ class Users:
         self._user_status_allow = user_status_allow
 
     @property
-    def user_status_deny(self):
+    def user_status_deny(self) -> str:
         """
         Getter for the 'user_status_deny' attribute.
 
@@ -152,7 +152,7 @@ class Users:
         self._user_status_deny = user_status_deny
 
     @property
-    def vault_config_path(self):
+    def vault_config_path(self) -> str:
         """
         Getter for the 'vault_config_path' attribute.
 
@@ -172,7 +172,7 @@ class Users:
         self._vault_config_path = vault_config_path
 
     @property
-    def vault_data_path(self):
+    def vault_data_path(self) -> str:
         """
         Getter for the 'vault_data_path' attribute.
 

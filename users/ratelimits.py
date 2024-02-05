@@ -4,6 +4,7 @@ This module provides the rate limit functionality for requests to the Telegram b
 """
 import random
 import math
+from typing import Union
 from datetime import datetime, timedelta
 from logger import log
 from vault import VaultClient
@@ -171,7 +172,7 @@ class RateLimiter:
         """
         self._vault_data_path = vault_data_path
 
-    def determine_rate_limit(self) -> dict | None:
+    def determine_rate_limit(self) -> Union[dict, None]:
         """
         Determine the rate limit status for the user ID.
 
@@ -245,7 +246,7 @@ class RateLimiter:
             'end_time': rate_limits['end_time'] if rate_limits else None
         }
 
-    def active_rate_limit(self) -> dict | None:
+    def active_rate_limit(self) -> Union[dict, None]:
         """
         Check and handle active rate limits for the user ID.
 
@@ -321,7 +322,7 @@ class RateLimiter:
 
         return self.request_ratelimits
 
-    def apply_rate_limit(self) -> dict | None:
+    def apply_rate_limit(self) -> Union[dict, None]:
         """
         Apply rate limits to the user ID and reset counters.
 
@@ -424,7 +425,7 @@ class RateLimiter:
             'end_time': None
         }
 
-    def counters_watching(self) -> dict | None:
+    def counters_watching(self) -> Union[dict, None]:
         """
         Update the request counters based on the configured rate limits and the time elapsed since the first request.
 

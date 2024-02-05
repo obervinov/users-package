@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## v2.0.2 - 2024-02-05
+### What's Changed
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.2...v2.0.3 by @obervinov in https://github.com/obervinov/users-package/pull/
+#### 🐛 Bug Fixes
+* Fix support python 3.9 in the package and workflows
+
+
 ## v2.0.2 - 2024-01-29
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.1...v2.0.2 by @obervinov in https://github.com/obervinov/users-package/pull/35
