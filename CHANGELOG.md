@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.3...v2.0.4 by @obervinov in https://github.com/obervinov/users-package/pull/37
 #### 🚀 Features
-* Bump the dependency version 
+* Bump the dependency to latest versions 
 #### 🐛 Bug Fixes
 * [Error when call `rl_controller.determine_rate_limit()`](https://github.com/obervinov/users-package/issues/38)
 * [Incorrect record of authentication events and user authorization in Vault data](https://github.com/obervinov/users-package/issues/37)
