@@ -4,6 +4,7 @@ This module provides the rate limit functionality for requests to the Telegram b
 """
 import random
 import math
+import json
 from typing import Union
 from datetime import datetime, timedelta
 from logger import log
@@ -77,9 +78,11 @@ class RateLimiter:
         self._vault_config_path = VAULT_CONFIG_PATH
         self._vault_data_path = VAULT_DATA_PATH
 
-        self.requests_configuration = self.vault.read_secret(
-            path=f"{self.vault_config_path}/{self.user_id}",
-            key='requests'
+        self.requests_configuration = json.loads(
+            self.vault.read_secret(
+                path=f"{self.vault_config_path}/{self.user_id}",
+                key='requests'
+            )
         )
 
         try:
@@ -207,12 +210,6 @@ class RateLimiter:
         # update the request counters based on the configured rate limits
         # and the time elapsed since the first response
         watcher = self.counters_watching()
-
-        log.warning(self.requests_configuration)
-        log.warning(self.requests_counters)
-        log.warning(type(self.requests_configuration))
-        log.warning(type(self.requests_counters))
-
 
         # If rate limits already applied
         if self.request_ratelimits['end_time']:
