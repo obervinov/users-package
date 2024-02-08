@@ -208,6 +208,9 @@ class RateLimiter:
         # and the time elapsed since the first response
         watcher = self.counters_watching()
 
+        log.warning(self.requests_configuration)
+        log.warning(self.requests_counters)
+
         # If rate limits already applied
         if self.request_ratelimits['end_time']:
             rate_limits = self.active_rate_limit()
