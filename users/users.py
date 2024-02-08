@@ -369,10 +369,6 @@ class Users:
         self.vault.write_secret(
             path=f"{self.vault_data_path}/{user_id}",
             key='authorization',
-            value={
-                'time': str(datetime.now()),
-                'status': status,
-                'role': role_id
-            }
+            value=str({'time': str(datetime.now()), 'status': status, 'role': role_id})
         )
         return status
