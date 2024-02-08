@@ -130,16 +130,16 @@ def fixture_users_attributes(vault_instance):
     # - limited request
     test_user1 = {
         'status': 'allowed',
-        'roles': ['admin_role'],
-        'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
+        'roles': ["admin_role"],
+        'requests': {"requests_per_day": 10, "requests_per_hour": 1, "random_shift_minutes": 15}
     }
     # Test user2
     # - allowed role1 and role2
     # - limited request
     test_user2 = {
         'status': 'allowed',
-        'roles': ['financial_role', 'goals_role'],
-        'requests': {'requests_per_day': 30, 'requests_per_hour': 5, 'random_shift_minutes': 15}
+        'roles': ["financial_role", "goals_role"],
+        'requests': {"requests_per_day": 30, "requests_per_hour": 5, "random_shift_minutes": 15}
     }
     # Test user3
     # - haven't roles
@@ -147,7 +147,7 @@ def fixture_users_attributes(vault_instance):
     test_user3 = {
         'status': 'allowed',
         'roles': [],
-        'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 60}
+        'requests': {"requests_per_day": 3, "requests_per_hour": 1, "random_shift_minutes": 60}
     }
     # Test user4
     # - forbidden user
@@ -159,50 +159,50 @@ def fixture_users_attributes(vault_instance):
     # Test user5 for additional cases in rate limits controller
     test_user5 = {
         'status': 'allowed',
-        'roles': ['financial_role'],
-        'requests': {'requests_per_day': 30, 'requests_per_hour': 3, 'random_shift_minutes': 15}
+        'roles': ["financial_role"],
+        'requests': {"requests_per_day": 30, "requests_per_hour": 3, "random_shift_minutes": 15}
     }
     # Test user6 for additional cases in rate limits controller
     test_user6 = {
         'status': 'allowed',
-        'roles': ['financial_role'],
-        'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
+        'roles': ["financial_role"],
+        'requests': {"requests_per_day": 10, "requests_per_hour": 1, "random_shift_minutes": 15}
     }
     # Test user6 for additional cases in rate limits controller
     test_user7 = {
         'status': 'allowed',
-        'roles': ['financial_role'],
-        'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
+        'roles': ["financial_role"],
+        'requests': {"requests_per_day": 10, "requests_per_hour": 1, "random_shift_minutes": 15}
     }
     # Test user8 for additional cases in rate limits controller
     test_user8 = {
         'status': 'allowed',
-        'roles': ['financial_role'],
-        'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
+        'roles': ["financial_role"],
+        'requests': {"requests_per_day": 10, "requests_per_hour": 1, "random_shift_minutes": 15}
     }
     # Test user9 for additional cases in rate limits controller
     test_user9 = {
         'status': 'allowed',
-        'roles': ['financial_role'],
-        'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
+        'roles': ["financial_role"],
+        'requests': {"requests_per_day": 10, "requests_per_hour": 1, "random_shift_minutes": 15}
     }
     # Test user10 for additional cases in rate limits controller
     test_user10 = {
         'status': 'allowed',
-        'roles': ['financial_role'],
-        'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
+        'roles': ["financial_role"],
+        'requests': {"requests_per_day": 10, "requests_per_hour": 1, "random_shift_minutes": 15}
     }
     # Test user11 for additional cases in rate limits controller (timer_watcher)
     test_user11 = {
         'status': 'allowed',
-        'roles': ['financial_role'],
-        'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
+        'roles': ["financial_role"],
+        'requests': {"requests_per_day": 10, "requests_per_hour": 1, "random_shift_minutes": 15}
     }
     # Test user12 for additional cases in rate limits controller (timer_watcher)
     test_user12 = {
         'status': 'allowed',
-        'roles': ['financial_role'],
-        'requests': {'requests_per_day': 30, 'requests_per_hour': 3, 'random_shift_minutes': 15}
+        'roles': ["financial_role"],
+        'requests': {"requests_per_day": 30, "requests_per_hour": 3, "random_shift_minutes": 15}
     }
     for key, value in test_user1.items():
         _ = vault_instance.write_secret(
