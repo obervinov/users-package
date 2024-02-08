@@ -210,6 +210,9 @@ class RateLimiter:
 
         log.warning(self.requests_configuration)
         log.warning(self.requests_counters)
+        log.warning(type(self.requests_configuration))
+        log.warning(type(self.requests_counters))
+
 
         # If rate limits already applied
         if self.request_ratelimits['end_time']:
