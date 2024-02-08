@@ -290,7 +290,7 @@ class Users:
         # verification of the status value
         if status is None:
             log.info(
-                '[class.%s] User ID %s not found in Vault configuration'
+                '[class.%s] User ID %s not found in Vault configuration '
                 'and will be denied access',
                 __class__.__name__,
                 user_id
@@ -318,10 +318,7 @@ class Users:
         self.vault.write_secret(
             path=f"{self.vault_data_path}/{user_id}",
             key='authentication',
-            value={
-                'time': str(datetime.now()),
-                'status': status
-            }
+            value=str({'time': str(datetime.now()), 'status': status})
         )
 
         return status
