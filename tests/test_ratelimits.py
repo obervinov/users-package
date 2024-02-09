@@ -2,6 +2,7 @@
 A test that checks the user request limit control function.
 """
 import re
+import json
 import pytest
 from users import RateLimiter
 
@@ -50,11 +51,11 @@ def test_check_rl_counters_increase(vault_instance):
         user_id=user_id
     )
     _ = rl_controller.determine_rate_limit()
-
-    assert vault_instance.read_secret(
+    requests_counters = vault_instance.read_secret(
         path=f"data/users/{user_id}",
         key="requests_counters"
-    ) == {'requests_per_day': 2, 'requests_per_hour': 2}
+    )
+    assert json.loads(requests_counters) == {'requests_per_day': 2, 'requests_per_hour': 2}
 
 
 @pytest.mark.order(8)
@@ -154,11 +155,11 @@ def test_check_rl_counters_watching_decrease_per_hour(vault_instance):
         user_id=user_id
     )
     _ = rl_controller.determine_rate_limit()
-
-    assert vault_instance.read_secret(
+    requests_counters = vault_instance.read_secret(
         path=f"data/users/{user_id}",
         key="requests_counters"
-    ) == {'requests_per_day': 4, 'requests_per_hour': 3}
+    )
+    assert json.loads(requests_counters) == {'requests_per_day': 4, 'requests_per_hour': 3}
 
 
 @pytest.mark.order(13)
@@ -172,8 +173,8 @@ def test_check_rl_counters_watching_decrease_per_day(vault_instance):
         user_id=user_id
     )
     _ = rl_controller.determine_rate_limit()
-
-    assert vault_instance.read_secret(
+    requests_counters = vault_instance.read_secret(
         path=f"data/users/{user_id}",
         key="requests_counters"
-    ) == {'requests_per_day': 3, 'requests_per_hour': 1}
+    )
+    assert json.loads(requests_counters) == {'requests_per_day': 3, 'requests_per_hour': 1}

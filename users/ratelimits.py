@@ -58,6 +58,7 @@ class RateLimiter:
 
         See the class docstring for more details and examples.
         """
+        # Initialize the Vault client
         if isinstance(vault, VaultClient):
             self._vault = vault
         elif isinstance(vault, dict):
@@ -74,35 +75,43 @@ class RateLimiter:
             )
             self._vault = None
 
+        # Initialize the user ID and constants
         self.user_id = user_id
         self._vault_config_path = VAULT_CONFIG_PATH
         self._vault_data_path = VAULT_DATA_PATH
 
-        self.requests_configuration = json.loads(
-            self.vault.read_secret(
-                path=f"{self.vault_config_path}/{self.user_id}",
-                key='requests'
-            )
+        # Read requests configuration from Vault
+        requests_configuration = self.vault.read_secret(
+            path=f"{self.vault_config_path}/{self.user_id}",
+            key='requests'
         )
-
-        try:
-            self.requests_counters = self.vault.read_secret(
-                path=f"{self.vault_data_path}/{user_id}",
-                key='requests_counters'
+        if requests_configuration:
+            self.requests_configuration = json.loads(requests_configuration)
+        else:
+            log.error(
+                '[class.%s] No requests configuration found for user ID %s',
+                __class__.__name__,
+                self.user_id
             )
-        # pylint: disable=W0718
-        # will be fixed after the solution https://github.com/obervinov/vault-package/issues/31
-        except Exception:
+
+        # Read requests counters and rate limits from Vault
+        requests_counters = self.vault.read_secret(
+            path=f"{self.vault_data_path}/{user_id}",
+            key='requests_counters'
+        )
+        if requests_counters:
+            self.requests_counters = json.loads(requests_counters)
+        else:
             self.requests_counters = {'requests_per_day': 0, 'requests_per_hour': 0}
 
-        try:
-            self.request_ratelimits = self.vault.read_secret(
-                path=f"{self.vault_data_path}/{user_id}",
-                key='rate_limits'
-            )
-        # pylint: disable=W0718
-        # will be fixed after the solution https://github.com/obervinov/vault-package/issues/31
-        except Exception:
+        # Read rate limits from Vault
+        requests_ratelimits = self.vault.read_secret(
+            path=f"{self.vault_data_path}/{user_id}",
+            key='rate_limits'
+        )
+        if requests_ratelimits:
+            self.request_ratelimits = json.loads(requests_ratelimits)
+        else:
             self.request_ratelimits = {'end_time': None, 'first_request_time': None}
 
     @property
@@ -206,33 +215,27 @@ class RateLimiter:
             self.request_ratelimits,
             self.requests_configuration
         )
-
         # update the request counters based on the configured rate limits
         # and the time elapsed since the first response
         watcher = self.counters_watching()
-
         # If rate limits already applied
         if self.request_ratelimits['end_time']:
             rate_limits = self.active_rate_limit()
-
         # If rate limits need to apply
         elif (
             self.requests_configuration['requests_per_day'] <= self.requests_counters['requests_per_day'] or
             self.requests_configuration['requests_per_hour'] <= self.requests_counters['requests_per_hour']
         ):
             rate_limits = self.apply_rate_limit()
-
         # If no rate limits, just +1 to request counters
         elif (
             self.requests_configuration['requests_per_day'] > self.requests_counters['requests_per_day'] and
             self.requests_configuration['requests_per_hour'] > self.requests_counters['requests_per_hour']
         ):
             rate_limits = self.no_active_rate_limit()
-
         # If something went wrong
         else:
             rate_limits = None
-
         log.debug(
             'After determining the rate limit status\n'
             'Watcher: %s\n'
@@ -244,10 +247,7 @@ class RateLimiter:
             self.request_ratelimits,
             self.requests_configuration
         )
-
-        return {
-            'end_time': rate_limits['end_time'] if rate_limits else None
-        }
+        return {'end_time': rate_limits['end_time'] if rate_limits else None}
 
     def active_rate_limit(self) -> Union[dict, None]:
         """
@@ -281,17 +281,16 @@ class RateLimiter:
                 self.user_id
             )
             self.request_ratelimits['end_time'] = None
+            # Update the request rate limit timer and counters in Vault
             self.vault.write_secret(
                 path=f"{self.vault_data_path}/{self.user_id}",
                 key='rate_limits',
-                value={
-                    'end_time': self.request_ratelimits['end_time']
-                }
+                value=json.dumps({'end_time': self.request_ratelimits['end_time']})
             )
             self.vault.write_secret(
                 path=f"{self.vault_data_path}/{self.user_id}",
                 key='rate_limits',
-                value=self.request_ratelimits
+                value=json.dumps(self.request_ratelimits)
             )
         else:
             log.warning(
@@ -320,9 +319,8 @@ class RateLimiter:
             self.vault.write_secret(
                 path=f"{self.vault_data_path}/{self.user_id}",
                 key='rate_limits',
-                value=self.request_ratelimits
+                value=json.dumps(self.request_ratelimits)
             )
-
         return self.request_ratelimits
 
     def apply_rate_limit(self) -> Union[dict, None]:
@@ -340,6 +338,7 @@ class RateLimiter:
                 or
             None
         """
+        # If the rate limit is already applied
         if self.requests_configuration['requests_per_day'] <= self.requests_counters['requests_per_day']:
             log.warning(
                 '[class.%s] The request limits are exhausted (per_day), '
@@ -357,7 +356,7 @@ class RateLimiter:
                 self.user_id,
                 end_time
             )
-
+        # If the rate limit is not yet applied
         elif self.requests_configuration['requests_per_hour'] <= self.requests_counters['requests_per_hour']:
             log.warning(
                 '[class.%s] The request limits are exhausted (per_hour), '
@@ -381,18 +380,17 @@ class RateLimiter:
                 self.user_id,
                 end_time
             )
-
+        # Update the request rate limit timer and counters in Vault
         self.vault.write_secret(
             path=f"{self.vault_data_path}/{self.user_id}",
             key='requests_counters',
-            value=self.requests_counters
+            value=json.dumps(self.requests_counters)
         )
         self.vault.write_secret(
             path=f"{self.vault_data_path}/{self.user_id}",
             key='rate_limits',
-            value=self.request_ratelimits
+            value=json.dumps(self.request_ratelimits)
         )
-
         return self.request_ratelimits
 
     def no_active_rate_limit(self) -> dict:
@@ -417,16 +415,13 @@ class RateLimiter:
         updated_counters = self.requests_counters.copy()
         updated_counters['requests_per_day'] += 1
         updated_counters['requests_per_hour'] += 1
-
+        # Update the request counters in Vault
         self.vault.write_secret(
             path=f"{self.vault_data_path}/{self.user_id}",
             key='requests_counters',
-            value=updated_counters
+            value=json.dumps(updated_counters)
         )
-
-        return {
-            'end_time': None
-        }
+        return {'end_time': None}
 
     def counters_watching(self) -> Union[dict, None]:
         """
@@ -455,38 +450,23 @@ class RateLimiter:
 
         else:
             shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
-
-            if (
-                datetime.now() >= datetime.strptime(
-                    self.request_ratelimits['first_request_time'],
-                    '%Y-%m-%d %H:%M:%S.%f'
-                ) + timedelta(hours=1, minutes=shift_minutes)
-                and
-                self.requests_counters['requests_per_hour'] != 0
-            ):
+            first_request_time = datetime.strptime(self.request_ratelimits['first_request_time'], '%Y-%m-%d %H:%M:%S.%f')
+            increase_hour_timedelta = timedelta(hours=1, minutes=shift_minutes)
+            if datetime.now() >= first_request_time + increase_hour_timedelta and self.requests_counters['requests_per_hour'] != 0:
                 if (self.requests_counters['requests_per_hour'] - self.requests_configuration['requests_per_hour']) <= 0:
                     self.requests_counters['requests_per_hour'] = 0
                 else:
                     self.requests_counters['requests_per_hour'] -= self.requests_configuration['requests_per_hour']
-
-            if (
-                datetime.now() >= datetime.strptime(
-                    self.request_ratelimits['first_request_time'],
-                    '%Y-%m-%d %H:%M:%S.%f'
-                ) + timedelta(days=1)
-                and
-                self.requests_counters['requests_per_day'] != 0
-            ):
+            if datetime.now() >= first_request_time + timedelta(days=1) and self.requests_counters['requests_per_day'] != 0:
                 if (self.requests_counters['requests_per_day'] - self.requests_configuration['requests_per_day']) <= 0:
                     self.requests_counters['requests_per_day'] = 0
                 else:
                     self.requests_counters['requests_per_day'] -= self.requests_configuration['requests_per_day']
-
             self.request_ratelimits['first_request_time'] = str(datetime.now())
             self.vault.write_secret(
                 path=f"{self.vault_data_path}/{self.user_id}",
                 key='request_ratelimits',
-                value=self.request_ratelimits
+                value=json.dumps(self.request_ratelimits)
             )
 
         response = {

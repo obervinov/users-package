@@ -1,8 +1,8 @@
-# pylint: disable=R0801
 """
 This python module is a implementation of user management functionality for telegram bots, such as:
 authentication, authorization and request limiting.
 """
+import json
 from datetime import datetime
 from logger import log
 from vault import VaultClient
@@ -244,7 +244,6 @@ class Users:
         if applicable.
         """
         user_info = {}
-
         user_info['access'] = self.authentication(
             user_id=user_id
         )
@@ -259,7 +258,6 @@ class Users:
                     user_id=user_id
                 )
                 user_info['rate_limits'] = rl_controller.determine_rate_limit()
-
         return user_info
 
     def authentication(
@@ -286,7 +284,6 @@ class Users:
             path=f"{self.vault_config_path}/{user_id}",
             key='status'
         )
-
         # verification of the status value
         if status is None:
             log.info(
@@ -314,13 +311,12 @@ class Users:
                 self.user_status_deny
             )
             status = self.user_status_deny
-
+        # Write latest authentication status to Vault
         self.vault.write_secret(
             path=f"{self.vault_data_path}/{user_id}",
             key='authentication',
-            value=str({'time': str(datetime.now()), 'status': status})
+            value=json.dumps({'time': str(datetime.now()), 'status': status})
         )
-
         return status
 
     def authorization(
@@ -346,19 +342,17 @@ class Users:
                 or
             (str) self.user_status_deny
         """
-        try:
-            if role_id in self.vault.read_secret(
-                path=f"{self.vault_config_path}/{user_id}",
-                key='roles'
-            ):
+        roles = self.vault.read_secret(
+            path=f"{self.vault_config_path}/{user_id}",
+            key='roles'
+        )
+        if roles:
+            if role_id in json.loads(roles):
                 status = self.user_status_allow
             else:
                 status = self.user_status_deny
-        # pylint: disable=W0718
-        # will be fixed after the solution https://github.com/obervinov/vault-package/issues/31
-        except Exception:
+        else:
             status = self.user_status_deny
-
         log.info(
             '[class.%s] Check role %s for user %s: %s',
             __class__.__name__,
@@ -366,9 +360,10 @@ class Users:
             user_id,
             status
         )
+        # Write latest authorization status to Vault
         self.vault.write_secret(
             path=f"{self.vault_data_path}/{user_id}",
             key='authorization',
-            value=str({'time': str(datetime.now()), 'status': status, 'role': role_id})
+            value=json.dumps({'time': str(datetime.now()), 'status': status, 'role': role_id})
         )
         return status
