@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from logger import log
 from vault import VaultClient
 from .constants import VAULT_CONFIG_PATH, VAULT_DATA_PATH
+from .exceptions import WrongUserConfiguration, VaultInstanceNotSet
 
 
 class RateLimiter:
@@ -73,18 +74,19 @@ class RateLimiter:
                 __class__.__name__,
                 vault
             )
-            self._vault = None
+            raise VaultInstanceNotSet("Vault instance is not set. Please provide a valid Vault instance as instance or dictionary.")
 
         # Initialize the user ID and constants
         self.user_id = user_id
         self._vault_config_path = VAULT_CONFIG_PATH
         self._vault_data_path = VAULT_DATA_PATH
 
-        # Read requests configuration from Vault
-        requests_configuration = self.vault.read_secret(
-            path=f"{self.vault_config_path}/{self.user_id}",
-            key='requests'
+        # Read user configuration from Vault
+        user_configuration = self.vault.read_secret(
+            path=f"{self.vault_config_path}/{self.user_id}"
         )
+        # Read requests configuration from user configuration
+        requests_configuration = user_configuration.get('requests', None)
         if requests_configuration:
             self.requests_configuration = json.loads(requests_configuration)
         else:
@@ -93,26 +95,25 @@ class RateLimiter:
                 __class__.__name__,
                 self.user_id
             )
+            raise WrongUserConfiguration("User configuration in Vault is wrong. Please provide a valid configuration for rate limits.")
 
-        # Read requests counters and rate limits from Vault
-        requests_counters = self.vault.read_secret(
-            path=f"{self.vault_data_path}/{user_id}",
-            key='requests_counters'
+        # Read user dynamic data from Vault
+        user_data = self.vault.read_secret(
+            path=f"{self.vault_data_path}/{user_id}"
         )
-        if requests_counters:
-            self.requests_counters = json.loads(requests_counters)
-        else:
-            self.requests_counters = {'requests_per_day': 0, 'requests_per_hour': 0}
+        # Read requests counters and rate limits from Vault
+        requests_counters = user_data.get(
+            'requests_counters',
+            {'requests_per_day': 0, 'requests_per_hour': 0}
+        )
+        self.requests_counters = json.loads(requests_counters)
 
         # Read rate limits from Vault
-        requests_ratelimits = self.vault.read_secret(
-            path=f"{self.vault_data_path}/{user_id}",
-            key='rate_limits'
+        requests_ratelimits = user_data.get(
+            'rate_limits',
+            {'end_time': None, 'first_request_time': None}
         )
-        if requests_ratelimits:
-            self.request_ratelimits = json.loads(requests_ratelimits)
-        else:
-            self.request_ratelimits = {'end_time': None, 'first_request_time': None}
+        self.request_ratelimits = json.loads(requests_ratelimits)
 
     @property
     def vault(self):

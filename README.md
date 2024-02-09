@@ -35,6 +35,13 @@ This module contains constant values
 | `USER_STATUS_DENY`  | User access status for denied access.             | `"denied"`      |
 
 
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="21" title="exceptions"> Description of module Exceptions
+| Exception                    | Describe                              | Usage Example                                    | Tips |
+|------------------------------|---------------------------------------|--------------------------------------------------|------|
+| `WrongUserConfiguration`     | Raised when user configuration is wrong. | ```python<br>try:<br>    raise WrongUserConfiguration("Incorrect user configuration")<br>except WrongUserConfiguration as e:<br>    print(e)<br>``` | Please, see the configuration example: https://github.com/obervinov/users-package?tab=readme-ov-file#-structure-of-configuration-and-statistics-data-in-vault |
+| `VaultInstanceNotSet`        | Raised when the Vault instance is not set. | ```python<br>try:<br>    raise VaultInstanceNotSet("Vault instance not set")<br>except VaultInstanceNotSet as e:<br>    print(e)<br>``` | Please, see documentation for the initialization of the class: https://github.com/obervinov/users-package?tab=readme-ov-file#class-initialization |
+
+
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/build.png" width="25" title="class"> Users class
 ### Class Initialization
 
@@ -595,7 +602,7 @@ description = ""
 
 [tool.poetry.dependencies]
 python = "^3.10"
-users = { git = "https://github.com/obervinov/users-package.git", tag = "v2.0.1" }
+users = { git = "https://github.com/obervinov/users-package.git", tag = "v2.0.4" }
 
 [build-system]
 requires = ["poetry-core"]

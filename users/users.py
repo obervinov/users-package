@@ -8,6 +8,7 @@ from logger import log
 from vault import VaultClient
 from .constants import VAULT_CONFIG_PATH, VAULT_DATA_PATH, USER_STATUS_ALLOW, USER_STATUS_DENY
 from .ratelimits import RateLimiter
+from .exceptions import VaultInstanceNotSet
 
 
 class Users:
@@ -83,7 +84,7 @@ class Users:
                 __class__.__name__,
                 vault
             )
-            self._vault = None
+            raise VaultInstanceNotSet("Vault instance is not set. Please provide a valid Vault instance as instance or dictionary.")
 
         self.rate_limits = rate_limits
         self._user_status_allow = USER_STATUS_ALLOW
@@ -354,7 +355,7 @@ class Users:
         else:
             status = self.user_status_deny
         log.info(
-            '[class.%s] Check role %s for user %s: %s',
+            '[class.%s] Check role `%s` for user `%s`: %s',
             __class__.__name__,
             role_id,
             user_id,
