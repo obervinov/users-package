@@ -33,8 +33,8 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "order: Set the execution order of tests")
 
 
-@pytest.fixture(name="vaultUrl", scope='session')
-def fixture_vaultUrl():
+@pytest.fixture(name="vault_url", scope='session')
+def fixture_vault_url():
     """Prepare a local environment or ci environment and return the URL of the Vault server"""
     # prepare vault for local environment
     if not os.getenv("CI"):
@@ -76,10 +76,10 @@ def fixture_policy_path():
 
 
 @pytest.fixture(name="vault_approle", scope='session')
-def fixture_vault_approle(vaultUrl, name, policy_path):
+def fixture_vault_approle(vault_url, name, policy_path):
     """Prepare a temporary Vault instance and return the Vault client"""
     configurator = VaultClient(
-                url=vaultUrl,
+                url=vault_url,
                 name=name,
                 new=True
     )
@@ -98,21 +98,21 @@ def fixture_vault_approle(vaultUrl, name, policy_path):
 
 
 @pytest.fixture(name="vault_instance", scope='session')
-def fixture_vault_instance(vaultUrl, vault_approle, name):
+def fixture_vault_instance(vault_url, vault_approle, name):
     """Returns an initialized vault instance"""
     return VaultClient(
-        url=vaultUrl,
+        url=vault_url,
         name=name,
         approle=vault_approle
     )
 
 
 @pytest.fixture(name="vault_configuration", scope='session')
-def fixture_vault_configuration(vaultUrl, vault_approle, name):
+def fixture_vault_configuration(vault_url, vault_approle, name):
     """Returns a dictionary for initializing the vault instance via the Users class"""
     return {
         'name': name,
-        'url': vaultUrl,
+        'url': vault_url,
         'approle': vault_approle
     }
 
