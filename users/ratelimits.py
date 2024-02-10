@@ -88,7 +88,16 @@ class RateLimiter:
         # Read requests configuration from user configuration
         requests_configuration = user_configuration.get('requests', None)
         if requests_configuration:
-            self.requests_configuration = json.loads(requests_configuration)
+            try:
+                self.requests_configuration = json.loads(requests_configuration)
+            except TypeError as error:
+                log.error(
+                    '[class.%s] Wrong value for requests configuration for user ID %s: %s',
+                    __class__.__name__,
+                    self.user_id,
+                    error
+                )
+                raise WrongUserConfiguration("User configuration in Vault is wrong. Please provide a valid configuration for requests.") from error
         else:
             log.error(
                 '[class.%s] No requests configuration found for user ID %s',
@@ -106,14 +115,32 @@ class RateLimiter:
             'requests_counters',
             {'requests_per_day': 0, 'requests_per_hour': 0}
         )
-        self.requests_counters = json.loads(requests_counters)
+        try:
+            self.requests_counters = json.loads(requests_counters)
+        except TypeError as error:
+            log.error(
+                '[class.%s] Wrong value for requests counters for user ID %s: %s',
+                __class__.__name__,
+                self.user_id,
+                error
+            )
+            raise WrongUserConfiguration("User data in Vault is wrong. Please provide a valid configuration for requests.") from error
 
         # Read rate limits from Vault
         requests_ratelimits = user_data.get(
             'rate_limits',
             {'end_time': None, 'first_request_time': None}
         )
-        self.request_ratelimits = json.loads(requests_ratelimits)
+        try:
+            self.request_ratelimits = json.loads(requests_ratelimits)
+        except TypeError as error:
+            log.error(
+                '[class.%s] Wrong value for rate limits for user ID %s: %s',
+                __class__.__name__,
+                self.user_id,
+                error
+            )
+            raise WrongUserConfiguration("User data in Vault is wrong. Please provide a valid configuration for rate limits.") from error
 
     @property
     def vault(self):
