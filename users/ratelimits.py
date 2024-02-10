@@ -113,7 +113,7 @@ class RateLimiter:
         # Read requests counters and rate limits from Vault
         requests_counters = user_data.get(
             'requests_counters',
-            {'requests_per_day': 0, 'requests_per_hour': 0}
+            '{"requests_per_day": 0, "requests_per_hour": 0}'
         )
         try:
             self.requests_counters = json.loads(requests_counters)
@@ -129,7 +129,7 @@ class RateLimiter:
         # Read rate limits from Vault
         requests_ratelimits = user_data.get(
             'rate_limits',
-            {'end_time': None, 'first_request_time': None}
+            '{"end_time": None, "first_request_time": None}'
         )
         try:
             self.request_ratelimits = json.loads(requests_ratelimits)
