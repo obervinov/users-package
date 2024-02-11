@@ -130,7 +130,7 @@ class RateLimiter:
         # Read rate limits from Vault
         requests_ratelimits = user_data.get(
             'rate_limits',
-            '{"end_time": None, "first_request_time": None}'
+            '{"end_time": null, "first_request_time": null}'
         )
         try:
             self.request_ratelimits = json.loads(requests_ratelimits)
@@ -141,7 +141,7 @@ class RateLimiter:
                 self.user_id,
                 error
             )
-            raise WrongUserConfiguration("User data in Vault is wrong. Please provide a valid configuration for rate limits.") from error
+            raise WrongUserConfiguration("User data in Vault is wrong. Please check user dynamic data.") from error
 
     @property
     def vault(self):
