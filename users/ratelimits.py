@@ -5,6 +5,7 @@ This module provides the rate limit functionality for requests to the Telegram b
 import random
 import math
 import json
+from json.decoder import JSONDecodeError
 from typing import Union
 from datetime import datetime, timedelta
 from logger import log
@@ -90,7 +91,7 @@ class RateLimiter:
         if requests_configuration:
             try:
                 self.requests_configuration = json.loads(requests_configuration)
-            except TypeError as error:
+            except (TypeError, JSONDecodeError) as error:
                 log.error(
                     '[class.%s] Wrong value for requests configuration for user ID %s: %s',
                     __class__.__name__,
@@ -117,7 +118,7 @@ class RateLimiter:
         )
         try:
             self.requests_counters = json.loads(requests_counters)
-        except TypeError as error:
+        except (TypeError, JSONDecodeError) as error:
             log.error(
                 '[class.%s] Wrong value for requests counters for user ID %s: %s',
                 __class__.__name__,
@@ -133,7 +134,7 @@ class RateLimiter:
         )
         try:
             self.request_ratelimits = json.loads(requests_ratelimits)
-        except TypeError as error:
+        except (TypeError, JSONDecodeError) as error:
             log.error(
                 '[class.%s] Wrong value for rate limits for user ID %s: %s',
                 __class__.__name__,
