@@ -39,3 +39,22 @@ class VaultInstanceNotSet(Exception):
     def __init__(self, message):
         self.message = message
         super().__init__(message)
+
+
+class FailedDeterminateRateLimit(Exception):
+    """
+    Raised when the rate limit cannot be determinated.
+
+    Args:
+        message (str): The error message.
+
+    Example:
+        >>> try:
+        ...     raise FaildDeterminateRateLimit("Failed to determinate rate limit")
+        ... except FaildDeterminateRateLimit as e:
+        ...     print(e)
+        Failed to determinate rate limit
+    """
+    def __init__(self, message):
+        self.message = message
+        super().__init__(message)

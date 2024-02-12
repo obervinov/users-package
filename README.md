@@ -40,6 +40,7 @@ This module contains constant values
 |------------------------------|---------------------------------------|--------------------------------------------------|------|
 | `WrongUserConfiguration`     | Raised when user configuration is wrong. | ```python<br>try:<br>    raise WrongUserConfiguration("Incorrect user configuration")<br>except WrongUserConfiguration as e:<br>    print(e)<br>``` | Please, see the configuration example: https://github.com/obervinov/users-package?tab=readme-ov-file#-structure-of-configuration-and-statistics-data-in-vault |
 | `VaultInstanceNotSet`        | Raised when the Vault instance is not set. | ```python<br>try:<br>    raise VaultInstanceNotSet("Vault instance not set")<br>except VaultInstanceNotSet as e:<br>    print(e)<br>``` | Please, see documentation for the initialization of the class: https://github.com/obervinov/users-package?tab=readme-ov-file#class-initialization |
+| `FailedDeterminateRateLimit` | Raised when the rate limit cannot be determined. | ```python<br>try:<br>    raise FailedDeterminateRateLimit("Failed to determine the rate limit")<br>except FailedDeterminateRateLimit as e:<br>    print(e)<br>``` | Please, check misconfiguration between configuration and historical data in Vault. |
 
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/build.png" width="25" title="class"> Users class
@@ -225,14 +226,14 @@ For more details, see the method docstring.
 
 ### Active Rate Limit
 
-The `active_rate_limit` method is used for a situation when restrictions on requests are already applied and the `user ID` has a `timestamp` of the end of restrictions. The method checks whether it is time to reset the request rate limit.
+The `_active_rate_limit` method is used for a situation when restrictions on requests are already applied and the `user ID` has a `timestamp` of the end of restrictions. The method checks whether it is time to reset the request rate limit.
 
 - **Arguments:**
   - None
 
 - **Example:**
   ```python
-  active_rate_limit()
+  _active_rate_limit()
   ```
 
 - **Returns:**
@@ -244,14 +245,14 @@ The `active_rate_limit` method is used for a situation when restrictions on requ
 
 ### Apply Rate Limit
 
-The `apply_rate_limit` method is used if the request limit counter is full and it is necessary to apply request limits for the specified user.
+The `_apply_rate_limit` method is used if the request limit counters is full and it is necessary to apply request limits for the specified user.
 
 - **Arguments:**
   - None
 
 - **Example:**
   ```python
-  active_rate_limit()
+  _apply_rate_limit()
   ```
 
 - **Returns:**
@@ -263,13 +264,13 @@ The `apply_rate_limit` method is used if the request limit counter is full and i
 
 ### No Active Rate Limit
 
-The `no_active_rate_limit` method handles the case when the rate limit is not applied and you just need to increase the request counter.
+The `_no_active_rate_limit` method handles the case when the rate limit is not applied and you just need to increase the request counter.
 - **Arguments:**
   - None
 
 - **Example:**
   ```python
-  no_active_rate_limit()
+  _no_active_rate_limit()
   ```
 
 - **Returns:**
@@ -279,27 +280,32 @@ The `no_active_rate_limit` method handles the case when the rate limit is not ap
       {"end_time": None}
     ```
 
-### Monitoring the request counter reset timer
-
-The `counters_watching` method monitors the request counters based on the timestamp of the first (`per_hour` or `per_day`) request and recalculates them as time passes. Thus, it provides the offset of the counter when the rate_limit is not exceeded a day or an hour has already passed.
+### Recalculating request counters from the `requests_history`
+The `_update_requests_counters` method recalculates the request counters based on the historical user data.
 - **Arguments:**
   - None
 
 - **Example:**
   ```python
-  counters_watching()
+  _update_requests_counters()
   ```
 
 - **Returns:**
-  - Always returns a dictionary.
-    ```python
-    (dict)
-    {
-      'per_hour': 1,
-      'per_day': 10,
-      'first_request_time': '2023-08-07 10:39:00.000000'
-    }
-    ```
+  - None
+
+### Consideration of the users requests time
+The `_update_requests_history` method updates the request history based on the user's requests in the Vault.
+- **Arguments:**
+  - None
+
+- **Example:**
+  ```python
+  _update_requests_history()
+  ```
+- **Returns:**
+  - None
+
+
 ### Description of Class Attributes
 | Data Type | Attribute                | Purpose                                                                  | Default Value                   |
 |-----------|--------------------------|--------------------------------------------------------------------------|---------------------------------|
@@ -308,13 +314,14 @@ The `counters_watching` method monitors the request counters based on the timest
 | `str`     | `vault_data_path`        | Path to the data in Vault.                                               | `"data/users"`                  |
 | `dict`    | `requests_configuration` | Configuration for rate limits from Vault.                                | Value from Vault Secret         |
 | `dict`    | `requests_counters`      | Counters for user's requests.                                            | Value from Vault Secret         |
-| `dict`    | `request_ratelimits`     | Rate limit information for the user.                                     | Value from Vault Secret         |
+| `dict`    | `requests_ratelimits`     | Rate limit information for the user.                                     | Value from Vault Secret         |
+| `dict`    | `user_data`              | Historical data for the user. Include `requests_counters` and `requests_ratelimits` | Value from Vault Secret         |
 
 
 ### Description of Class Methods
 | Method Name       | Description                                                       | Arguments                                          | Usage Examples                                            | Returns Examples                                      | Configuration Path                                                            | History Path                                                                   |
 |-------------------|-------------------------------------------------------------------|---------------------------------------------------|----------------------------------------------------------|--------------------------------------------------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------------|
-| `__init__`          | Creates a new RateLimiter instance.                                 | `vault (any)`: Configuration for initializing the Vault client. `user_id (str)`: The user ID for which rate limits are applied. | `RateLimiter(vault=vault_client, user_id='12345')`                            | N/A                                                                          | `{self.vault_config_path}/{user_id}:requests` reads requests configuration in Vault to determine rate limit parameters. | `{self.vault_data_path}/{user_id}:requests_counters` and `{self.vault_data_path}/{user_id}:rate_limits` reads requests historical data in Vault to determine rate limits state. |
+| `__init__`          | Creates a new RateLimiter instance.                                 | `vault (any)`: Configuration for initializing the Vault client. `user_id (str)`: The user ID for which rate limits are applied. | `RateLimiter(vault=vault_client, user_id='12345')`                            | N/A                                                                          | `{self.vault_config_path}/{user_id}:requests` reads requests configuration in Vault to determine rate limit parameters. | `{self.vault_data_path}/{user_id}:requests_counters` and `{self.vault_data_path}/{user_id}:requests_ratelimits` reads requests historical data in Vault to determine rate limits state. |
 | `vault`             | Getter for the 'vault' attribute.                                  | N/A                                                                                                                 | `vault = limiter.vault`                                                     | VaultClient instance or `None`                                                | N/A | N/A |
 | `vault`             | Setter for the 'vault' attribute.                                  | `vault (any)`: Configuration for initializing the Vault client.                                                   | `limiter.vault = vault_client`                                                | N/A                                                                          | N/A | N/A |
 | `vault_config_path` | Getter for the 'vault_config_path' attribute.                      | N/A                                                                                                                 | `path = limiter.vault_config_path`                                          | `str` (Path to the configuration data in Vault)                                 | N/A | N/A |
@@ -322,10 +329,12 @@ The `counters_watching` method monitors the request counters based on the timest
 | `vault_data_path`   | Getter for the 'vault_data_path' attribute.                        | N/A                                                                                                                 | `path = limiter.vault_data_path`                                            | `str` (Path to the data in Vault)                                               | N/A | N/A |
 | `vault_data_path`   | Setter for the 'vault_data_path' attribute.                        | `vault_data_path (str)`: Path to the data in Vault.                                                              | `limiter.vault_data_path = 'custom_path'`                                    | N/A                                                                          | N/A | N/A |
 | `determine_rate_limit` | Determine the rate limit status for the specified user ID.                    | N/A                                                                                                                 | `rate_limits = limiter.determine_rate_limit()`                               | `dict` (Rate limit timestamp for the user ID) or `None`                        | N/A | N/A |
-| `active_rate_limit` | Check and handle active rate limits for the user.                   | N/A                                                                                                                 | `rate_limits = limiter.active_rate_limit()`                                   | `dict` (Rate limit timestamp for the user ID) or `None` (if rate limit has been reset)                        | N/A | `{self.vault_data_path}/{user_id}:rate_limits`  writes or delete rate limit timestamp in Vault. | 
-| `apply_rate_limit`  | Apply rate limits to the user ID and reset request counters.                  | N/A                                                                                                                 | `rate_limits = limiter.apply_rate_limit()`                                    | `dict` (Rate limit timestamp for the user ID) or `None`                         | N/A | `{self.vault_data_path}/{user_id}:rate_limits`  writes rate limit timestamp and `{self.vault_data_path}/{user_id}:requests_counters` reset request counters in Vault. | 
-| `no_active_rate_limit` | Handle the case when no rate limits are applicable.              | N/A                                                                                                                 | `rate_limits = limiter.no_active_rate_limit()`                               | `(dict) {'end_time': None}`                        | N/A |`{self.vault_data_path}/{user_id}:requests_counters` writes +1 counter to request counters in Vault. | 
-| `counters_watching()` | Update the request counters based on the configured rate limits and the time elapsed since the first request.              | N/A                                                                                                                 | `current_counters = limiter.counters_watching()`                               | `(dict) {'per_hour': 10, 'per_day': 100, 'first_request_time': datetime.datetime(2022, 1, 1, 0, 0)}`                        | N/A |`{self.vault_data_path}/{user_id}:rate_limits` updates the counter for the request counters in the Vault. | 
+| `_active_rate_limit` | Check and handle active rate limits for the user.                   | N/A                                                                                                                 | `rate_limits = limiter._active_rate_limit()`                                   | `dict` (Rate limit timestamp for the user ID) or `None` (if rate limit has been reset)                        | N/A | `{self.vault_data_path}/{user_id}:rate_limits`  writes or delete rate limit timestamp in Vault. | 
+| `_apply_rate_limit`  | Apply rate limits to the user ID and reset request counters.                  | N/A                                                                                                                 | `rate_limits = limiter._apply_rate_limit()`                                    | `dict` (Rate limit timestamp for the user ID) or `None`                         | N/A | `{self.vault_data_path}/{user_id}:rate_limits`  writes rate limit timestamp and `{self.vault_data_path}/{user_id}:requests_counters` reset request counters in Vault. | 
+| `_no_active_rate_limit` | Handle the case when no rate limits are applicable.              | N/A                                                                                                                 | `rate_limits = limiter._no_active_rate_limit()`                               | `(dict) {'end_time': None}`                        | N/A |`{self.vault_data_path}/{user_id}:requests_counters` writes +1 counter to request counters in Vault. | 
+| `_update_requests_counters()` | Update the request counters based on the historical user data.              | N/A                                                                                                                 | `limiter._update_requests_counters()`                               | `None`                        | N/A |`{self.vault_data_path}/{user_id}:requests_ratelimits` updates the counter for the request counters in the Vault. | N/A |
+| `_update_requests_history()` | Update the request history based on the user's requests in the Vault.              | N/A                                                                                                                 | `limiter._update_requests_history()`                               | `None`                        | N/A |`{self.vault_data_path}/{user_id}:requests_counters` writes current request timestamp to requests list in the Vault. | N/A |
+
 
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/requirements.png" width="25" title="data-structure"> Structure of configuration and statistics data in vault
