@@ -263,7 +263,7 @@ The `_apply_rate_limit` method is used if the request limit counters is full and
     ```
 
 ### Recalculating request counters from the `requests_history`
-The `_update_requests_counters` method recalculates the request counters based on the historical user data.
+The `_update_requests_counters` method recalculates the request counters based on the historical user data (`per_hour` and `per_day`).
 - **Arguments:**
   - None
 
@@ -276,7 +276,7 @@ The `_update_requests_counters` method recalculates the request counters based o
   - None
 
 ### Consideration of the users requests time
-The `_update_requests_history` method added current request timestamp to the requests list in the Vault.
+The `_update_requests_history` method added current request timestamp to the requests history list in the Vault.
 - **Arguments:**
   - None
 
@@ -291,13 +291,14 @@ The `_update_requests_history` method added current request timestamp to the req
 ### Description of Class Attributes
 | Data Type | Attribute                | Purpose                                                                  | Default Value                   |
 |-----------|--------------------------|--------------------------------------------------------------------------|---------------------------------|
-| `any`     | `vault`                  | The initialized VaultClient instance or `None` if initialization failed. | N/A                             |
+| `any`     | `_vault`                 | The initialized VaultClient instance or `None` if initialization failed. | N/A                             |
+| `str`     | `user_id`                | The user ID for which rate limits are applied.                           | N/A                             |
 | `str`     | `vault_config_path`      | Path to the configuration data in Vault.                                 | `"configuration/users"`         |
 | `str`     | `vault_data_path`        | Path to the data in Vault.                                               | `"data/users"`                  |
 | `dict`    | `requests_configuration` | Configuration for rate limits from Vault.                                | Value from Vault Secret         |
 | `dict`    | `requests_counters`      | Counters for user's requests.                                            | Value from Vault Secret         |
-| `dict`    | `requests_ratelimits`     | Rate limit information for the user.                                     | Value from Vault Secret         |
-| `dict`    | `user_data`              | Historical data for the user. Include `requests_counters` and `requests_ratelimits` | Value from Vault Secret         |
+| `dict`    | `requests_ratelimits`    | Rate limit information for the user.                                     | Value from Vault Secret         |
+| `list`    | `requests_history`       | Historical data with timestamps of user requests.                        | Value from Vault Secret         |
 
 
 ### Description of Class Methods

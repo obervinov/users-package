@@ -14,6 +14,7 @@ from .constants import VAULT_CONFIG_PATH, VAULT_DATA_PATH
 from .exceptions import WrongUserConfiguration, VaultInstanceNotSet, FailedDeterminateRateLimit
 
 
+# pylint: disable=too-many-instance-attributes
 class RateLimiter:
     """
     The RateLimiter class provides the rate limit functionality for requests
@@ -82,11 +83,11 @@ class RateLimiter:
         self._vault_config_path = VAULT_CONFIG_PATH
         self._vault_data_path = VAULT_DATA_PATH
 
-        # Read user configuration from Vault
+        # Read general user configuration from Vault
         user_configuration = self.vault.read_secret(
             path=f"{self.vault_config_path}/{self.user_id}"
         )
-        # Read requests configuration from user configuration
+        # Extract requests configuration from general user configuration
         requests_configuration = user_configuration.get('requests', None)
         if requests_configuration:
             try:
@@ -107,12 +108,12 @@ class RateLimiter:
             )
             raise WrongUserConfiguration("User configuration in Vault is wrong. Please provide a valid configuration for rate limits.")
 
-        # Read user dynamic data from Vault
-        self.user_data = self.vault.read_secret(
+        # Read general dynamic user data from Vault
+        user_data = self.vault.read_secret(
             path=f"{self.vault_data_path}/{user_id}"
         )
-        # Read requests counters and rate limits from Vault
-        requests_counters = self.user_data.get(
+        # Extract requests counters from general dynamic user data
+        requests_counters = user_data.get(
             'requests_counters',
             '{"requests_per_day": 0, "requests_per_hour": 0}'
         )
@@ -126,8 +127,8 @@ class RateLimiter:
                 error
             )
             raise WrongUserConfiguration("User data in Vault is wrong. Please provide a valid configuration for requests.") from error
-        # Read rate limits from Vault
-        requests_ratelimits = self.user_data.get(
+        # Extract rate limit timestamp from general dynamic user data
+        requests_ratelimits = user_data.get(
             'requests_ratelimits',
             '{"end_time": null}'
         )
@@ -136,6 +137,21 @@ class RateLimiter:
         except (TypeError, JSONDecodeError) as error:
             log.error(
                 '[class.%s] Wrong value for rate limits for user ID %s: %s',
+                __class__.__name__,
+                self.user_id,
+                error
+            )
+            raise WrongUserConfiguration("User data in Vault is wrong. Please check user dynamic data.") from error
+        # Extract historical requests from general dynamic user data
+        requests_history = user_data.get(
+            'requests_history',
+            '[]'
+        )
+        try:
+            self.requests_history = json.loads(requests_history)
+        except (TypeError, JSONDecodeError) as error:
+            log.error(
+                '[class.%s] Wrong value for historical requests for user ID %s: %s',
                 __class__.__name__,
                 self.user_id,
                 error
@@ -235,9 +251,10 @@ class RateLimiter:
             None
         """
         log.debug(
-            'Before determining the rate limit status\nData: %s\nConfiguration: %s\n',
-            self.user_data,
-            self.requests_configuration
+            'Before determining the rate limit status\nConfiguration: %s\nHistory: %s\nCounters: %s\n',
+            self.requests_configuration,
+            self.requests_history,
+            self.requests_counters
         )
         # update the request counters based on the configured rate limits
         self._update_requests_counters()
@@ -259,11 +276,12 @@ class RateLimiter:
         # If something went wrong
         else:
             log.error(
-                '[class.%s] Failed to determinate rate limit for user ID %s:\nConfiguration: %s\nData: %s\n',
+                '[class.%s] Failed to determinate rate limit for user ID %s:\nConfiguration: %s\nCounters: %s\nHistory: %s\n',
                 __class__.__name__,
                 self.user_id,
                 self.requests_configuration,
-                self.user_data
+                self.requests_counters,
+                self.requests_history
             )
             raise FailedDeterminateRateLimit("Failed to determinate rate limit for the user ID.")
         # update the request history for the user ID with current request timestamp
@@ -292,12 +310,10 @@ class RateLimiter:
         Examples:
             >>> limiter._update_requests_history()
         """
-        requests_history = self.user_data.get('requests_history', '[]')
         request_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
         try:
-            requests_history = json.loads(requests_history)
-            requests_history.append(request_timestamp)
-            requests_history.sort()
+            self.requests_history.append(request_timestamp)
+            self.requests_history.sort()
         except (TypeError, JSONDecodeError) as error:
             log.error(
                 '[class.%s] Wrong value for requests history for user ID %s: %s',
@@ -310,10 +326,8 @@ class RateLimiter:
         self.vault.write_secret(
             path=f"{self.vault_data_path}/{self.user_id}",
             key='requests_history',
-            value=json.dumps(requests_history)
+            value=json.dumps(self.requests_history)
         )
-        # Update the request history in the user data
-        self.user_data['requests_history'] = requests_history
 
     def _active_rate_limit(self) -> Union[dict, None]:
         """
@@ -456,9 +470,8 @@ class RateLimiter:
         )
         requests_per_hour = 0
         requests_per_day = 0
-        requests_history = json.loads(self.user_data.get('requests_history', '[]'))
-        if requests_history:
-            for request in requests_history:
+        if self.requests_history:
+            for request in self.requests_history:
                 request_timestamp = datetime.strptime(request, '%Y-%m-%d %H:%M:%S.%f')
                 if request_timestamp >= datetime.now() - timedelta(hours=1):
                     requests_per_hour = requests_per_hour + 1
