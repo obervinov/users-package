@@ -129,7 +129,7 @@ class RateLimiter:
         # Read rate limits from Vault
         requests_ratelimits = self.user_data.get(
             'requests_ratelimits',
-            '{"end_time": null, "first_request_time": null}'
+            '{"end_time": null}'
         )
         try:
             self.requests_ratelimits = json.loads(requests_ratelimits)
@@ -239,6 +239,8 @@ class RateLimiter:
             self.user_data,
             self.requests_configuration
         )
+        # update the request counters based on the configured rate limits
+        self._update_requests_counters()
         # If rate limits already applied
         if self.requests_ratelimits['end_time']:
             rate_limits = self._active_rate_limit()
@@ -253,7 +255,7 @@ class RateLimiter:
             self.requests_configuration['requests_per_day'] > self.requests_counters['requests_per_day'] and
             self.requests_configuration['requests_per_hour'] > self.requests_counters['requests_per_hour']
         ):
-            rate_limits = self._no_active_rate_limit()
+            rate_limits = {'end_time': None}
         # If something went wrong
         else:
             log.error(
@@ -264,12 +266,8 @@ class RateLimiter:
                 self.user_data
             )
             raise FailedDeterminateRateLimit("Failed to determinate rate limit for the user ID.")
-
         # update the request history for the user ID with current request timestamp
         self._update_requests_history()
-        # update the request counters based on the configured rate limits
-        self._update_requests_counters()
-
         log.debug(
             'After determining the rate limit status\nCounters: %s\nRateLimits: %s\nConfig: %s\n',
             self.requests_counters,
@@ -295,7 +293,7 @@ class RateLimiter:
             >>> limiter._update_requests_history()
         """
         requests_history = self.user_data.get('requests_history', '[]')
-        request_timestamp = datetime.strptime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+        request_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
         try:
             requests_history = json.loads(requests_history)
             requests_history.append(request_timestamp)
@@ -437,28 +435,6 @@ class RateLimiter:
         )
         return self.requests_ratelimits
 
-    def _no_active_rate_limit(self) -> dict:
-        """
-        Handles the case when the rate limit is not applied and you just need to increase the request counter.
-
-        Args:
-            None
-
-        Returns:
-            (dict): Always returns a dictionary with `None`
-            {
-                'end_time': None
-            }
-        """
-        log.debug(
-            '[class.%s] The limits have not been exhausted, '
-            'the limits on the number of requests are not applied for user ID %s',
-            __class__.__name__,
-            self.user_id
-        )
-        updated_counters = self.requests_counters.copy()
-        return {'end_time': None}
-
     def _update_requests_counters(self) -> None:
         """
         Update the request counters based on the historical user data.
@@ -480,24 +456,26 @@ class RateLimiter:
         )
         requests_per_hour = 0
         requests_per_day = 0
-        for request in self.user_data.get('requests_history', []):
-            request_timestamp = datetime.strptime(request, '%Y-%m-%d %H:%M:%S.%f')
-            if request_timestamp >= datetime.now() - timedelta(hours=1):
-                requests_per_hour = requests_per_hour + 1
-            if request_timestamp >= datetime.now() - timedelta(days=1):
-                requests_per_day = requests_per_day + 1
-        requests_counters = {
+        requests_history = json.loads(self.user_data.get('requests_history', '[]'))
+        if requests_history:
+            for request in requests_history:
+                request_timestamp = datetime.strptime(request, '%Y-%m-%d %H:%M:%S.%f')
+                if request_timestamp >= datetime.now() - timedelta(hours=1):
+                    requests_per_hour = requests_per_hour + 1
+                if request_timestamp >= datetime.now() - timedelta(days=1):
+                    requests_per_day = requests_per_day + 1
+        self.requests_counters = {
             'requests_per_hour': requests_per_hour,
             'requests_per_day': requests_per_day
         }
         self.vault.write_secret(
             path=f"{self.vault_data_path}/{self.user_id}",
             key='requests_counters',
-            value=json.dumps(requests_counters)
+            value=json.dumps(self.requests_counters)
         )
         log.info(
             '[class.%s] Counters updated for user ID %s: %s',
             __class__.__name__,
             self.user_id,
-            requests_counters
+            self.requests_counters
         )

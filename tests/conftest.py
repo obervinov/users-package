@@ -244,24 +244,28 @@ def fixture_users_data(vault_instance):
     data = [
         {
             'name': 'testUser1',
-            'requests_counters': {'requests_per_day': 11, 'requests_per_hour': 2},
-            'rate_limits': {'end_time': None, 'first_request_time': None}
+            'requests_history': [
+                str(datetime.now() - timedelta(minutes=10*i)) for i in range(1, 2)
+            ] + [
+                str(datetime.now() - timedelta(hours=i)) for i in range(2, 11)
+            ],
+            'requests_ratelimits': {'end_time': None}
         },
         # Test user2: requests counters
         # - the request limit has not been exceeded
         # - restrictions on requests don't apply
         {
             'name': 'testUser2',
-            'requests_counters': {'requests_per_day': 0, 'requests_per_hour': 0},
-            'rate_limits': {'end_time': None, 'first_request_time': None}
+            'requests_history': [],
+            'requests_ratelimits': {'end_time': None}
         },
         # Test user3: exist rate limit timestamp
         # - the request limit has been reset to zero
         # - restrictions on requests apply
         {
             'name': 'testUser3',
-            'requests_counters': {'requests_per_day': 0, 'requests_per_hour': 0},
-            'rate_limits': {'end_time': f"{datetime.now() + timedelta(days=1)}", 'first_request_time': None}
+            'requests_history': [],
+            'requests_ratelimits': {'end_time': f"{datetime.now() + timedelta(days=1)}"}
         },
 
         # Test user4: EMPTY (because configuration is forbidden access)
@@ -271,8 +275,8 @@ def fixture_users_data(vault_instance):
         # - restrictions on requests apply
         {
             'name': 'testUser5',
-            'requests_counters': {'requests_per_day': 0, 'requests_per_hour': 0},
-            'rate_limits': {'end_time': f"{datetime.now() + timedelta(hours=1)}", 'first_request_time': None}
+            'requests_history': [],
+            'requests_ratelimits': {'end_time': f"{datetime.now() + timedelta(hours=1)}"}
         },
 
         # Test user6: EMPTY (because configuration is forbidden access)
@@ -282,53 +286,69 @@ def fixture_users_data(vault_instance):
         # - restrictions on requests have not yet been applied
         {
             'name': 'testUser7',
-            'requests_counters': {'requests_per_day': 10, 'requests_per_hour': 0},
-            'rate_limits': {'end_time': None, 'first_request_time': None}
+            'requests_history': [str(datetime.now() - timedelta(hours=i)) for i in range(2, 13)],
+            'requests_ratelimits': {'end_time': None}
         },
         # Test user8: detect and setup rate limits timestamps (for requests_per_hour)
         # - request limit exceeded
         # - restrictions on requests have not yet been applied
         {
             'name': 'testUser8',
-            'requests_counters': {'requests_per_day': 1, 'requests_per_hour': 1},
-            'rate_limits': {'end_time': None, 'first_request_time': None}
+            'requests_history': [
+                str(datetime.now() - timedelta(minutes=10*i)) for i in range(1, 2)
+            ] + [
+                str(datetime.now() - timedelta(hours=i)) for i in range(2, 3)
+            ],
+            'requests_ratelimits': {'end_time': None}
         },
         # Test user9: detect and setup rate limits timestamps (for both: requests_per_day and requests_per_hour)
         # - request limit exceeded
         # - restrictions on requests have not yet been applied
         {
             'name': 'testUser9',
-            'requests_counters': {'requests_per_day': 10, 'requests_per_hour': 1},
-            'rate_limits': {'end_time': None, 'first_request_time': None}
+            'requests_history': [
+                str(datetime.now() - timedelta(minutes=10*i)) for i in range(1, 2)
+            ] + [
+                str(datetime.now() - timedelta(hours=i)) for i in range(2, 13)
+            ],
+            'requests_ratelimits': {'end_time': None}
         },
         # Test user10: reset expired rate limit
         # - the counter is reset to zero
         # - the speed limit timer has expired
         {
             'name': 'testUser10',
-            'requests_counters': {'requests_per_day': 0, 'requests_per_hour': 0},
-            'rate_limits': {'end_time': str(datetime.now() - timedelta(hours=1)), 'first_request_time': None}
+            'requests_history': [],
+            'requests_ratelimits': {'end_time': str(datetime.now() - timedelta(hours=1))}
         },
         # Test user11: reset expired rate limit
         # - the counter is reset to zero
         # - the speed limit timer has expired
         {
             'name': 'testUser11',
-            'requests_counters': {'requests_per_day': 3, 'requests_per_hour': 3},
-            'rate_limits': {'end_time': None, 'first_request_time': str(datetime.now() - timedelta(hours=1, minutes=16))}
+            'requests_history': [
+                str(datetime.now() - timedelta(minutes=15*i)) for i in range(1, 5)
+            ] + [
+                str(datetime.now() - timedelta(hours=i)) for i in range(20, 26)
+            ],
+            'requests_ratelimits': {'end_time': None}
         },
         # Test user12: reset expired rate limit
         # - the counter is reset to zero
         # - the speed limit timer has expired
         {
             'name': 'testUser12',
-            'requests_counters': {'requests_per_day': 32, 'requests_per_hour': 1},
-            'rate_limits': {'end_time': None, 'first_request_time': str(datetime.now() - timedelta(days=2))}
+            'requests_history': [
+                str(datetime.now() - timedelta(minutes=10*i)) for i in range(1, 2)
+            ] + [
+                str(datetime.now() - timedelta(hours=i)) for i in range(22, 34)
+            ],
+            'requests_ratelimits': {'end_time': None}
         }
     ]
     for user in data:
         for key, value in user.items():
-            if key in ['requests_counters', 'rate_limits']:
+            if key in ['requests_history', 'requests_ratelimits']:
                 _ = vault_instance.write_secret(
                     path=f'data/users/{user["name"]}',
                     key=key,

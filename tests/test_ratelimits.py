@@ -55,7 +55,7 @@ def test_check_rl_counters_increase(vault_instance):
         path=f"data/users/{user_id}",
         key="requests_counters"
     )
-    assert json.loads(requests_counters) == {'requests_per_day': 2, 'requests_per_hour': 2}
+    assert json.loads(requests_counters) == {'requests_per_day': 1, 'requests_per_hour': 1}
 
 
 @pytest.mark.order(8)
@@ -124,26 +124,6 @@ def test_check_rl_reset(vault_instance):
     assert end_time is None, f"end_time is not None in the result for {user_id}"
 
 
-@pytest.mark.order(11)
-def test_check_rl_counters_watching_timestamp(vault_instance, timestamp_pattern):
-    """
-    The function checks how the setting of the timestamp of the first request in the counters works.
-    """
-    user_id = 'testUser10'
-    rl_controller = RateLimiter(
-        vault=vault_instance,
-        user_id=user_id
-    )
-    _ = rl_controller.determine_rate_limit()
-
-    first_request_time = rl_controller.request_ratelimits.get('first_request_time', None)
-    assert first_request_time is not None, f"first_request_time is not present in the result for {user_id}"
-    assert re.match(
-        timestamp_pattern,
-        first_request_time
-    ), f"first_request_time '{first_request_time}' does not match the expected pattern for {user_id}"
-
-
 @pytest.mark.order(12)
 def test_check_rl_counters_watching_decrease_per_hour(vault_instance):
     """
@@ -159,7 +139,7 @@ def test_check_rl_counters_watching_decrease_per_hour(vault_instance):
         path=f"data/users/{user_id}",
         key="requests_counters"
     )
-    assert json.loads(requests_counters) == {'requests_per_day': 4, 'requests_per_hour': 3}
+    assert json.loads(requests_counters) == {'requests_per_day': 8, 'requests_per_hour': 3}
 
 
 @pytest.mark.order(13)
