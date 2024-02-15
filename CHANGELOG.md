@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 #### 🐛 Bug Fixes
 * [Incorrect record of authentication events and user authorization in Vault data](https://github.com/obervinov/users-package/issues/37)
 * [Error when call `rl_controller.determine_rate_limit()`](https://github.com/obervinov/users-package/issues/38)
+* Fixes various RateLimit class bugs related to request accounting and operation of request counters
+* A little tests refactoring
 
 
 

@@ -328,7 +328,7 @@ It supports user configurations to define system access rights, roles, and reque
   - `status`: The status of user access, which can be either
       - `self.user_status_allow`
       - `self.user_status_deny`
-  - `roles`: A list of roles associated with the user ID, e.g., `['role1', 'role2']`.
+  - `roles`: A list of roles associated with the user ID, e.g., `["role1", "role2"]`.
   - `requests`: Limits on the number of requests
       - `requests_per_day`
       - `requests_per_hour`
@@ -368,7 +368,7 @@ It supports user configurations to define system access rights, roles, and reque
       }
       ```
 
-  - `rate_limits`: Information about rate limits, including the
+  - `requests_ratelimits`: Information about rate limits, including the
       - `end_time` of the rate limit
  
       ```json
@@ -381,6 +381,16 @@ It supports user configurations to define system access rights, roles, and reque
       {
         "end_time": None
       }
+      ```
+  - `requests_history`: Historical data with timestamps of user requests
+      - `list` of timestamps of user requests
+ 
+      ```json
+      [
+        "2023-08-07 10:39:00.000000",
+        "2023-08-07 10:40:00.000000",
+        "2023-08-06 10:00:00.000000"
+      ]
       ```
   - `authorization`: Details about the authorization process, including the time, status
       - `timestamp`
@@ -413,7 +423,14 @@ It supports user configurations to define system access rights, roles, and reque
     }
     ```
     ```json
-    "rate_limits": {"end_time": "None"}
+    "requests_ratelimits": {"end_time": "2023-08-07 10:39:00.000000"}
+    ```
+    ```json
+    "requests_history": [
+      "2023-08-07 10:39:00.000000",
+      "2023-08-07 10:40:00.000000",
+      "2023-08-06 10:00:00.000000"
+    ]
     ```
     ```json
     "authorization": {
@@ -487,7 +504,6 @@ user_info = users.user_access_check(
 # check permissions, roles, and rate limits
 if user_info["access"] == users.user_status_allow:
     print("Hi, you can use the bot!")
-
     if user_info["permissions"] == users.user_status_allow:
         if user_info["rate_limits"]["end_time"]:
             print(f"You have sent too many requests, the limit is applied until {user_info['rate_limits']['end_time']}")
@@ -495,7 +511,6 @@ if user_info["access"] == users.user_status_allow:
             print("You have admin's rights")
     else:
         print("You do not have access rights to this function")
-
 else:
     print("Access denied, goodbye!")
 ```
