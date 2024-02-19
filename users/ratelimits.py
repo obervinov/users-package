@@ -37,6 +37,11 @@ class RateLimiter:
         requests_configuration (dict): Configuration for rate limits from Vault.
         requests_counters (dict): Counters for user's requests.
         requests_ratelimits (dict): Rate limit information for the user.
+    
+    Raises:
+        VaultInstanceNotSet: If the Vault instance is not set.
+        WrongUserConfiguration: If the user configuration in Vault is wrong.
+        FailedDeterminateRateLimit: If the rate limit for the user ID cannot be determined.
 
     Examples:
         >>> limiter = RateLimiter(vault=vault_client, user_id='User1')
@@ -58,6 +63,10 @@ class RateLimiter:
 
         Returns:
             None
+
+        Raises:
+            VaultInstanceNotSet: If the Vault instance is not set.
+            WrongUserConfiguration: If the user configuration in Vault is wrong.
 
         See the class docstring for more details and examples.
         """
@@ -234,6 +243,9 @@ class RateLimiter:
 
         Args:
             None
+
+        Raises:
+            FailedDeterminateRateLimit: If the rate limit for the user ID cannot be determined.
 
         Examples:
             >>> rl_status = limiter.determine_rate_limit()
@@ -463,8 +475,8 @@ class RateLimiter:
             >>> ratelimits = RateLimits()
             >>> ratelimits._counters_watcher()
         """
-        log.info(
-            '[class.%s] Updating request counters for user ID %s',
+        log.debug(
+            '[class.%s] Calculating of request counters for user ID %s',
             __class__.__name__,
             self.user_id
         )
@@ -487,8 +499,7 @@ class RateLimiter:
             value=json.dumps(self.requests_counters)
         )
         log.info(
-            '[class.%s] Counters updated for user ID %s: %s',
+            '[class.%s] Current request counters: %s',
             __class__.__name__,
-            self.user_id,
             self.requests_counters
         )

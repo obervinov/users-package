@@ -34,6 +34,9 @@ class Users:
         vault_config_path (str): Path to the configuration data in Vault.
         vault_data_path (str): Path to the historical data in Vault.
 
+    Raises:
+        VaultInstanceNotSet: If the vault instance is not set.
+
     Examples:
         >>> users_without_ratelimits = Users(vault=vault_client, rate_limits=False)
 
@@ -64,6 +67,9 @@ class Users:
                 - (dict) Configuration for initializing a VaultClient instance in this class.
 
             :param rate_limits (bool): Enable rate limit functionality.
+        
+        Raises:
+            VaultInstanceNotSet: If the vault instance is not set.
 
         Returns:
             None
