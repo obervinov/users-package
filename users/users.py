@@ -67,7 +67,7 @@ class Users:
                 - (dict) Configuration for initializing a VaultClient instance in this class.
 
             :param rate_limits (bool): Enable rate limit functionality.
-        
+
         Raises:
             VaultInstanceNotSet: If the vault instance is not set.
 
