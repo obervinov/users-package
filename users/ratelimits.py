@@ -382,23 +382,39 @@ class RateLimiter:
                 __class__.__name__,
                 self.user_id
             )
-            # calculate the multiplier on the rate limit if requests continue to arrive after the application of rate_limit
+
+            # Calculate the multiplier on the rate limit if requests continue to arrive after the application of rate_limit
             # in order to distribute the remaining requests in the same way based on the configuration
-            restriction_multiplier_hours = math.ceil(
-                self.requests_counters['requests_per_hour'] // self.requests_configuration['requests_per_hour']
-            )
-            first_timestamp = datetime.strptime(
+
+            # Situation 1: counter exceeds configuration and configuration equals 1
+            if (
+                self.requests_configuration['requests_per_hour'] == 1
+                and
+                self.requests_counters['requests_per_hour'] > self.requests_configuration['requests_per_hour']
+            ):
+                shift_minutes = 60 + random.randint(1, self.requests_configuration['random_shift_minutes'])
+
+            # Situation 2: counter exceeds configuration by a multiple
+            elif (
+                self.requests_counters['requests_per_hour'] > self.requests_configuration['requests_per_hour']
+                and
+                self.requests_counters['requests_per_hour'] % self.requests_configuration['requests_per_hour'] == 0
+            ):
+                shift_minutes = 60 + random.randint(1, self.requests_configuration['random_shift_minutes'])
+
+            # Situation 3: counter exceeds configuration, but not by a multiple
+            elif (
+                self.requests_counters['requests_per_hour'] > self.requests_configuration['requests_per_hour']
+                and
+                self.requests_counters['requests_per_hour'] % self.requests_configuration['requests_per_hour'] != 0
+            ):
+                shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
+
+            latest_end_time = datetime.strptime(
                 self.requests_ratelimits['end_time'],
                 '%Y-%m-%d %H:%M:%S.%f'
             )
-            shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
-
-            self.requests_ratelimits['end_time'] = str(
-                first_timestamp + timedelta(
-                    hours=restriction_multiplier_hours,
-                    minutes=shift_minutes
-                )
-            )
+            self.requests_ratelimits['end_time'] = str(latest_end_time + timedelta(minutes=shift_minutes))
             self.vault.write_secret(
                 path=f"{self.vault_data_path}/{self.user_id}",
                 key='requests_ratelimits',
