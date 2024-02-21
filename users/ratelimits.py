@@ -3,7 +3,6 @@
 This module provides the rate limit functionality for requests to the Telegram bot.
 """
 import random
-import math
 import json
 from json.decoder import JSONDecodeError
 from typing import Union
@@ -409,6 +408,10 @@ class RateLimiter:
                 self.requests_counters['requests_per_hour'] % self.requests_configuration['requests_per_hour'] != 0
             ):
                 shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
+
+            # Situation 4: counter does not exceed configuration
+            else:
+                shift_minutes = 0
 
             latest_end_time = datetime.strptime(
                 self.requests_ratelimits['end_time'],
