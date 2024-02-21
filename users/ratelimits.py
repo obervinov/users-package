@@ -36,7 +36,7 @@ class RateLimiter:
         requests_configuration (dict): Configuration for rate limits from Vault.
         requests_counters (dict): Counters for user's requests.
         requests_ratelimits (dict): Rate limit information for the user.
-    
+
     Raises:
         VaultInstanceNotSet: If the Vault instance is not set.
         WrongUserConfiguration: If the user configuration in Vault is wrong.
