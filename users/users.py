@@ -1,13 +1,14 @@
-# pylint: disable=R0801
 """
 This python module is a implementation of user management functionality for telegram bots, such as:
 authentication, authorization and request limiting.
 """
+import json
 from datetime import datetime
 from logger import log
 from vault import VaultClient
 from .constants import VAULT_CONFIG_PATH, VAULT_DATA_PATH, USER_STATUS_ALLOW, USER_STATUS_DENY
 from .ratelimits import RateLimiter
+from .exceptions import VaultInstanceNotSet
 
 
 class Users:
@@ -32,6 +33,9 @@ class Users:
         user_status_deny (str): A constant representing denied user status.
         vault_config_path (str): Path to the configuration data in Vault.
         vault_data_path (str): Path to the historical data in Vault.
+
+    Raises:
+        VaultInstanceNotSet: If the vault instance is not set.
 
     Examples:
         >>> users_without_ratelimits = Users(vault=vault_client, rate_limits=False)
@@ -64,6 +68,9 @@ class Users:
 
             :param rate_limits (bool): Enable rate limit functionality.
 
+        Raises:
+            VaultInstanceNotSet: If the vault instance is not set.
+
         Returns:
             None
 
@@ -83,7 +90,7 @@ class Users:
                 __class__.__name__,
                 vault
             )
-            self._vault = None
+            raise VaultInstanceNotSet("Vault instance is not set. Please provide a valid Vault instance as instance or dictionary.")
 
         self.rate_limits = rate_limits
         self._user_status_allow = USER_STATUS_ALLOW
@@ -244,7 +251,6 @@ class Users:
         if applicable.
         """
         user_info = {}
-
         user_info['access'] = self.authentication(
             user_id=user_id
         )
@@ -259,7 +265,6 @@ class Users:
                     user_id=user_id
                 )
                 user_info['rate_limits'] = rl_controller.determine_rate_limit()
-
         return user_info
 
     def authentication(
@@ -286,11 +291,10 @@ class Users:
             path=f"{self.vault_config_path}/{user_id}",
             key='status'
         )
-
         # verification of the status value
         if status is None:
             log.info(
-                '[class.%s] User ID %s not found in Vault configuration'
+                '[class.%s] User ID %s not found in Vault configuration '
                 'and will be denied access',
                 __class__.__name__,
                 user_id
@@ -314,16 +318,12 @@ class Users:
                 self.user_status_deny
             )
             status = self.user_status_deny
-
+        # Write latest authentication status to Vault
         self.vault.write_secret(
             path=f"{self.vault_data_path}/{user_id}",
             key='authentication',
-            value={
-                'time': str(datetime.now()),
-                'status': status
-            }
+            value=json.dumps({'time': str(datetime.now()), 'status': status})
         )
-
         return status
 
     def authorization(
@@ -349,33 +349,28 @@ class Users:
                 or
             (str) self.user_status_deny
         """
-        try:
-            if role_id in self.vault.read_secret(
-                path=f"{self.vault_config_path}/{user_id}",
-                key='roles'
-            ):
+        roles = self.vault.read_secret(
+            path=f"{self.vault_config_path}/{user_id}",
+            key='roles'
+        )
+        if roles:
+            if role_id in json.loads(roles):
                 status = self.user_status_allow
             else:
                 status = self.user_status_deny
-        # pylint: disable=W0718
-        # will be fixed after the solution https://github.com/obervinov/vault-package/issues/31
-        except Exception:
+        else:
             status = self.user_status_deny
-
         log.info(
-            '[class.%s] Check role %s for user %s: %s',
+            '[class.%s] Check role `%s` for user `%s`: %s',
             __class__.__name__,
             role_id,
             user_id,
             status
         )
+        # Write latest authorization status to Vault
         self.vault.write_secret(
             path=f"{self.vault_data_path}/{user_id}",
             key='authorization',
-            value={
-                'time': str(datetime.now()),
-                'status': status,
-                'role': role_id
-            }
+            value=json.dumps({'time': str(datetime.now()), 'status': status, 'role': role_id})
         )
         return status

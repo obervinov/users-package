@@ -3,14 +3,17 @@
 This module provides the rate limit functionality for requests to the Telegram bot.
 """
 import random
-import math
+import json
+from json.decoder import JSONDecodeError
 from typing import Union
 from datetime import datetime, timedelta
 from logger import log
 from vault import VaultClient
 from .constants import VAULT_CONFIG_PATH, VAULT_DATA_PATH
+from .exceptions import WrongUserConfiguration, VaultInstanceNotSet, FailedDeterminateRateLimit
 
 
+# pylint: disable=too-many-instance-attributes
 class RateLimiter:
     """
     The RateLimiter class provides the rate limit functionality for requests
@@ -32,7 +35,12 @@ class RateLimiter:
         vault_data_path (str): Path to the historical data in Vault.
         requests_configuration (dict): Configuration for rate limits from Vault.
         requests_counters (dict): Counters for user's requests.
-        request_ratelimits (dict): Rate limit information for the user.
+        requests_ratelimits (dict): Rate limit information for the user.
+
+    Raises:
+        VaultInstanceNotSet: If the Vault instance is not set.
+        WrongUserConfiguration: If the user configuration in Vault is wrong.
+        FailedDeterminateRateLimit: If the rate limit for the user ID cannot be determined.
 
     Examples:
         >>> limiter = RateLimiter(vault=vault_client, user_id='User1')
@@ -55,8 +63,13 @@ class RateLimiter:
         Returns:
             None
 
+        Raises:
+            VaultInstanceNotSet: If the Vault instance is not set.
+            WrongUserConfiguration: If the user configuration in Vault is wrong.
+
         See the class docstring for more details and examples.
         """
+        # Initialize the Vault client
         if isinstance(vault, VaultClient):
             self._vault = vault
         elif isinstance(vault, dict):
@@ -71,36 +84,87 @@ class RateLimiter:
                 __class__.__name__,
                 vault
             )
-            self._vault = None
+            raise VaultInstanceNotSet("Vault instance is not set. Please provide a valid Vault instance as instance or dictionary.")
 
+        # Initialize the user ID and constants
         self.user_id = user_id
         self._vault_config_path = VAULT_CONFIG_PATH
         self._vault_data_path = VAULT_DATA_PATH
 
-        self.requests_configuration = self.vault.read_secret(
-            path=f"{self.vault_config_path}/{self.user_id}",
-            key='requests'
+        # Read general user configuration from Vault
+        user_configuration = self.vault.read_secret(
+            path=f"{self.vault_config_path}/{self.user_id}"
         )
-
-        try:
-            self.requests_counters = self.vault.read_secret(
-                path=f"{self.vault_data_path}/{user_id}",
-                key='requests_counters'
+        # Extract requests configuration from general user configuration
+        requests_configuration = user_configuration.get('requests', None)
+        if requests_configuration:
+            try:
+                self.requests_configuration = json.loads(requests_configuration)
+            except (TypeError, JSONDecodeError) as error:
+                log.error(
+                    '[class.%s] Wrong value for requests configuration for user ID %s: %s',
+                    __class__.__name__,
+                    self.user_id,
+                    error
+                )
+                raise WrongUserConfiguration("User configuration in Vault is wrong. Please provide a valid configuration for requests.") from error
+        else:
+            log.error(
+                '[class.%s] No requests configuration found for user ID %s',
+                __class__.__name__,
+                self.user_id
             )
-        # pylint: disable=W0718
-        # will be fixed after the solution https://github.com/obervinov/vault-package/issues/31
-        except Exception:
-            self.requests_counters = {'requests_per_day': 0, 'requests_per_hour': 0}
+            raise WrongUserConfiguration("User configuration in Vault is wrong. Please provide a valid configuration for rate limits.")
 
+        # Read general dynamic user data from Vault
+        user_data = self.vault.read_secret(
+            path=f"{self.vault_data_path}/{user_id}"
+        )
+        # Extract requests counters from general dynamic user data
+        requests_counters = user_data.get(
+            'requests_counters',
+            '{"requests_per_day": 0, "requests_per_hour": 0}'
+        )
         try:
-            self.request_ratelimits = self.vault.read_secret(
-                path=f"{self.vault_data_path}/{user_id}",
-                key='rate_limits'
+            self.requests_counters = json.loads(requests_counters)
+        except (TypeError, JSONDecodeError) as error:
+            log.error(
+                '[class.%s] Wrong value for requests counters for user ID %s: %s',
+                __class__.__name__,
+                self.user_id,
+                error
             )
-        # pylint: disable=W0718
-        # will be fixed after the solution https://github.com/obervinov/vault-package/issues/31
-        except Exception:
-            self.request_ratelimits = {'end_time': None, 'first_request_time': None}
+            raise WrongUserConfiguration("User data in Vault is wrong. Please provide a valid configuration for requests.") from error
+        # Extract rate limit timestamp from general dynamic user data
+        requests_ratelimits = user_data.get(
+            'requests_ratelimits',
+            '{"end_time": null}'
+        )
+        try:
+            self.requests_ratelimits = json.loads(requests_ratelimits)
+        except (TypeError, JSONDecodeError) as error:
+            log.error(
+                '[class.%s] Wrong value for rate limits for user ID %s: %s',
+                __class__.__name__,
+                self.user_id,
+                error
+            )
+            raise WrongUserConfiguration("User data in Vault is wrong. Please check user dynamic data.") from error
+        # Extract historical requests from general dynamic user data
+        requests_history = user_data.get(
+            'requests_history',
+            '[]'
+        )
+        try:
+            self.requests_history = json.loads(requests_history)
+        except (TypeError, JSONDecodeError) as error:
+            log.error(
+                '[class.%s] Wrong value for historical requests for user ID %s: %s',
+                __class__.__name__,
+                self.user_id,
+                error
+            )
+            raise WrongUserConfiguration("User data in Vault is wrong. Please check user dynamic data.") from error
 
     @property
     def vault(self):
@@ -179,6 +243,9 @@ class RateLimiter:
         Args:
             None
 
+        Raises:
+            FailedDeterminateRateLimit: If the rate limit for the user ID cannot be determined.
+
         Examples:
             >>> rl_status = limiter.determine_rate_limit()
 
@@ -195,58 +262,85 @@ class RateLimiter:
             None
         """
         log.debug(
-            'Before determining the rate limit status\n'
-            'Counters: %s\n'
-            'RateLimits: %s\n'
-            'Config: %s\n',
-            self.requests_counters,
-            self.request_ratelimits,
-            self.requests_configuration
+            'Before determining the rate limit status\nConfiguration: %s\nHistory: %s\nCounters: %s\n',
+            self.requests_configuration,
+            self.requests_history,
+            self.requests_counters
         )
-
         # update the request counters based on the configured rate limits
-        # and the time elapsed since the first response
-        watcher = self.counters_watching()
-
+        self._update_requests_counters()
         # If rate limits already applied
-        if self.request_ratelimits['end_time']:
-            rate_limits = self.active_rate_limit()
-
+        if self.requests_ratelimits['end_time']:
+            rate_limits = self._active_rate_limit()
         # If rate limits need to apply
         elif (
             self.requests_configuration['requests_per_day'] <= self.requests_counters['requests_per_day'] or
             self.requests_configuration['requests_per_hour'] <= self.requests_counters['requests_per_hour']
         ):
-            rate_limits = self.apply_rate_limit()
-
+            rate_limits = self._apply_rate_limit()
         # If no rate limits, just +1 to request counters
         elif (
             self.requests_configuration['requests_per_day'] > self.requests_counters['requests_per_day'] and
             self.requests_configuration['requests_per_hour'] > self.requests_counters['requests_per_hour']
         ):
-            rate_limits = self.no_active_rate_limit()
-
+            rate_limits = {'end_time': None}
         # If something went wrong
         else:
-            rate_limits = None
-
+            log.error(
+                '[class.%s] Failed to determinate rate limit for user ID %s:\nConfiguration: %s\nCounters: %s\nHistory: %s\n',
+                __class__.__name__,
+                self.user_id,
+                self.requests_configuration,
+                self.requests_counters,
+                self.requests_history
+            )
+            raise FailedDeterminateRateLimit("Failed to determinate rate limit for the user ID.")
+        # update the request history for the user ID with current request timestamp
+        self._update_requests_history()
         log.debug(
-            'After determining the rate limit status\n'
-            'Watcher: %s\n'
-            'Counters: %s\n'
-            'RateLimits: %s\n'
-            'Config: %s\n',
-            watcher,
+            'After determining the rate limit status\nCounters: %s\nRateLimits: %s\nConfig: %s\n',
             self.requests_counters,
-            self.request_ratelimits,
+            self.requests_ratelimits,
             self.requests_configuration
         )
+        return {'end_time': rate_limits['end_time'] if rate_limits else None}
 
-        return {
-            'end_time': rate_limits['end_time'] if rate_limits else None
-        }
+    def _update_requests_history(self) -> None:
+        """
+        Update the request history for the user ID.
 
-    def active_rate_limit(self) -> Union[dict, None]:
+        Args:
+            None
+
+        Returns:
+            None
+
+        Raises:
+            WrongUserConfiguration: If the user data in Vault is wrong.
+
+        Examples:
+            >>> limiter._update_requests_history()
+        """
+        request_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+        try:
+            self.requests_history.append(request_timestamp)
+            self.requests_history.sort()
+        except (TypeError, JSONDecodeError) as error:
+            log.error(
+                '[class.%s] Wrong value for requests history for user ID %s: %s',
+                __class__.__name__,
+                self.user_id,
+                error
+            )
+            raise WrongUserConfiguration("User data in Vault is wrong. Please check user dynamic data.") from error
+        # Update the request history in Vault
+        self.vault.write_secret(
+            path=f"{self.vault_data_path}/{self.user_id}",
+            key='requests_history',
+            value=json.dumps(self.requests_history)
+        )
+
+    def _active_rate_limit(self) -> Union[dict, None]:
         """
         Check and handle active rate limits for the user ID.
 
@@ -265,64 +359,73 @@ class RateLimiter:
                 or
             None
         """
-        if self.request_ratelimits['end_time'] is None:
+        if self.requests_ratelimits['end_time'] is None:
             return None
 
-        if datetime.now() >= datetime.strptime(
-            self.request_ratelimits['end_time'],
-            '%Y-%m-%d %H:%M:%S.%f'
-        ):
+        if datetime.now() >= datetime.strptime(self.requests_ratelimits['end_time'], '%Y-%m-%d %H:%M:%S.%f'):
             log.info(
-                '[class.%s] Date rate limit expired, reset for user ID %s',
+                '[class.%s] Rate limit for user ID %s has expired, resetting the rate limit',
                 __class__.__name__,
                 self.user_id
             )
-            self.request_ratelimits['end_time'] = None
+            self.requests_ratelimits['end_time'] = None
             self.vault.write_secret(
                 path=f"{self.vault_data_path}/{self.user_id}",
-                key='rate_limits',
-                value={
-                    'end_time': self.request_ratelimits['end_time']
-                }
-            )
-            self.vault.write_secret(
-                path=f"{self.vault_data_path}/{self.user_id}",
-                key='rate_limits',
-                value=self.request_ratelimits
+                key='requests_ratelimits',
+                value=json.dumps(self.requests_ratelimits)
             )
         else:
             log.warning(
-                '[class.%s] A speed limit has been detected for user ID %s '
+                '[class.%s] A rate limit has been detected for user ID %s '
                 'that has already been applied and has not expired yet',
                 __class__.__name__,
                 self.user_id
             )
-            # calculate the multiplier on the rate limit if requests continue to arrive after the application of rate_limit
+
+            # Calculate the multiplier on the rate limit if requests continue to arrive after the application of rate_limit
             # in order to distribute the remaining requests in the same way based on the configuration
-            restriction_multiplier_hours = math.ceil(
-                self.requests_counters['requests_per_hour'] // self.requests_configuration['requests_per_hour']
-            )
-            first_timestamp = datetime.strptime(
-                self.request_ratelimits['end_time'],
+
+            # Situation 1: counter exceeds configuration and configuration equals 1
+            if (
+                self.requests_configuration['requests_per_hour'] == 1
+                and
+                self.requests_counters['requests_per_hour'] > self.requests_configuration['requests_per_hour']
+            ):
+                shift_minutes = 60 + random.randint(1, self.requests_configuration['random_shift_minutes'])
+
+            # Situation 2: counter exceeds configuration by a multiple
+            elif (
+                self.requests_counters['requests_per_hour'] > self.requests_configuration['requests_per_hour']
+                and
+                self.requests_counters['requests_per_hour'] % self.requests_configuration['requests_per_hour'] == 0
+            ):
+                shift_minutes = 60 + random.randint(1, self.requests_configuration['random_shift_minutes'])
+
+            # Situation 3: counter exceeds configuration, but not by a multiple
+            elif (
+                self.requests_counters['requests_per_hour'] > self.requests_configuration['requests_per_hour']
+                and
+                self.requests_counters['requests_per_hour'] % self.requests_configuration['requests_per_hour'] != 0
+            ):
+                shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
+
+            # Situation 4: counter does not exceed configuration
+            else:
+                shift_minutes = 0
+
+            latest_end_time = datetime.strptime(
+                self.requests_ratelimits['end_time'],
                 '%Y-%m-%d %H:%M:%S.%f'
             )
-            shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
-
-            self.request_ratelimits['end_time'] = str(
-                first_timestamp + timedelta(
-                    hours=restriction_multiplier_hours,
-                    minutes=shift_minutes
-                )
-            )
+            self.requests_ratelimits['end_time'] = str(latest_end_time + timedelta(minutes=shift_minutes))
             self.vault.write_secret(
                 path=f"{self.vault_data_path}/{self.user_id}",
-                key='rate_limits',
-                value=self.request_ratelimits
+                key='requests_ratelimits',
+                value=json.dumps(self.requests_ratelimits)
             )
+        return self.requests_ratelimits
 
-        return self.request_ratelimits
-
-    def apply_rate_limit(self) -> Union[dict, None]:
+    def _apply_rate_limit(self) -> Union[dict, None]:
         """
         Apply rate limits to the user ID and reset counters.
 
@@ -337,6 +440,7 @@ class RateLimiter:
                 or
             None
         """
+        # If the rate limit is already applied
         if self.requests_configuration['requests_per_day'] <= self.requests_counters['requests_per_day']:
             log.warning(
                 '[class.%s] The request limits are exhausted (per_day), '
@@ -345,16 +449,14 @@ class RateLimiter:
                 self.user_id
             )
             end_time = str(datetime.now() + timedelta(days=1))
-            self.request_ratelimits['end_time'] = end_time
-            self.requests_counters['requests_per_hour'] += 1
-            self.requests_counters['requests_per_day'] += 1
+            self.requests_ratelimits['end_time'] = end_time
             log.info(
                 '[class.%s] Rate limit for user ID %s set to expire at %s',
                 __class__.__name__,
                 self.user_id,
                 end_time
             )
-
+        # If the rate limit is not yet applied
         elif self.requests_configuration['requests_per_hour'] <= self.requests_counters['requests_per_hour']:
             log.warning(
                 '[class.%s] The request limits are exhausted (per_hour), '
@@ -363,71 +465,24 @@ class RateLimiter:
                 self.user_id
             )
             shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
-            end_time = str(
-                datetime.now() + timedelta(
-                    hours=1,
-                    minutes=shift_minutes
-                )
-            )
-            self.request_ratelimits['end_time'] = end_time
-            self.requests_counters['requests_per_day'] += 1
-            self.requests_counters['requests_per_hour'] += 1
+            end_time = str(datetime.now() + timedelta(hours=1, minutes=shift_minutes))
+            self.requests_ratelimits['end_time'] = end_time
             log.info(
                 '[class.%s] Rate limit for user ID %s set to expire at %s',
                 __class__.__name__,
                 self.user_id,
                 end_time
             )
-
         self.vault.write_secret(
             path=f"{self.vault_data_path}/{self.user_id}",
-            key='requests_counters',
-            value=self.requests_counters
+            key='requests_ratelimits',
+            value=json.dumps(self.requests_ratelimits)
         )
-        self.vault.write_secret(
-            path=f"{self.vault_data_path}/{self.user_id}",
-            key='rate_limits',
-            value=self.request_ratelimits
-        )
+        return self.requests_ratelimits
 
-        return self.request_ratelimits
-
-    def no_active_rate_limit(self) -> dict:
+    def _update_requests_counters(self) -> None:
         """
-        Handles the case when the rate limit is not applied and you just need to increase the request counter.
-
-        Args:
-            None
-
-        Returns:
-            (dict): Always returns a dictionary with `None`
-            {
-                'end_time': None
-            }
-        """
-        log.info(
-            '[class.%s] The limits have not been exhausted, '
-            'the limits on the number of requests are not applied for user ID %s',
-            __class__.__name__,
-            self.user_id
-        )
-        updated_counters = self.requests_counters.copy()
-        updated_counters['requests_per_day'] += 1
-        updated_counters['requests_per_hour'] += 1
-
-        self.vault.write_secret(
-            path=f"{self.vault_data_path}/{self.user_id}",
-            key='requests_counters',
-            value=updated_counters
-        )
-
-        return {
-            'end_time': None
-        }
-
-    def counters_watching(self) -> Union[dict, None]:
-        """
-        Update the request counters based on the configured rate limits and the time elapsed since the first request.
+        Update the request counters based on the historical user data.
 
         Args:
             None
@@ -437,64 +492,33 @@ class RateLimiter:
 
         Examples:
             >>> ratelimits = RateLimits()
-            >>> ratelimits.counters_watching()
-            {'per_hour': 10, 'per_day': 100, 'first_request_time': '2023-11-18 18:19:13.458355'}
-
+            >>> ratelimits._counters_watcher()
         """
-        log.info(
-            '[class.%s] Updating request counters for user ID %s',
+        log.debug(
+            '[class.%s] Calculating of request counters for user ID %s',
             __class__.__name__,
             self.user_id
         )
-
-        if self.request_ratelimits.get('first_request_time', None) is None:
-            self.request_ratelimits['first_request_time'] = str(datetime.now())
-
-        else:
-            shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
-
-            if (
-                datetime.now() >= datetime.strptime(
-                    self.request_ratelimits['first_request_time'],
-                    '%Y-%m-%d %H:%M:%S.%f'
-                ) + timedelta(hours=1, minutes=shift_minutes)
-                and
-                self.requests_counters['requests_per_hour'] != 0
-            ):
-                if (self.requests_counters['requests_per_hour'] - self.requests_configuration['requests_per_hour']) <= 0:
-                    self.requests_counters['requests_per_hour'] = 0
-                else:
-                    self.requests_counters['requests_per_hour'] -= self.requests_configuration['requests_per_hour']
-
-            if (
-                datetime.now() >= datetime.strptime(
-                    self.request_ratelimits['first_request_time'],
-                    '%Y-%m-%d %H:%M:%S.%f'
-                ) + timedelta(days=1)
-                and
-                self.requests_counters['requests_per_day'] != 0
-            ):
-                if (self.requests_counters['requests_per_day'] - self.requests_configuration['requests_per_day']) <= 0:
-                    self.requests_counters['requests_per_day'] = 0
-                else:
-                    self.requests_counters['requests_per_day'] -= self.requests_configuration['requests_per_day']
-
-            self.request_ratelimits['first_request_time'] = str(datetime.now())
-            self.vault.write_secret(
-                path=f"{self.vault_data_path}/{self.user_id}",
-                key='request_ratelimits',
-                value=self.request_ratelimits
-            )
-
-        response = {
-            'per_hour': self.requests_counters['requests_per_hour'],
-            'per_day': self.requests_counters['requests_per_day'],
-            'first_request_time': self.request_ratelimits['first_request_time']
+        requests_per_hour = 0
+        requests_per_day = 0
+        if self.requests_history:
+            for request in self.requests_history:
+                request_timestamp = datetime.strptime(request, '%Y-%m-%d %H:%M:%S.%f')
+                if request_timestamp >= datetime.now() - timedelta(hours=1):
+                    requests_per_hour = requests_per_hour + 1
+                if request_timestamp >= datetime.now() - timedelta(days=1):
+                    requests_per_day = requests_per_day + 1
+        self.requests_counters = {
+            'requests_per_hour': requests_per_hour,
+            'requests_per_day': requests_per_day
         }
-        log.info(
-            '[class.%s] Counters updated for user ID %s: %s',
-            __class__.__name__,
-            self.user_id,
-            response
+        self.vault.write_secret(
+            path=f"{self.vault_data_path}/{self.user_id}",
+            key='requests_counters',
+            value=json.dumps(self.requests_counters)
         )
-        return response
+        log.info(
+            '[class.%s] Current request counters: %s',
+            __class__.__name__,
+            self.requests_counters
+        )

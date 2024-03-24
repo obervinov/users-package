@@ -2,6 +2,7 @@
 This module stores fixtures for performing tests.
 """
 import os
+import json
 import subprocess
 from datetime import timedelta, datetime
 import time
@@ -125,157 +126,113 @@ def fixture_timestamp_pattern():
 @pytest.fixture(name="users_attributes", scope='function')
 def fixture_users_attributes(vault_instance):
     """Fill in the configuration with test user attributes"""
-    # Test user1
-    # - allowed all permissions
-    # - limited request
-    test_user1 = {
-        'status': 'allowed',
-        'roles': ['admin_role'],
-        'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
-    }
-    # Test user2
-    # - allowed role1 and role2
-    # - limited request
-    test_user2 = {
-        'status': 'allowed',
-        'roles': ['financial_role', 'goals_role'],
-        'requests': {'requests_per_day': 30, 'requests_per_hour': 5, 'random_shift_minutes': 15}
-    }
-    # Test user3
-    # - haven't roles
-    # - hard limited request
-    test_user3 = {
-        'status': 'allowed',
-        'roles': [],
-        'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 60}
-    }
-    # Test user4
-    # - forbidden user
-    test_user4 = {
-        'status': 'denied',
-        'roles': [],
-        'requests': {}
-    }
-    # Test user5 for additional cases in rate limits controller
-    test_user5 = {
-        'status': 'allowed',
-        'roles': ['financial_role'],
-        'requests': {'requests_per_day': 30, 'requests_per_hour': 3, 'random_shift_minutes': 15}
-    }
-    # Test user6 for additional cases in rate limits controller
-    test_user6 = {
-        'status': 'allowed',
-        'roles': ['financial_role'],
-        'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
-    }
-    # Test user6 for additional cases in rate limits controller
-    test_user7 = {
-        'status': 'allowed',
-        'roles': ['financial_role'],
-        'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
-    }
-    # Test user8 for additional cases in rate limits controller
-    test_user8 = {
-        'status': 'allowed',
-        'roles': ['financial_role'],
-        'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
-    }
-    # Test user9 for additional cases in rate limits controller
-    test_user9 = {
-        'status': 'allowed',
-        'roles': ['financial_role'],
-        'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
-    }
-    # Test user10 for additional cases in rate limits controller
-    test_user10 = {
-        'status': 'allowed',
-        'roles': ['financial_role'],
-        'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
-    }
-    # Test user11 for additional cases in rate limits controller (timer_watcher)
-    test_user11 = {
-        'status': 'allowed',
-        'roles': ['financial_role'],
-        'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
-    }
-    # Test user12 for additional cases in rate limits controller (timer_watcher)
-    test_user12 = {
-        'status': 'allowed',
-        'roles': ['financial_role'],
-        'requests': {'requests_per_day': 30, 'requests_per_hour': 3, 'random_shift_minutes': 15}
-    }
-    for key, value in test_user1.items():
-        _ = vault_instance.write_secret(
-            path='configuration/users/testUser1',
-            key=key,
-            value=value
-        )
-    for key, value in test_user2.items():
-        _ = vault_instance.write_secret(
-            path='configuration/users/testUser2',
-            key=key,
-            value=value
-        )
-    for key, value in test_user3.items():
-        _ = vault_instance.write_secret(
-            path='configuration/users/testUser3',
-            key=key,
-            value=value
-        )
-    for key, value in test_user4.items():
-        _ = vault_instance.write_secret(
-            path='configuration/users/testUser4',
-            key=key,
-            value=value
-        )
-    for key, value in test_user5.items():
-        _ = vault_instance.write_secret(
-            path='configuration/users/testUser5',
-            key=key,
-            value=value
-        )
-    for key, value in test_user6.items():
-        _ = vault_instance.write_secret(
-            path='configuration/users/testUser6',
-            key=key,
-            value=value
-        )
-    for key, value in test_user7.items():
-        _ = vault_instance.write_secret(
-            path='configuration/users/testUser7',
-            key=key,
-            value=value
-        )
-    for key, value in test_user8.items():
-        _ = vault_instance.write_secret(
-            path='configuration/users/testUser8',
-            key=key,
-            value=value
-        )
-    for key, value in test_user9.items():
-        _ = vault_instance.write_secret(
-            path='configuration/users/testUser9',
-            key=key,
-            value=value
-        )
-    for key, value in test_user10.items():
-        _ = vault_instance.write_secret(
-            path='configuration/users/testUser10',
-            key=key,
-            value=value
-        )
-    for key, value in test_user11.items():
-        _ = vault_instance.write_secret(
-            path='configuration/users/testUser11',
-            key=key,
-            value=value
-        )
-    for key, value in test_user12.items():
-        _ = vault_instance.write_secret(
-            path='configuration/users/testUser12',
-            key=key,
-            value=value
-        )
+    configurations = [
+        # Test user1
+        # - allowed all permissions
+        # - limited request
+        {
+            'name': 'testUser1',
+            'status': 'allowed',
+            'roles': ['admin_role'],
+            'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
+        },
+        # Test user2
+        # - allowed role1 and role2
+        # - limited request
+        {
+            'name': 'testUser2',
+            'status': 'allowed',
+            'roles': ['financial_role', 'goals_role'],
+            'requests': {'requests_per_day': 30, 'requests_per_hour': 5, 'random_shift_minutes': 15}
+        },
+        # Test user3
+        # - haven't roles
+        # - hard limited request
+        {
+            'name': 'testUser3',
+            'status': 'allowed',
+            'roles': [],
+            'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 60}
+        },
+        # Test user4
+        # - forbidden user
+        {
+            'name': 'testUser4',
+            'status': 'denied',
+            'roles': [],
+            'requests': {}
+        },
+        # Test user5 for additional cases in rate limits controller
+        {
+            'name': 'testUser5',
+            'status': 'allowed',
+            'roles': ['financial_role'],
+            'requests': {'requests_per_day': 30, 'requests_per_hour': 3, 'random_shift_minutes': 15}
+        },
+        # Test user6 for additional cases in rate limits controller
+        {
+            'name': 'testUser6',
+            'status': 'allowed',
+            'roles': ['financial_role'],
+            'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
+        },
+        # Test user6 for additional cases in rate limits controller
+        {
+            'name': 'testUser7',
+            'status': 'allowed',
+            'roles': ['financial_role'],
+            'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
+        },
+        # Test user8 for additional cases in rate limits controller
+        {
+            'name': 'testUser8',
+            'status': 'allowed',
+            'roles': ['financial_role'],
+            'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
+        },
+        # Test user9 for additional cases in rate limits controller
+        {
+            'name': 'testUser9',
+            'status': 'allowed',
+            'roles': ['financial_role'],
+            'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
+        },
+        # Test user10 for additional cases in rate limits controller
+        {
+            'name': 'testUser10',
+            'status': 'allowed',
+            'roles': ['financial_role'],
+            'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
+        },
+        # Test user11 for additional cases in rate limits controller (timer_watcher)
+        {
+            'name': 'testUser11',
+            'status': 'allowed',
+            'roles': ['financial_role'],
+            'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
+        },
+        # Test user12 for additional cases in rate limits controller (timer_watcher)
+        {
+            'name': 'testUser12',
+            'status': 'allowed',
+            'roles': ['financial_role'],
+            'requests': {'requests_per_day': 30, 'requests_per_hour': 3, 'random_shift_minutes': 15}
+        }
+    ]
+    for configuration in configurations:
+        for key, value in configuration.items():
+            if key in ['requests', 'roles']:
+                _ = vault_instance.write_secret(
+                    path=f'configuration/users/{configuration["name"]}',
+                    key=key,
+                    value=json.dumps(value)
+                )
+            else:
+                _ = vault_instance.write_secret(
+                    path=f'configuration/users/{configuration["name"]}',
+                    key=key,
+                    value=value
+                )
 
 
 @pytest.fixture(name="users_data", scope='function')
@@ -284,139 +241,125 @@ def fixture_users_data(vault_instance):
     # Test user1: detect and setup rate limits timestamp
     # - request limit exceeded
     # - restrictions on requests have not yet been applied
-    test_user1 = {
-        'requests_counters': {'requests_per_day': 11, 'requests_per_hour': 2},
-        'rate_limits': {'end_time': None, 'first_request_time': None}
-    }
-    # Test user2: requests counters
-    # - the request limit has not been exceeded
-    # - restrictions on requests don't apply
-    test_user2 = {
-        'requests_counters': {'requests_per_day': 0, 'requests_per_hour': 0},
-        'rate_limits': {'end_time': None, 'first_request_time': None}
-    }
-    # Test user3: exist rate limit timestamp
-    # - the request limit has been reset to zero
-    # - restrictions on requests apply
-    test_user3 = {
-        'requests_counters': {'requests_per_day': 0, 'requests_per_hour': 0},
-        'rate_limits': {'end_time': f"{datetime.now() + timedelta(days=1)}", 'first_request_time': None}
-    }
+    data = [
+        {
+            'name': 'testUser1',
+            'requests_history': [
+                str(datetime.now() - timedelta(minutes=10*i)) for i in range(1, 2)
+            ] + [
+                str(datetime.now() - timedelta(hours=i)) for i in range(2, 11)
+            ],
+            'requests_ratelimits': {'end_time': None}
+        },
+        # Test user2: requests counters
+        # - the request limit has not been exceeded
+        # - restrictions on requests don't apply
+        {
+            'name': 'testUser2',
+            'requests_history': [],
+            'requests_ratelimits': {'end_time': None}
+        },
+        # Test user3: exist rate limit timestamp
+        # - the request limit has been reset to zero
+        # - restrictions on requests apply
+        {
+            'name': 'testUser3',
+            'requests_history': [],
+            'requests_ratelimits': {'end_time': f"{datetime.now() + timedelta(days=1)}"}
+        },
 
-    # Test user4: EMPTY (because configuration is forbidden access)
+        # Test user4: EMPTY (because configuration is forbidden access)
 
-    # Test user5: exist rate limit timestamp
-    # - the request limit has been reset to zero
-    # - restrictions on requests apply
-    test_user5 = {
-        'requests_counters': {'requests_per_day': 0, 'requests_per_hour': 0},
-        'rate_limits': {'end_time': f"{datetime.now() + timedelta(hours=1)}", 'first_request_time': None}
-    }
+        # Test user5: exist rate limit timestamp
+        # - the request limit has been reset to zero
+        # - restrictions on requests apply
+        {
+            'name': 'testUser5',
+            'requests_history': [],
+            'requests_ratelimits': {'end_time': f"{datetime.now() + timedelta(hours=1)}"}
+        },
 
-    # Test user6: EMPTY (because configuration is forbidden access)
+        # Test user6: EMPTY (because configuration is forbidden access)
 
-    # Test user7: detect and setup rate limits timestamps (for requests_per_day)
-    # - request limit exceeded
-    # - restrictions on requests have not yet been applied
-    test_user7 = {
-        'requests_counters': {'requests_per_day': 10, 'requests_per_hour': 0},
-        'rate_limits': {'end_time': None, 'first_request_time': None}
-    }
-    # Test user8: detect and setup rate limits timestamps (for requests_per_hour)
-    # - request limit exceeded
-    # - restrictions on requests have not yet been applied
-    test_user8 = {
-        'requests_counters': {'requests_per_day': 1, 'requests_per_hour': 1},
-        'rate_limits': {'end_time': None, 'first_request_time': None}
-    }
-    # Test user9: detect and setup rate limits timestamps (for both: requests_per_day and requests_per_hour)
-    # - request limit exceeded
-    # - restrictions on requests have not yet been applied
-    test_user9 = {
-        'requests_counters': {'requests_per_day': 10, 'requests_per_hour': 1},
-        'rate_limits': {'end_time': None, 'first_request_time': None}
-    }
-    # Test user10: reset expired rate limit
-    # - the counter is reset to zero
-    # - the speed limit timer has expired
-    test_user10 = {
-        'requests_counters': {'requests_per_day': 0, 'requests_per_hour': 0},
-        'rate_limits': {'end_time': str(datetime.now() - timedelta(hours=1)), 'first_request_time': None}
-    }
-    # Test user11: reset expired rate limit
-    # - the counter is reset to zero
-    # - the speed limit timer has expired
-    test_user11 = {
-        'requests_counters': {'requests_per_day': 3, 'requests_per_hour': 3},
-        'rate_limits': {'end_time': None, 'first_request_time': str(datetime.now() - timedelta(hours=1, minutes=16))}
-    }
-    # Test user12: reset expired rate limit
-    # - the counter is reset to zero
-    # - the speed limit timer has expired
-    test_user12 = {
-        'requests_counters': {'requests_per_day': 32, 'requests_per_hour': 1},
-        'rate_limits': {'end_time': None, 'first_request_time': str(datetime.now() - timedelta(days=2))}
-    }
-    for key, value in test_user1.items():
-        _ = vault_instance.write_secret(
-            path='data/users/testUser1',
-            key=key,
-            value=value
-        )
-    for key, value in test_user2.items():
-        _ = vault_instance.write_secret(
-            path='data/users/testUser2',
-            key=key,
-            value=value
-        )
-    for key, value in test_user3.items():
-        _ = vault_instance.write_secret(
-            path='data/users/testUser3',
-            key=key,
-            value=value
-        )
-    for key, value in test_user5.items():
-        _ = vault_instance.write_secret(
-            path='data/users/testUser5',
-            key=key,
-            value=value
-        )
-    for key, value in test_user7.items():
-        _ = vault_instance.write_secret(
-            path='data/users/testUser7',
-            key=key,
-            value=value
-        )
-    for key, value in test_user8.items():
-        _ = vault_instance.write_secret(
-            path='data/users/testUser8',
-            key=key,
-            value=value
-        )
-    for key, value in test_user9.items():
-        _ = vault_instance.write_secret(
-            path='data/users/testUser9',
-            key=key,
-            value=value
-        )
-    for key, value in test_user10.items():
-        _ = vault_instance.write_secret(
-            path='data/users/testUser10',
-            key=key,
-            value=value
-        )
-    for key, value in test_user11.items():
-        _ = vault_instance.write_secret(
-            path='data/users/testUser11',
-            key=key,
-            value=value
-        )
-    for key, value in test_user12.items():
-        _ = vault_instance.write_secret(
-            path='data/users/testUser12',
-            key=key,
-            value=value
-        )
+        # Test user7: detect and setup rate limits timestamps (for requests_per_day)
+        # - request limit exceeded
+        # - restrictions on requests have not yet been applied
+        {
+            'name': 'testUser7',
+            'requests_history': [str(datetime.now() - timedelta(hours=i)) for i in range(2, 13)],
+            'requests_ratelimits': {'end_time': None}
+        },
+        # Test user8: detect and setup rate limits timestamps (for requests_per_hour)
+        # - request limit exceeded
+        # - restrictions on requests have not yet been applied
+        {
+            'name': 'testUser8',
+            'requests_history': [
+                str(datetime.now() - timedelta(minutes=10*i)) for i in range(1, 2)
+            ] + [
+                str(datetime.now() - timedelta(hours=i)) for i in range(2, 3)
+            ],
+            'requests_ratelimits': {'end_time': None}
+        },
+        # Test user9: detect and setup rate limits timestamps (for both: requests_per_day and requests_per_hour)
+        # - request limit exceeded
+        # - restrictions on requests have not yet been applied
+        {
+            'name': 'testUser9',
+            'requests_history': [
+                str(datetime.now() - timedelta(minutes=10*i)) for i in range(1, 2)
+            ] + [
+                str(datetime.now() - timedelta(hours=i)) for i in range(2, 13)
+            ],
+            'requests_ratelimits': {'end_time': None}
+        },
+        # Test user10: reset expired rate limit
+        # - the counter is reset to zero
+        # - the speed limit timer has expired
+        {
+            'name': 'testUser10',
+            'requests_history': [],
+            'requests_ratelimits': {'end_time': str(datetime.now() - timedelta(hours=1))}
+        },
+        # Test user11: reset expired rate limit
+        # - the counter is reset to zero
+        # - the speed limit timer has expired
+        {
+            'name': 'testUser11',
+            'requests_history': [
+                str(datetime.now() - timedelta(minutes=15*i)) for i in range(1, 5)
+            ] + [
+                str(datetime.now() - timedelta(hours=i)) for i in range(20, 26)
+            ],
+            'requests_ratelimits': {'end_time': None}
+        },
+        # Test user12: reset expired rate limit
+        # - the counter is reset to zero
+        # - the speed limit timer has expired
+        {
+            'name': 'testUser12',
+            'requests_history': [
+                str(datetime.now() - timedelta(minutes=10*i)) for i in range(1, 2)
+            ] + [
+                str(datetime.now() - timedelta(hours=i)) for i in range(22, 34)
+            ],
+            'requests_ratelimits': {'end_time': None}
+        }
+    ]
+    for user in data:
+        for key, value in user.items():
+            if key in ['requests_history', 'requests_ratelimits']:
+                _ = vault_instance.write_secret(
+                    path=f'data/users/{user["name"]}',
+                    key=key,
+                    value=json.dumps(value)
+                )
+            else:
+                _ = vault_instance.write_secret(
+                    path=f'data/users/{user["name"]}',
+                    key=key,
+                    value=value
+                )
 
 
 @pytest.fixture(name="users", scope='function')
