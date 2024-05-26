@@ -1,9 +1,9 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
-title: ''
-labels: ''
-assignees: ''
+about: Suggest an idea for this module
+title: 'Feature request: <description>'
+labels: 'enhancement'
+assignees: 'obervinov'
 
 ---
 

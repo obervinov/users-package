@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## v2.0.5 - 2024-05-15
+### What's Changed
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.4...v2.0.5 by @obervinov in https://github.com/obervinov/users-package/pull/41
+#### 📚 Documentation
+* Update `.md` templates
+#### 🚀 Features
+* Add `github-actions` in dependency bot
+
+
+
 ## v2.0.4 - 2024-03-24
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.3...v2.0.4 by @obervinov in https://github.com/obervinov/users-package/pull/39
@@ -13,7 +23,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 * [Error when call `rl_controller.determine_rate_limit()`](https://github.com/obervinov/users-package/issues/38)
 * Fixes various RateLimit class bugs related to request accounting and operation of request counters
 * A little tests refactoring
-
 
 
 ## v2.0.3 - 2024-02-05
