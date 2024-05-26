@@ -333,27 +333,24 @@ class RateLimiter:
                 '[class.%s] A rate limit %s already exists for user ID %s, and not yet expired',
                 __class__.__name__, self.requests_ratelimits['end_time'], self.user_id
             )
+            shift_minutes = 0
 
-## WHAT ABOUT PER_DAY RATE LIMITS??? IT'S NOT CONSIDERED IN THE CODE BELOW ##
-            shift_minutes = 0 
-            # Priority 1: If the counter exceeds the configuration per day
+            # Priority 1: If the counter exceeds the configuration per day - shift by 24 hours
             if self.requests_counters['requests_per_day'] > self.requests_configuration['requests_per_day']:
-                pass
-                
+                shift_minutes = 1440
+
             # Priority 2: If the counter exceeds the configuration per hour
             elif self.requests_counters['requests_per_hour'] > self.requests_configuration['requests_per_hour']:
-                # Situation 1: counter exceeds configuration and configuration equals 1
-                if self.requests_configuration['requests_per_hour'] == 1:
+                # Counter exceeds configuration and configuration equals 1 or counter is a multiple of configuration
+                if (
+                    self.requests_configuration['requests_per_hour'] == 1 or
+                    self.requests_counters['requests_per_hour'] % self.requests_configuration['requests_per_hour'] == 0
+                ):
                     shift_minutes = 60 + random.randint(1, self.requests_configuration['random_shift_minutes'])
 
-                # Situation 2: counter exceeds configuration by a multiple
-                elif self.requests_counters['requests_per_hour'] % self.requests_configuration['requests_per_hour'] == 0:
-                    shift_minutes = 60 + random.randint(1, self.requests_configuration['random_shift_minutes'])
-
-                # Situation 3: counter exceeds configuration, but not by a multiple
+                # Counter exceeds configuration, but not by a multiple
                 elif self.requests_counters['requests_per_hour'] % self.requests_configuration['requests_per_hour'] != 0:
                     shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
-
 
             latest_end_time = datetime.strptime(self.requests_ratelimits['end_time'], '%Y-%m-%d %H:%M:%S.%f')
             self.requests_ratelimits['end_time'] = str(latest_end_time + timedelta(minutes=shift_minutes))
