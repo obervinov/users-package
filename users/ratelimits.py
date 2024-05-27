@@ -334,23 +334,22 @@ class RateLimiter:
                 __class__.__name__, self.requests_ratelimits['end_time'], self.user_id
             )
             shift_minutes = 0
+            per_day_exceeded = self.requests_counters['requests_per_day'] > self.requests_configuration['requests_per_day']
+            per_hour_exceeded = self.requests_counters['requests_per_hour'] > self.requests_configuration['requests_per_hour']
+            per_day_multiplier = self.requests_counters['requests_per_day'] % self.requests_configuration['requests_per_day']
+            per_hour_multiplier = self.requests_counters['requests_per_hour'] % self.requests_configuration['requests_per_hour']
 
-            # Priority 1: If the counter exceeds the configuration per day - shift by 24 hours
-            if self.requests_counters['requests_per_day'] > self.requests_configuration['requests_per_day']:
+            # Case1: If the counter exceeds the configuration per DAY and the counter is a multiple of the configuration - shift by 24 hours
+            if (per_day_exceeded and self.requests_counters['requests_per_day'] == 1) or (per_day_exceeded and per_day_multiplier == 0):
                 shift_minutes = 1440
 
-            # Priority 2: If the counter exceeds the configuration per hour
-            elif self.requests_counters['requests_per_hour'] > self.requests_configuration['requests_per_hour']:
-                # Counter exceeds configuration and configuration equals 1 or counter is a multiple of configuration
-                if (
-                    self.requests_configuration['requests_per_hour'] == 1 or
-                    self.requests_counters['requests_per_hour'] % self.requests_configuration['requests_per_hour'] == 0
-                ):
-                    shift_minutes = 60 + random.randint(1, self.requests_configuration['random_shift_minutes'])
+            # Case2: If the counter exceeds the configuration per HOUR and the counter is a multiple of the configuration - shift by 60 minutes + random shift
+            elif (per_hour_exceeded and self.requests_counters['requests_per_hour'] == 1) or (per_hour_exceeded and per_hour_multiplier == 0):
+                shift_minutes = 60 + random.randint(1, self.requests_configuration['random_shift_minutes'])
 
-                # Counter exceeds configuration, but not by a multiple
-                elif self.requests_counters['requests_per_hour'] % self.requests_configuration['requests_per_hour'] != 0:
-                    shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
+            # Case3: If the counter exceeds the configuration per HOUR and the counter is not a multiple of the configuration - shift only by random shift
+            elif per_hour_exceeded and per_hour_multiplier != 0:
+                shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
 
             latest_end_time = datetime.strptime(self.requests_ratelimits['end_time'], '%Y-%m-%d %H:%M:%S.%f')
             self.requests_ratelimits['end_time'] = str(latest_end_time + timedelta(minutes=shift_minutes))
