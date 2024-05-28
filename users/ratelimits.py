@@ -334,8 +334,8 @@ class RateLimiter:
                 __class__.__name__, self.requests_ratelimits['end_time'], self.user_id
             )
             shift_minutes = 0
-            per_day_exceeded = self.requests_counters['requests_per_day'] > self.requests_configuration['requests_per_day']
-            per_hour_exceeded = self.requests_counters['requests_per_hour'] > self.requests_configuration['requests_per_hour']
+            per_day_exceeded = self.requests_counters['requests_per_day'] >= self.requests_configuration['requests_per_day']
+            per_hour_exceeded = self.requests_counters['requests_per_hour'] >= self.requests_configuration['requests_per_hour']
             per_day_multiplier = self.requests_counters['requests_per_day'] % self.requests_configuration['requests_per_day']
             per_hour_multiplier = self.requests_counters['requests_per_hour'] % self.requests_configuration['requests_per_hour']
 

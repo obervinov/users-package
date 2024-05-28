@@ -3,14 +3,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## v2.0.5 - 2024-05-26
+## v2.0.5 - 2024-05-29
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.4...v2.0.5 by @obervinov in https://github.com/obervinov/users-package/pull/41
 #### 📚 Documentation
 * Update `.md` templates
 #### 🚀 Features
 * Add `github-actions` in dependency bot
-
+#### 🐛 Bug Fixes
+* [Configuration `per_day` in RateLimit not working as expected](https://github.com/obervinov/users-package/issues/40)
 
 
 ## v2.0.4 - 2024-03-24
