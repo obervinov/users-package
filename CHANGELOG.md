@@ -7,9 +7,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.4...v2.0.5 by @obervinov in https://github.com/obervinov/users-package/pull/41
 #### 📚 Documentation
-* Update `.md` templates
+* Update `*.md` templates
 #### 🚀 Features
 * Add `github-actions` in dependency bot
+* Bump workflow version to `v1.2.2`
+* Add new workflow jobs: `pr` and `milestone`
 #### 🐛 Bug Fixes
 * [Configuration `per_day` in RateLimit not working as expected](https://github.com/obervinov/users-package/issues/40)
 

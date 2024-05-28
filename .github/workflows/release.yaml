@@ -26,5 +26,5 @@ jobs:
     needs: [changelog, pylint, pytest, pyproject]
 
   milestone:
-    uses: obervinov/_templates/.github/workflows/milestone.yaml@v1.2.0
+    uses: obervinov/_templates/.github/workflows/milestone.yaml@v1.2.2
     needs: [create-release]

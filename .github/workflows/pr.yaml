@@ -23,4 +23,4 @@ jobs:
     uses: obervinov/_templates/.github/workflows/pyproject.yaml@v1.2.2
 
   pr:
-    uses: obervinov/_templates/.github/workflows/pr.yaml@v1.2.0
+    uses: obervinov/_templates/.github/workflows/pr.yaml@v1.2.2
