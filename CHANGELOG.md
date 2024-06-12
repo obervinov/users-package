@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## v3.0.0 - 2024-06-12
+### What's Changed
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.5...v3.0.0 by @obervinov in https://github.com/obervinov/users-package/pull/43
+#### 🚀 Features
+* Bump workflow `_templates` version to `v1.2.6`
+* Bump vault-package version to `v3.0.0`
+* Bump transitive dependencies
+
+
+
 ## v2.0.5 - 2024-05-28
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.4...v2.0.5 by @obervinov in https://github.com/obervinov/users-package/pull/41
