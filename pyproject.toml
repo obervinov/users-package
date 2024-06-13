@@ -18,6 +18,7 @@ include = ["CHANGELOG.md"]
 
 [tool.poetry.dependencies]
 python = "^3.9 || ^3.10 || ^3.11"
+psycopg2 = "^2.9.9"
 logger = { git = "https://github.com/obervinov/logger-package.git", tag = "v1.0.6" }
 vault  = { git = "https://github.com/obervinov/vault-package.git", tag = "v3.0.0" }
 

@@ -88,7 +88,7 @@ class RateLimiter:
         self._vault_data_path = VAULT_DATA_PATH
 
         # Read general user configuration from Vault
-        user_configuration = self.vault.read_secret(path=f"{self.vault_config_path}/{self.user_id}")
+        user_configuration = self.vault.kv2engine.read_secret(path=f"{self.vault_config_path}/{self.user_id}")
         # Extract requests configuration from general user configuration
         requests_configuration = user_configuration.get('requests', None)
         if requests_configuration:
@@ -102,7 +102,7 @@ class RateLimiter:
             raise WrongUserConfiguration("User configuration in Vault is wrong. Please provide a valid configuration for rate limits.")
 
         # Read general dynamic user data from Vault
-        user_data = self.vault.read_secret(path=f"{self.vault_data_path}/{user_id}")
+        user_data = self.vault.kv2engine.read_secret(path=f"{self.vault_data_path}/{user_id}")
 
         # Extract requests counters from general dynamic user data
         requests_counters = user_data.get('requests_counters', '{"requests_per_day": 0, "requests_per_hour": 0}')
@@ -291,7 +291,7 @@ class RateLimiter:
             )
             raise WrongUserConfiguration("User data in Vault is wrong. Please check user dynamic data.") from error
         # Update the request history in Vault
-        self.vault.write_secret(
+        self.vault.kv2engine.write_secret(
             path=f"{self.vault_data_path}/{self.user_id}",
             key='requests_history',
             value=json.dumps(self.requests_history)
@@ -321,7 +321,7 @@ class RateLimiter:
                 __class__.__name__, self.user_id, self.requests_ratelimits['end_time']
             )
             self.requests_ratelimits['end_time'] = None
-            self.vault.write_secret(
+            self.vault.kv2engine.write_secret(
                 path=f"{self.vault_data_path}/{self.user_id}",
                 key='requests_ratelimits',
                 value=json.dumps(self.requests_ratelimits)
@@ -353,7 +353,7 @@ class RateLimiter:
 
             latest_end_time = datetime.strptime(self.requests_ratelimits['end_time'], '%Y-%m-%d %H:%M:%S.%f')
             self.requests_ratelimits['end_time'] = str(latest_end_time + timedelta(minutes=shift_minutes))
-            self.vault.write_secret(
+            self.vault.kv2engine.write_secret(
                 path=f"{self.vault_data_path}/{self.user_id}",
                 key='requests_ratelimits',
                 value=json.dumps(self.requests_ratelimits)
@@ -408,7 +408,7 @@ class RateLimiter:
                 self.user_id,
                 end_time
             )
-        self.vault.write_secret(
+        self.vault.kv2engine.write_secret(
             path=f"{self.vault_data_path}/{self.user_id}",
             key='requests_ratelimits',
             value=json.dumps(self.requests_ratelimits)
@@ -447,7 +447,7 @@ class RateLimiter:
             'requests_per_hour': requests_per_hour,
             'requests_per_day': requests_per_day
         }
-        self.vault.write_secret(
+        self.vault.kv2engine.write_secret(
             path=f"{self.vault_data_path}/{self.user_id}",
             key='requests_counters',
             value=json.dumps(self.requests_counters)

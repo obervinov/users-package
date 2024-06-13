@@ -3,7 +3,7 @@ This module contains constant values used in the application.
 """
 
 # Constants for Vault paths
-VAULT_CONFIG_PATH = "configuration/users"
+USERS_VAULT_CONFIGURATION_PATH = "configuration/users"
 VAULT_DATA_PATH = "data/users"
 
 # User statuses

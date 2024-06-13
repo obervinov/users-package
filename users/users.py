@@ -3,11 +3,11 @@ This python module is a implementation of user management functionality for tele
 authentication, authorization and request limiting.
 """
 import json
-from datetime import datetime
 from logger import log
 from vault import VaultClient
 from .constants import VAULT_CONFIG_PATH, VAULT_DATA_PATH, USER_STATUS_ALLOW, USER_STATUS_DENY
 from .ratelimits import RateLimiter
+from .storage import Storage
 from .exceptions import VaultInstanceNotSet
 
 
@@ -80,19 +80,16 @@ class Users:
             self._vault = vault
         elif isinstance(vault, dict):
             self._vault = VaultClient(
-                name=vault.get('name', None),
                 url=vault.get('url', None),
-                approle=vault.get('approle', None)
+                namespace=vault.get('namespace', None),
+                auth=vault.get('auth', None)
             )
         else:
-            log.error(
-                '[class.%s] wrong vault parameters in Users(vault=%s), see doc-string',
-                __class__.__name__,
-                vault
-            )
+            log.error('[Users]: wrong vault parameters in Users(vault=%s), see doc-string', vault)
             raise VaultInstanceNotSet("Vault instance is not set. Please provide a valid Vault instance as instance or dictionary.")
 
         self.rate_limits = rate_limits
+        self.storage = Storage(vault_client=self.vault)
         self._user_status_allow = USER_STATUS_ALLOW
         self._user_status_deny = USER_STATUS_DENY
         self._vault_config_path = VAULT_CONFIG_PATH
@@ -251,9 +248,7 @@ class Users:
         if applicable.
         """
         user_info = {}
-        user_info['access'] = self.authentication(
-            user_id=user_id
-        )
+        user_info['access'] = self.authentication(user_id=user_id)
         if user_info['access'] == self.user_status_allow and role_id:
             user_info['permissions'] = self.authorization(
                 user_id=user_id,
@@ -287,42 +282,26 @@ class Users:
                 or
             (str) self.user_status_deny
         """
-        status = self.vault.read_secret(
+        status = self.vault.kv2engine.read_secret(
             path=f"{self.vault_config_path}/{user_id}",
             key='status'
         )
         # verification of the status value
         if status is None:
-            log.info(
-                '[class.%s] User ID %s not found in Vault configuration '
-                'and will be denied access',
-                __class__.__name__,
-                user_id
-            )
+            log.info('[Users]: user ID %s not found in Vault configuration and will be denied access', user_id)
             status = self.user_status_deny
         elif status in self.user_status_allow or status in self.user_status_deny:
-            log.info(
-                '[class.%s] Access from user ID %s: %s',
-                __class__.__name__,
-                user_id,
-                status
-            )
+            log.info('[Users]: access from user ID %s: %s', user_id, status)
         else:
             log.error(
-                '[class.%s] Invalid configuration for %s status=%s '
-                'value can be %s or %s',
-                __class__.__name__,
-                user_id,
-                status,
-                self.user_status_allow,
-                self.user_status_deny
+                '[Users] invalid configuration for %s status=%s value can be %s or %s',
+                user_id, status, self.user_status_allow, self.user_status_deny
             )
             status = self.user_status_deny
-        # Write latest authentication status to Vault
-        self.vault.write_secret(
-            path=f"{self.vault_data_path}/{user_id}",
-            key='authentication',
-            value=json.dumps({'time': str(datetime.now()), 'status': status})
+        self.storage.write_access_log(
+            user_id=user_id,
+            details={'type': 'authentication', 'action': 'login'},
+            status=status
         )
         return status
 
@@ -361,16 +340,10 @@ class Users:
         else:
             status = self.user_status_deny
         log.info(
-            '[class.%s] Check role `%s` for user `%s`: %s',
-            __class__.__name__,
-            role_id,
-            user_id,
-            status
-        )
-        # Write latest authorization status to Vault
-        self.vault.write_secret(
-            path=f"{self.vault_data_path}/{user_id}",
-            key='authorization',
-            value=json.dumps({'time': str(datetime.now()), 'status': status, 'role': role_id})
+            '[Users]: check role `%s` for user `%s`: %s', role_id, user_id, status)
+        self.storage.write_access_log(
+            user_id=user_id,
+            details={'type': 'authorization', 'role': role_id},
+            status=status
         )
         return status

@@ -58,3 +58,22 @@ class FailedDeterminateRateLimit(Exception):
     def __init__(self, message):
         self.message = message
         super().__init__(message)
+
+
+class FailedStorageConnection(Exception):
+    """
+    Raised when the storage connection fails.
+
+    Args:
+        message (str): The error message.
+
+    Example:
+        >>> try:
+        ...     raise FailedStorageConnection("Failed to connect to storage")
+        ... except FailedStorageConnection as e:
+        ...     print(e)
+        Failed to connect to storage
+    """
+    def __init__(self, message):
+        self.message = message
+        super().__init__(message)
