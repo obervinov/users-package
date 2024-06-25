@@ -1,5 +1,6 @@
 """This module contains the storage class for the storage of user data: requests, access logs, etc."""
 import psycopg2
+from logger import log
 from .exceptions import FailedStorageConnection
 
 
@@ -44,26 +45,60 @@ class Storage:
         )
         self.cursor = self.connection.cursor()
 
-    def write_access_log(
+    def register_user(
         self,
         user_id: str = None,
-        details: dict = None,
+        chat_id: str = None,
         status: str = None
     ) -> None:
         """
-        Write access logs to the database with the user access status.
+        Register the user in the database.
 
         Args:
             user_id (str): The user ID.
-            details (dict): The user access details.
-            status (str): The user access status.
+            chat_id (str): The chat ID.
+            status (str): The user state.
 
         Returns:
             None
 
         Example:
             >>> storage = Storage(database_connection, database_credentials)
-            >>> storage.write_access_logs("user1", {"type": "authorization", "role": "admin"}, "allowed")
+            >>> storage.register_user("user1", "chat1", "allowed")
         """
-        self.cursor.execute(f"INSERT INTO access_logs (user_id, details, status) VALUES ('{user_id}', '{details}', '{status}')")
+        try:
+            self.cursor.execute(f"INSERT INTO users (user_id, chat_id, status) VALUES ('{user_id}', '{chat_id}', '{status}')")
+            self.connection.commit()
+            log.info(f"[Users]: {user_id} has been successfully registered in the database.")
+        except psycopg2.errors.UniqueViolation:
+            log.info(f"[Users]: {user_id} already exists in the database. Updating the chat ID and status.")
+            self.cursor.execute(f"UPDATE users SET chat_id='{chat_id}', status='{status}' WHERE user_id='{user_id}'")
+            self.connection.rollback()
+
+    def log_user_request(
+        self,
+        user_id: str = None,
+        request: dict = None
+    ) -> None:
+        """
+        Write the user requests to the database.
+
+        Args:
+            user_id (str): The user ID.
+            request (dict): The user request details.
+
+        Parameters:
+
+
+        Returns:
+            None
+
+        Example:
+            >>> storage = Storage(database_connection, database_credentials)
+            >>> storage.log_user_request("user1", {"type": "GET", "path": "/users"})
+        """
+        self.cursor.execute(
+            "INSERT INTO users_requests (user_id, message_id, chat_id, authentication, authorization, rate_limits) VALUES "
+            f"('{user_id}', '{request['message_id']}', '{request['chat_id']}', '{request['authentication']}', '{request['authorization']}', '{request['rate_limits']}')"
+        )
         self.connection.commit()

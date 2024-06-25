@@ -3,13 +3,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## v3.0.0 - 2024-06-12
+## v3.0.0 - 2024-06-25
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.5...v3.0.0 by @obervinov in https://github.com/obervinov/users-package/pull/43
+#### 💥 Breaking Changes
+* Bump vault-package version to `v3.0.0` (this version contains major changes)
+* [Feature request: Add an additional backend - `Postgres` to store historical user data](https://github.com/obervinov/users-package/issues/41)
+* `authentication()` and `authorization()` methods are private now
 #### 🚀 Features
 * Bump workflow `_templates` version to `v1.2.6`
 * Bump vault-package version to `v3.0.0`
 * Bump transitive dependencies
+* [Feature request: Add an additional backend - `Postgres` to store historical user data](https://github.com/obervinov/users-package/issues/41)
 
 
 
