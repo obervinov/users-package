@@ -102,3 +102,23 @@ class Storage:
             f"('{user_id}', '{request['message_id']}', '{request['chat_id']}', '{request['authentication']}', '{request['authorization']}', '{request['rate_limits']}')"
         )
         self.connection.commit()
+
+    def get_user_requests(
+        self,
+        user_id: str = None
+    ) -> list:
+        """
+        Get the user requests from the database.
+
+        Args:
+            user_id (str): The user ID.
+
+        Returns:
+            list: The list of user requests.
+
+        Example:
+            >>> storage = Storage(database_connection, database_credentials)
+            >>> storage.get_user_requests("user1")
+        """
+        self.cursor.execute(f"SELECT id, timestamp, rate_limits FROM users_requests WHERE user_id='{user_id}' ORDER BY timestamp DESC LIMIT 1000")
+        return self.cursor.fetchall()

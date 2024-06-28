@@ -4,7 +4,6 @@ This module contains constant values used in the application.
 
 # Constants for Vault paths
 USERS_VAULT_CONFIGURATION_PATH = "configuration/users"
-VAULT_DATA_PATH = "data/users"
 
 # User statuses
 USER_STATUS_ALLOW = "allowed"

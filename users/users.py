@@ -5,7 +5,7 @@ authentication, authorization and request limiting.
 import json
 from logger import log
 from vault import VaultClient
-from .constants import VAULT_CONFIG_PATH, VAULT_DATA_PATH, USER_STATUS_ALLOW, USER_STATUS_DENY
+from .constants import VAULT_CONFIG_PATH, USER_STATUS_ALLOW, USER_STATUS_DENY
 from .ratelimits import RateLimiter
 from .storage import Storage
 from .exceptions import VaultInstanceNotSet
@@ -20,11 +20,7 @@ class Users:
         :param vault (any): Configuration for initializing the Vault client.
             - (object) VaultClient instance for interacting with the Vault API.
             - (dict) Configuration for initializing a VaultClient instance in this class.
-
-        :param rate_limits (bool): Enable rate limit functionality.
-
-    Returns:
-        None
+        :param rate_limits (bool): Enable rate limit functionality. Default is False.
 
     Attributes:
         vault (any): The initialized VaultClient instance or None if initialization failed.
@@ -32,22 +28,22 @@ class Users:
         user_status_allow (str): A constant representing allowed user status.
         user_status_deny (str): A constant representing denied user status.
         vault_config_path (str): Path to the configuration data in Vault.
-        vault_data_path (str): Path to the historical data in Vault.
 
     Raises:
         VaultInstanceNotSet: If the vault instance is not set.
 
     Examples:
-        >>> users_without_ratelimits = Users(vault=vault_client, rate_limits=False)
+        >>> users_with_ratelimits = Users(vault=vault_client, rate_limits=True)
 
-        >>> users_with_ratelimits = Users(vault=vault_client)
+        >>> users = Users(vault=vault_client)
 
         >>> vault_config = {
-                "name": "my_project",
+                "namespace": "my_project",
                 "url": "https://vault.example.com",
-                "approle": {
-                    "id": "my_approle",
-                    "secret-id": "my_secret"
+                "auth": {
+                    "type": "approle",
+                    "role_id": "role_id",
+                    "secret_id": "secret_id"
                 }
            }
         >>> users_with_dict_vault = Users(vault=vault_config)
@@ -55,7 +51,7 @@ class Users:
     def __init__(
         self,
         vault: any = None,
-        rate_limits: bool = True
+        rate_limits: bool = False
     ) -> None:
         """
         Create a new Users instance.
@@ -64,8 +60,7 @@ class Users:
             :param vault (any): Configuration for initializing the Vault client.
                 - (object) VaultClient instance for interacting with the Vault API.
                 - (dict) Configuration for initializing a VaultClient instance in this class.
-
-            :param rate_limits (bool): Enable rate limit functionality.
+            :param rate_limits (bool): Enable rate limit functionality. Default is False.
 
         Raises:
             VaultInstanceNotSet: If the vault instance is not set.
@@ -76,9 +71,9 @@ class Users:
         See the class docstring for more details and examples.
         """
         if isinstance(vault, VaultClient):
-            self._vault = vault
+            self.vault = vault
         elif isinstance(vault, dict):
-            self._vault = VaultClient(
+            self.vault = VaultClient(
                 url=vault.get('url', None),
                 namespace=vault.get('namespace', None),
                 auth=vault.get('auth', None)
@@ -92,27 +87,6 @@ class Users:
         self._user_status_allow = USER_STATUS_ALLOW
         self._user_status_deny = USER_STATUS_DENY
         self._vault_config_path = VAULT_CONFIG_PATH
-        self._vault_data_path = VAULT_DATA_PATH
-
-    @property
-    def vault(self) -> any:
-        """
-        Getter for the 'vault' attribute.
-
-        Returns:
-            (any): The 'vault' attribute.
-        """
-        return self._vault
-
-    @vault.setter
-    def vault(self, vault: any):
-        """
-        Setter for the 'vault' attribute.
-
-        Args:
-            vault (any): Configuration for initializing the Vault client.
-        """
-        self._vault = vault
 
     @property
     def user_status_allow(self) -> str:
@@ -251,6 +225,7 @@ class Users:
                 if user_info['permissions'] == self.user_status_allow and self.rate_limits:
                     rl_controller = RateLimiter(
                         vault=self.vault,
+                        storage=self.storage,
                         user_id=user_id
                     )
                     user_info['rate_limits'] = rl_controller.determine_rate_limit()
@@ -339,6 +314,5 @@ class Users:
                 status = self.user_status_deny
         else:
             status = self.user_status_deny
-        log.info(
-            '[Users]: check role `%s` for user `%s`: %s', role_id, user_id, status)
+        log.info('[Users]: check role `%s` for user `%s`: %s', role_id, user_id, status)
         return status
