@@ -33,8 +33,8 @@ class RateLimiter:
         storage (Storage): Storage instance for storing user data.
         vault_config_path (str): Path to the configuration data in Vault.
         requests_configuration (dict): Configuration for rate limits from Vault.
-        requests_counters (dict): Counters for user's requests.
-        requests_ratelimits (dict): Rate limit information for the user.
+        user_requests (list): List of user requests from the storage.
+        requests_counters (dict): Counters for user requests.
 
     Raises:
         VaultInstanceNotSet: If the Vault instance is not set.
@@ -96,28 +96,9 @@ class RateLimiter:
             log.error('[Users.RateLimiter]: No requests configuration found for user ID %s', self.user_id)
             raise WrongUserConfiguration("User configuration in Vault is wrong. Please provide a valid configuration for rate limits.")
 
-        # Extract user request from the storage
-        user_requests = self.storage.get_user_request(user_id=self.user_id)
-        requests_counters = _colculate_requests_counters(requests=user_requests)
-        
-        
-        
-
-        # Extract rate limit timestamp from general dynamic user data
-        requests_ratelimits = user_data.get('requests_ratelimits', '{"end_time": null}')
-        try:
-            self.requests_ratelimits = json.loads(requests_ratelimits)
-        except (TypeError, JSONDecodeError) as error:
-            log.error('[Users.RateLimiter]: Wrong value for rate limits for user ID %s: %s', self.user_id, error)
-            raise WrongUserConfiguration("User data in Vault is wrong. Please check user dynamic data.") from error
-
-        # Extract historical requests from general dynamic user data
-        requests_history = user_data.get('requests_history', '[]')
-        try:
-            self.requests_history = json.loads(requests_history)
-        except (TypeError, JSONDecodeError) as error:
-            log.error('[Users.RateLimiter]: Wrong value for historical requests for user ID %s: %s', self.user_id, error)
-            raise WrongUserConfiguration("User data in Vault is wrong. Please check user dynamic data.") from error
+        # Extract user requests from the storage
+        self.user_requests = self.storage.get_user_request(user_id=self.user_id)
+        self.requests_counters = self._calculate_requests_counters()
 
     @property
     def vault_config_path(
@@ -169,14 +150,10 @@ class RateLimiter:
                 or
             None
         """
-        log.debug(
-            'Before determining the rate limit status\nConfiguration: %s\nHistory: %s\nCounters: %s\n',
-            self.requests_configuration, self.requests_history, self.requests_counters
-        )
-
-        # update the request counters based on the configured rate limits
-        self._update_requests_counters()
-
+        # Sorting the user requests by timestamp
+        user_requests = sorted(self.user_requests, key=lambda x: datetime.strptime(x['rate_limits'], '%Y-%m-%d %H:%M:%S.%f'), reverse=True)
+        
+        
         # If rate limits already applied
         if self.requests_ratelimits['end_time']:
             rate_limits = self._active_rate_limit()
@@ -208,41 +185,6 @@ class RateLimiter:
         )
         return {'end_time': rate_limits['end_time'] if rate_limits else None}
 
-    def _update_requests_history(self) -> None:
-        """
-        Update the request history for the user ID.
-
-        Args:
-            None
-
-        Returns:
-            None
-
-        Raises:
-            WrongUserConfiguration: If the user data in Vault is wrong.
-
-        Examples:
-            >>> limiter._update_requests_history()
-        """
-        request_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-        try:
-            self.requests_history.append(request_timestamp)
-            self.requests_history.sort()
-        except (TypeError, JSONDecodeError) as error:
-            log.error(
-                '[Users.RateLimiter]: Wrong value for requests history for user ID %s: %s',
-                __class__.__name__,
-                self.user_id,
-                error
-            )
-            raise WrongUserConfiguration("User data in Vault is wrong. Please check user dynamic data.") from error
-        # Update the request history in Vault
-        self.vault.kv2engine.write_secret(
-            path=f"{self.vault_data_path}/{self.user_id}",
-            key='requests_history',
-            value=json.dumps(self.requests_history)
-        )
-
     def _active_rate_limit(self) -> Union[dict, None]:
         """
         Check and handle active rate limits for the user ID.
@@ -271,7 +213,7 @@ class RateLimiter:
                 path=f"{self.vault_data_path}/{self.user_id}",
                 key='requests_ratelimits',
                 value=json.dumps(self.requests_ratelimits)
-            )
+                        )
         else:
             # Calculate the multiplier on the rate limit if requests continue to arrive after the application of rate_limit
             # in order to distribute the remaining requests in the same way based on the configuration
@@ -284,7 +226,7 @@ class RateLimiter:
             per_hour_exceeded = self.requests_counters['requests_per_hour'] >= self.requests_configuration['requests_per_hour']
             per_day_multiplier = self.requests_counters['requests_per_day'] % self.requests_configuration['requests_per_day']
             per_hour_multiplier = self.requests_counters['requests_per_hour'] % self.requests_configuration['requests_per_hour']
-
+    
             # Case1: If the counter exceeds the configuration per DAY and the counter is a multiple of the configuration - shift by 24 hours
             if (per_day_exceeded and self.requests_counters['requests_per_day'] == 1) or (per_day_exceeded and per_day_multiplier == 0):
                 shift_minutes = 1440
@@ -361,9 +303,9 @@ class RateLimiter:
         )
         return self.requests_ratelimits
 
-    def _update_requests_counters(self) -> None:
+    def _calculate_requests_counters(self) -> dict:
         """
-        Update the request counters based on the historical user data.
+        Calculate the user request counters: per hour and per day.
 
         Args:
             None
@@ -373,33 +315,20 @@ class RateLimiter:
 
         Examples:
             >>> ratelimits = RateLimits()
-            >>> ratelimits._counters_watcher()
+            >>> ratelimits._calculate_requests_counters()
         """
-        log.debug(
-            '[Users.RateLimiter]: Calculating of request counters for user ID %s',
-            __class__.__name__,
-            self.user_id
-        )
+        log.debug('[Users.RateLimiter]: Calculating of request counters for user ID %s', self.user_id)
         requests_per_hour = 0
         requests_per_day = 0
-        if self.requests_history:
-            for request in self.requests_history:
-                request_timestamp = datetime.strptime(request, '%Y-%m-%d %H:%M:%S.%f')
+        if self.user_requests:
+            for request in self.user_requests:
+                request_timestamp = datetime.strptime(request['timestamp'], '%Y-%m-%d %H:%M:%S.%f')
                 if request_timestamp >= datetime.now() - timedelta(hours=1):
                     requests_per_hour = requests_per_hour + 1
                 if request_timestamp >= datetime.now() - timedelta(days=1):
                     requests_per_day = requests_per_day + 1
-        self.requests_counters = {
+        log.info('[Users.RateLimiter]: Current request counters: %s', self.requests_counters)
+        return {
             'requests_per_hour': requests_per_hour,
             'requests_per_day': requests_per_day
         }
-        self.vault.kv2engine.write_secret(
-            path=f"{self.vault_data_path}/{self.user_id}",
-            key='requests_counters',
-            value=json.dumps(self.requests_counters)
-        )
-        log.info(
-            '[Users.RateLimiter]: Current request counters: %s',
-            __class__.__name__,
-            self.requests_counters
-        )
