@@ -14,6 +14,7 @@ assignees: 'obervinov'
 **Describe the bug**
 Not working <describe> in <class> as expected.
 Error message: <error message>
+Log link: <link to log>
 
 **Additional context**
 User configuration:

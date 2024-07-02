@@ -3,11 +3,11 @@ This python module is a implementation of user management functionality for tele
 authentication, authorization and request limiting.
 """
 import json
-from datetime import datetime
 from logger import log
 from vault import VaultClient
-from .constants import VAULT_CONFIG_PATH, VAULT_DATA_PATH, USER_STATUS_ALLOW, USER_STATUS_DENY
+from .constants import VAULT_CONFIG_PATH, USER_STATUS_ALLOW, USER_STATUS_DENY
 from .ratelimits import RateLimiter
+from .storage import Storage
 from .exceptions import VaultInstanceNotSet
 
 
@@ -20,11 +20,7 @@ class Users:
         :param vault (any): Configuration for initializing the Vault client.
             - (object) VaultClient instance for interacting with the Vault API.
             - (dict) Configuration for initializing a VaultClient instance in this class.
-
-        :param rate_limits (bool): Enable rate limit functionality.
-
-    Returns:
-        None
+        :param rate_limits (bool): Enable rate limit functionality. Default is False.
 
     Attributes:
         vault (any): The initialized VaultClient instance or None if initialization failed.
@@ -32,31 +28,30 @@ class Users:
         user_status_allow (str): A constant representing allowed user status.
         user_status_deny (str): A constant representing denied user status.
         vault_config_path (str): Path to the configuration data in Vault.
-        vault_data_path (str): Path to the historical data in Vault.
 
     Raises:
         VaultInstanceNotSet: If the vault instance is not set.
 
     Examples:
-        >>> users_without_ratelimits = Users(vault=vault_client, rate_limits=False)
+        >>> users_with_ratelimits = Users(vault=vault_client, rate_limits=True)
 
-        >>> users_with_ratelimits = Users(vault=vault_client)
+        >>> users = Users(vault=vault_client)
 
         >>> vault_config = {
-                "name": "my_project",
+                "namespace": "my_project",
                 "url": "https://vault.example.com",
-                "approle": {
-                    "id": "my_approle",
-                    "secret-id": "my_secret"
+                "auth": {
+                    "type": "approle",
+                    "role_id": "role_id",
+                    "secret_id": "secret_id"
                 }
            }
         >>> users_with_dict_vault = Users(vault=vault_config)
     """
-
     def __init__(
         self,
         vault: any = None,
-        rate_limits: bool = True
+        rate_limits: bool = False
     ) -> None:
         """
         Create a new Users instance.
@@ -65,8 +60,7 @@ class Users:
             :param vault (any): Configuration for initializing the Vault client.
                 - (object) VaultClient instance for interacting with the Vault API.
                 - (dict) Configuration for initializing a VaultClient instance in this class.
-
-            :param rate_limits (bool): Enable rate limit functionality.
+            :param rate_limits (bool): Enable rate limit functionality. Default is False.
 
         Raises:
             VaultInstanceNotSet: If the vault instance is not set.
@@ -77,46 +71,22 @@ class Users:
         See the class docstring for more details and examples.
         """
         if isinstance(vault, VaultClient):
-            self._vault = vault
+            self.vault = vault
         elif isinstance(vault, dict):
-            self._vault = VaultClient(
-                name=vault.get('name', None),
+            self.vault = VaultClient(
                 url=vault.get('url', None),
-                approle=vault.get('approle', None)
+                namespace=vault.get('namespace', None),
+                auth=vault.get('auth', None)
             )
         else:
-            log.error(
-                '[class.%s] wrong vault parameters in Users(vault=%s), see doc-string',
-                __class__.__name__,
-                vault
-            )
+            log.error('[Users]: wrong vault parameters in Users(vault=%s), see doc-string', vault)
             raise VaultInstanceNotSet("Vault instance is not set. Please provide a valid Vault instance as instance or dictionary.")
 
         self.rate_limits = rate_limits
+        self.storage = Storage(vault_client=self.vault)
         self._user_status_allow = USER_STATUS_ALLOW
         self._user_status_deny = USER_STATUS_DENY
         self._vault_config_path = VAULT_CONFIG_PATH
-        self._vault_data_path = VAULT_DATA_PATH
-
-    @property
-    def vault(self) -> any:
-        """
-        Getter for the 'vault' attribute.
-
-        Returns:
-            (any): The 'vault' attribute.
-        """
-        return self._vault
-
-    @vault.setter
-    def vault(self, vault: any):
-        """
-        Setter for the 'vault' attribute.
-
-        Args:
-            vault (any): Configuration for initializing the Vault client.
-        """
-        self._vault = vault
 
     @property
     def user_status_allow(self) -> str:
@@ -178,30 +148,11 @@ class Users:
         """
         self._vault_config_path = vault_config_path
 
-    @property
-    def vault_data_path(self) -> str:
-        """
-        Getter for the 'vault_data_path' attribute.
-
-        Returns:
-            (str): The 'vault_data_path' attribute.
-        """
-        return self._vault_data_path
-
-    @vault_data_path.setter
-    def vault_data_path(self, vault_data_path: str):
-        """
-        Setter for the 'vault_data_path' attribute.
-
-        Args:
-            vault_data_path (str): Path to the data in Vault.
-        """
-        self._vault_data_path = vault_data_path
-
     def user_access_check(
         self,
         user_id: str = None,
-        role_id: str = None
+        role_id: str = None,
+        **kwargs
     ) -> dict:
         """
         The main entry point for authentication, authorization, and request rate limit verification.
@@ -209,6 +160,10 @@ class Users:
         Args:
             :param user_id (str): Required user ID.
             :param role_id (str): Required role ID for the specified user ID.
+
+        Keyword Args:
+            :param chat_id (str): Required chat ID.
+            :param message_id (str): Required message ID.
 
         Returns:
             (dict) {
@@ -239,7 +194,9 @@ class Users:
         Examples:
             >>> user_access_check(
                     user_id='user1',
-                    role_id='admin_role'
+                    role_id='admin_role',
+                    chat_id='chat1',
+                    message_id='msg1'
                 )
 
         This method serves as the main entry point for user access control.
@@ -251,23 +208,41 @@ class Users:
         if applicable.
         """
         user_info = {}
-        user_info['access'] = self.authentication(
-            user_id=user_id
-        )
-        if user_info['access'] == self.user_status_allow and role_id:
-            user_info['permissions'] = self.authorization(
+        user_info['access'] = self._authentication(user_id=user_id)
+
+        if user_info['access'] == self.user_status_allow:
+            self.storage.register_user(
                 user_id=user_id,
-                role_id=role_id
+                status=user_info['access'],
+                chat_id=kwargs.get('chat_id', 'undefined')
             )
-            if user_info['permissions'] == self.user_status_allow and self.rate_limits:
-                rl_controller = RateLimiter(
-                    vault=self.vault,
-                    user_id=user_id
+
+            if role_id:
+                user_info['permissions'] = self._authorization(
+                    user_id=user_id,
+                    role_id=role_id
                 )
-                user_info['rate_limits'] = rl_controller.determine_rate_limit()
+                if user_info['permissions'] == self.user_status_allow and self.rate_limits:
+                    rl_controller = RateLimiter(
+                        vault=self.vault,
+                        storage=self.storage,
+                        user_id=user_id
+                    )
+                    user_info['rate_limits'] = rl_controller.determine_rate_limit()
+
+        self.storage.log_user_request(
+            user_id=user_id,
+            request={
+                'chat_id': kwargs.get('chat_id', 'undefined'),
+                'message_id': kwargs.get('message_id', 'undefined'),
+                'authentication': user_info['access'],
+                'authorization': user_info.get('permissions', 'undefined'),
+                'rate_limits': user_info.get('rate_limits', 'undefined')
+            }
+        )
         return user_info
 
-    def authentication(
+    def _authentication(
         self,
         user_id: str = None
     ) -> str:
@@ -287,46 +262,25 @@ class Users:
                 or
             (str) self.user_status_deny
         """
-        status = self.vault.read_secret(
+        status = self.vault.kv2engine.read_secret(
             path=f"{self.vault_config_path}/{user_id}",
             key='status'
         )
         # verification of the status value
         if status is None:
-            log.info(
-                '[class.%s] User ID %s not found in Vault configuration '
-                'and will be denied access',
-                __class__.__name__,
-                user_id
-            )
+            log.info('[Users]: user ID %s not found in Vault configuration and will be denied access', user_id)
             status = self.user_status_deny
         elif status in self.user_status_allow or status in self.user_status_deny:
-            log.info(
-                '[class.%s] Access from user ID %s: %s',
-                __class__.__name__,
-                user_id,
-                status
-            )
+            log.info('[Users]: access from user ID %s: %s', user_id, status)
         else:
             log.error(
-                '[class.%s] Invalid configuration for %s status=%s '
-                'value can be %s or %s',
-                __class__.__name__,
-                user_id,
-                status,
-                self.user_status_allow,
-                self.user_status_deny
+                '[Users] invalid configuration for %s status=%s value can be %s or %s',
+                user_id, status, self.user_status_allow, self.user_status_deny
             )
             status = self.user_status_deny
-        # Write latest authentication status to Vault
-        self.vault.write_secret(
-            path=f"{self.vault_data_path}/{user_id}",
-            key='authentication',
-            value=json.dumps({'time': str(datetime.now()), 'status': status})
-        )
         return status
 
-    def authorization(
+    def _authorization(
         self,
         user_id: str = None,
         role_id: str = None
@@ -360,17 +314,5 @@ class Users:
                 status = self.user_status_deny
         else:
             status = self.user_status_deny
-        log.info(
-            '[class.%s] Check role `%s` for user `%s`: %s',
-            __class__.__name__,
-            role_id,
-            user_id,
-            status
-        )
-        # Write latest authorization status to Vault
-        self.vault.write_secret(
-            path=f"{self.vault_data_path}/{user_id}",
-            key='authorization',
-            value=json.dumps({'time': str(datetime.now()), 'status': status, 'role': role_id})
-        )
+        log.info('[Users]: check role `%s` for user `%s`: %s', role_id, user_id, status)
         return status
