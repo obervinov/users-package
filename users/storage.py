@@ -105,20 +105,25 @@ class Storage:
 
     def get_user_requests(
         self,
-        user_id: str = None
+        user_id: str = None,
+        limit: int = 1000,
+        order: str = "timestamp DESC"
     ) -> list:
         """
         Get the user requests from the database.
 
         Args:
             user_id (str): The user ID.
+            limit (int): The number of requests to return.
+            order (str): The order of the requests.
 
         Returns:
             list: The list of user requests.
+            >>> [(id, timestamp, rate_limits), ...]
 
         Example:
             >>> storage = Storage(database_connection, database_credentials)
-            >>> storage.get_user_requests("user1")
+            >>> storage.get_user_requests(user_id="user1", limit=10, order="timestamp DESC")
         """
-        self.cursor.execute(f"SELECT id, timestamp, rate_limits FROM users_requests WHERE user_id='{user_id}' ORDER BY timestamp DESC LIMIT 1000")
+        self.cursor.execute(f"SELECT id, timestamp, rate_limits FROM users_requests WHERE user_id='{user_id}' ORDER BY {order} LIMIT {limit}")
         return self.cursor.fetchall()

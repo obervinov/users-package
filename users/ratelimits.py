@@ -96,8 +96,6 @@ class RateLimiter:
             log.error('[Users.RateLimiter]: No requests configuration found for user ID %s', self.user_id)
             raise WrongUserConfiguration("User configuration in Vault is wrong. Please provide a valid configuration for rate limits.")
 
-        # Extract user requests from the storage
-        self.user_requests = self.storage.get_user_request(user_id=self.user_id)
         self.requests_counters = self._calculate_requests_counters()
 
     @property
@@ -150,39 +148,32 @@ class RateLimiter:
                 or
             None
         """
-        # Sorting the user requests by timestamp
-        user_requests = sorted(self.user_requests, key=lambda x: datetime.strptime(x['rate_limits'], '%Y-%m-%d %H:%M:%S.%f'), reverse=True)
-        
-        
-        # If rate limits already applied
-        if self.requests_ratelimits['end_time']:
-            rate_limits = self._active_rate_limit()
-        # If rate limits need to apply
-        elif (
-            self.requests_configuration['requests_per_day'] <= self.requests_counters['requests_per_day'] or
-            self.requests_configuration['requests_per_hour'] <= self.requests_counters['requests_per_hour']
-        ):
-            rate_limits = self._apply_rate_limit()
-        # If no rate limits, just +1 to request counters
-        elif (
-            self.requests_configuration['requests_per_day'] > self.requests_counters['requests_per_day'] and
-            self.requests_configuration['requests_per_hour'] > self.requests_counters['requests_per_hour']
-        ):
-            rate_limits = {'end_time': None}
-        # If something went wrong
-        else:
-            log.error(
-                '[Users.RateLimiter]: Failed to determinate rate limit for user ID %s:\nConfiguration: %s\nCounters: %s\nHistory: %s\n',
-                __class__.__name__, self.user_id, self.requests_configuration, self.requests_counters, self.requests_history
-            )
-            raise FailedDeterminateRateLimit("Failed to determinate rate limit for the user ID.")
+        # Get the rate limits for the user ID
+        user_requests = self.storage.get_user_requests(user_id=self.user_id, order="rate_limits DESC")
+        if user_requests:
+            # If rate limits is active (compared the last request with the current time)
+            if datetime.strptime(user_requests[0][2], '%Y-%m-%d %H:%M:%S.%f') >= datetime.now():
+                rate_limits = self._active_rate_limit()
+            # If rate limits need to apply
+            elif (
+                self.requests_configuration['requests_per_day'] <= self.requests_counters['requests_per_day'] or
+                self.requests_configuration['requests_per_hour'] <= self.requests_counters['requests_per_hour']
+            ):
+                rate_limits = self._apply_rate_limit()
+            # If no rate limits, just +1 to request counters
+            elif (
+                self.requests_configuration['requests_per_day'] > self.requests_counters['requests_per_day'] and
+                self.requests_configuration['requests_per_hour'] > self.requests_counters['requests_per_hour']
+            ):
+                rate_limits = {'end_time': None}
+            # If something went wrong
+            else:
+                log.error(
+                    '[Users.RateLimiter]: Failed to determinate rate limit for user ID %s:\nConfiguration: %s\nCounters: %s\nHistory: %s\n',
+                    self.user_id, self.requests_configuration, self.requests_counters, self.requests_history
+                )
+                raise FailedDeterminateRateLimit("Failed to determinate rate limit for the user ID.")
 
-        # update the request history for the user ID with current request timestamp
-        self._update_requests_history()
-        log.debug(
-            'After determining the rate limit status\nCounters: %s\nRateLimits: %s\nConfig: %s\n',
-            self.requests_counters, self.requests_ratelimits, self.requests_configuration
-        )
         return {'end_time': rate_limits['end_time'] if rate_limits else None}
 
     def _active_rate_limit(self) -> Union[dict, None]:
@@ -320,8 +311,9 @@ class RateLimiter:
         log.debug('[Users.RateLimiter]: Calculating of request counters for user ID %s', self.user_id)
         requests_per_hour = 0
         requests_per_day = 0
-        if self.user_requests:
-            for request in self.user_requests:
+        user_requests = self.storage.get_user_requests(user_id=self.user_id)
+        if user_requests:
+            for request in user_requests:
                 request_timestamp = datetime.strptime(request['timestamp'], '%Y-%m-%d %H:%M:%S.%f')
                 if request_timestamp >= datetime.now() - timedelta(hours=1):
                     requests_per_hour = requests_per_hour + 1
