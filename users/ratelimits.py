@@ -123,7 +123,7 @@ class RateLimiter:
         """
         self._vault_config_path = vault_config_path
 
-    def determine_rate_limit(self) -> Union[dict, None]:
+    def determine_rate_limit(self) -> Union[datetime, None]:
         """
         Determine the rate limit status for the user ID.
 
@@ -137,23 +137,19 @@ class RateLimiter:
             >>> rl_status = limiter.determine_rate_limit()
 
         Returns:
-            (dict | None): Rate limit timestamp for the user ID.
-            {
-              "end_time": "2023-08-07 10:39:00.000000"
-            }
-                or
-            {
-              "end_time": None
-            }
+            (datetime | None): Rate limit timestamp for the user ID.
+            2023-08-07 10:39:00.000000
                 or
             None
         """
+        rate_limits = None
+
         # Get the rate limits for the user ID
         user_requests = self.storage.get_user_requests(user_id=self.user_id, order="rate_limits DESC")
         if user_requests:
             # If rate limits is active (compared the last request with the current time)
             if datetime.strptime(user_requests[0][2], '%Y-%m-%d %H:%M:%S.%f') >= datetime.now():
-                rate_limits = self._active_rate_limit()
+                rate_limits = self._validate_rate_limit()
             # If rate limits need to apply
             elif (
                 self.requests_configuration['requests_per_day'] <= self.requests_counters['requests_per_day'] or
@@ -165,18 +161,17 @@ class RateLimiter:
                 self.requests_configuration['requests_per_day'] > self.requests_counters['requests_per_day'] and
                 self.requests_configuration['requests_per_hour'] > self.requests_counters['requests_per_hour']
             ):
-                rate_limits = {'end_time': None}
+                rate_limits = None
             # If something went wrong
             else:
                 log.error(
-                    '[Users.RateLimiter]: Failed to determinate rate limit for user ID %s:\nConfiguration: %s\nCounters: %s\nHistory: %s\n',
-                    self.user_id, self.requests_configuration, self.requests_counters, self.requests_history
+                    '[Users.RateLimiter]: Failed to determinate rate limit for user ID %s:\nConfiguration: %s\nCounters: %s',
+                    self.user_id, self.requests_configuration, self.requests_counters
                 )
                 raise FailedDeterminateRateLimit("Failed to determinate rate limit for the user ID.")
+        return rate_limits
 
-        return {'end_time': rate_limits['end_time'] if rate_limits else None}
-
-    def _active_rate_limit(self) -> Union[dict, None]:
+    def _validate_rate_limit(self) -> Union[datetime, None]:
         """
         Check and handle active rate limits for the user ID.
 
@@ -184,115 +179,64 @@ class RateLimiter:
             None
 
         Returns:
-            (dict | None): Rate limit timestamp for the user ID or None if the time has already expired.
-            {
-              "end_time": "2023-08-07 10:39:00.000000"
-            }
+            (datetime | None): Rate limit timestamp for the user ID or None if the time has already expired.
+            2023-08-07 10:39:00.000000
                 or
-            {
-              "end_time": None
-            }
+            None
         """
+        latest_rate_limit_timestamp = self.storage.get_user_requests(user_id=self.user_id, order="rate_limits DESC", limit=1)[0][2]
+        per_day_exceeded = self.requests_counters['requests_per_day'] >= self.requests_configuration['requests_per_day']
+        per_hour_exceeded = self.requests_counters['requests_per_hour'] >= self.requests_configuration['requests_per_hour']
+
         # If the rate limit has already expired - reset the rate limit
-        if datetime.now() >= datetime.strptime(self.requests_ratelimits['end_time'], '%Y-%m-%d %H:%M:%S.%f'):
-            log.info(
-                '[Users.RateLimiter]: Rate limit %s for user ID %s has expired, resetting the rate limit',
-                __class__.__name__, self.user_id, self.requests_ratelimits['end_time']
-            )
-            self.requests_ratelimits['end_time'] = None
-            self.vault.kv2engine.write_secret(
-                path=f"{self.vault_data_path}/{self.user_id}",
-                key='requests_ratelimits',
-                value=json.dumps(self.requests_ratelimits)
-                        )
-        else:
-            # Calculate the multiplier on the rate limit if requests continue to arrive after the application of rate_limit
-            # in order to distribute the remaining requests in the same way based on the configuration
-            log.info(
-                '[Users.RateLimiter]: A rate limit %s already exists for user ID %s, and not yet expired',
-                __class__.__name__, self.requests_ratelimits['end_time'], self.user_id
-            )
-            shift_minutes = 0
-            per_day_exceeded = self.requests_counters['requests_per_day'] >= self.requests_configuration['requests_per_day']
-            per_hour_exceeded = self.requests_counters['requests_per_hour'] >= self.requests_configuration['requests_per_hour']
-            per_day_multiplier = self.requests_counters['requests_per_day'] % self.requests_configuration['requests_per_day']
-            per_hour_multiplier = self.requests_counters['requests_per_hour'] % self.requests_configuration['requests_per_hour']
-    
-            # Case1: If the counter exceeds the configuration per DAY and the counter is a multiple of the configuration - shift by 24 hours
-            if (per_day_exceeded and self.requests_counters['requests_per_day'] == 1) or (per_day_exceeded and per_day_multiplier == 0):
-                shift_minutes = 1440
+        if datetime.now() >= datetime.strptime(latest_rate_limit_timestamp, '%Y-%m-%d %H:%M:%S.%f'):
+            log.info('[Users.RateLimiter]: The rate limit %s for user ID %s has expired and will be reset', latest_rate_limit_timestamp, self.user_id)
+            return None
 
-            # Case2: If the counter exceeds the configuration per HOUR and the counter is a multiple of the configuration - shift by 60 minutes + random shift
-            elif (per_hour_exceeded and self.requests_counters['requests_per_hour'] == 1) or (per_hour_exceeded and per_hour_multiplier == 0):
-                shift_minutes = 60 + random.randint(1, self.requests_configuration['random_shift_minutes'])
+        # Case1: If the counter exceeds the configuration per DAY
+        if per_day_exceeded:
+            if latest_rate_limit_timestamp:
+                new_rate_limit = datetime.strptime(latest_rate_limit_timestamp, '%Y-%m-%d %H:%M:%S.%f') + timedelta(days=1)
+            else:
+                new_rate_limit = datetime.now() + timedelta(days=1)
 
-            # Case3: If the counter exceeds the configuration per HOUR and the counter is not a multiple of the configuration - shift only by random shift
-            elif per_hour_exceeded and per_hour_multiplier != 0:
-                shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
+        # Case2: If the counter exceeds the configuration per HOUR
+        elif per_hour_exceeded:
+            shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
+            if latest_rate_limit_timestamp:
+                new_rate_limit = datetime.strptime(latest_rate_limit_timestamp, '%Y-%m-%d %H:%M:%S.%f') + timedelta(hours=1, minutes=shift_minutes)
+            else:
+                new_rate_limit = datetime.now() + timedelta(hours=1, minutes=shift_minutes)
 
-            latest_end_time = datetime.strptime(self.requests_ratelimits['end_time'], '%Y-%m-%d %H:%M:%S.%f')
-            self.requests_ratelimits['end_time'] = str(latest_end_time + timedelta(minutes=shift_minutes))
-            self.vault.kv2engine.write_secret(
-                path=f"{self.vault_data_path}/{self.user_id}",
-                key='requests_ratelimits',
-                value=json.dumps(self.requests_ratelimits)
-            )
-        return self.requests_ratelimits
+        log.info('[Users.RateLimiter]: The rate limit already applied for user ID %s. Updated rate limit: %s', self.user_id, str(new_rate_limit))
 
-    def _apply_rate_limit(self) -> Union[dict, None]:
+        return new_rate_limit
+
+    def _apply_rate_limit(self) -> Union[datetime, None]:
         """
-        Apply rate limits to the user ID and reset counters.
+        Apply rate limits to the user ID and return the rate limit timestamp.
 
         Args:
             None
 
         Returns:
-            (dict | None): Rate limit timestamp for the user ID, or None if not applicable.
-            {
-              "end_time": "2023-08-07 10:39:00.000000"
-            }
+            (datetime | None): Rate limit timestamp for the user ID, or None if not applicable.
+            2023-08-07 10:39:00.000000
                 or
             None
         """
         # If the rate limit is already applied
         if self.requests_configuration['requests_per_day'] <= self.requests_counters['requests_per_day']:
-            log.warning(
-                '[Users.RateLimiter]: The request limits are exhausted (per_day), '
-                'the rate limit will be applied for user ID %s',
-                __class__.__name__,
-                self.user_id
-            )
-            end_time = str(datetime.now() + timedelta(days=1))
-            self.requests_ratelimits['end_time'] = end_time
-            log.info(
-                '[Users.RateLimiter]: Rate limit for user ID %s set to expire at %s',
-                __class__.__name__,
-                self.user_id,
-                end_time
-            )
+            rate_limit = datetime.now() + timedelta(days=1)
+            log.info('[Users.RateLimiter]: The requests limit per day are exhausted for user ID %s. The rate limit will expire at %s', self.user_id, str(rate_limit))
+
         # If the rate limit is not yet applied
         elif self.requests_configuration['requests_per_hour'] <= self.requests_counters['requests_per_hour']:
-            log.warning(
-                '[Users.RateLimiter]: The request limits are exhausted (per_hour), '
-                'the rate limit will be applied for user ID %s',
-                __class__.__name__,
-                self.user_id
-            )
             shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
-            end_time = str(datetime.now() + timedelta(hours=1, minutes=shift_minutes))
-            self.requests_ratelimits['end_time'] = end_time
-            log.info(
-                '[Users.RateLimiter]: Rate limit for user ID %s set to expire at %s',
-                __class__.__name__,
-                self.user_id,
-                end_time
-            )
-        self.vault.kv2engine.write_secret(
-            path=f"{self.vault_data_path}/{self.user_id}",
-            key='requests_ratelimits',
-            value=json.dumps(self.requests_ratelimits)
-        )
-        return self.requests_ratelimits
+            rate_limit = datetime.now() + timedelta(hours=1, minutes=shift_minutes)
+            log.info('[Users.RateLimiter]: The requests limit per hour are exhausted for user ID %s. The rate limit will expire at %s', self.user_id, str(rate_limit))
+
+        return rate_limit
 
     def _calculate_requests_counters(self) -> dict:
         """

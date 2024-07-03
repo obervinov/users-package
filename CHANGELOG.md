@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 * `authentication()` and `authorization()` methods are private now
 * `rate limit` functions are now switched off by default and need to be switched on explicitly
 * Removed unused option to manually set `vault_client` attributes
+* Changed returns in `determine_rate_limit()` method. More details in the [documentation](DEPRECATED.md)
+* Changed logger level to `INFO` for messages when the user rate limit is exceeded
 #### 🚀 Features
 * Bump workflow `_templates` version to `v1.2.6`
 * Bump vault-package version to `v3.0.0`
