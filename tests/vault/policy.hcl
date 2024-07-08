@@ -34,9 +34,3 @@ path "pytest/config" {
 path "pytest/data/configuration/*" {
   capabilities = ["create", "read", "update", "list"]
 }
-
-# Operations for the module
-# Work with secret event data
-path "pytest/data/data/*" {
-  capabilities = ["create", "read", "update", "list"]
-}
