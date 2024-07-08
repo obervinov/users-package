@@ -3,34 +3,56 @@ A test that checks the function of the user's entry point.
 """
 import re
 import pytest
+import datetime
 
 
-@pytest.mark.order(11)
-def test_check_entrypoint_doesnt_exist_user(users):
+@pytest.mark.order(1)
+def test_users_doesnt_exist_user(users):
     """
-    Verify that the main entry point for user verification handles the case
-    where the user does not exist.
+    Verify behavior when the user does not exist in the Vault configuration (without rate limiting).
     """
-    user = 'testUser99'
-    assert users.user_access_check(user_id=user) == {
-                'access': users.user_status_deny
-    }
+    assert users.user_access_check(user_id='testUser99') == {'access': users.user_status_deny}
 
 
-@pytest.mark.order(12)
+@pytest.mark.order(2)
+def test_users_without_rl_doesnt_exist_user(users):
+    """
+    Verify behavior when the user does not exist in the Vault configuration (with rate limiting).
+    """
+    assert users.user_access_check(user_id='testUser99') == {'access': users.user_status_deny}
+
+
+@pytest.mark.order(3)
 def test_check_entrypoint_rl_disabled(users_without_rl):
     """
-    Verify that the main entry point for user verification handles the case
-    where rate limiting is disabled.
+    Verify response when rate limiting is disabled.
     """
-    user = 'testUser9'
-    assert users_without_rl.user_access_check(user_id=user, role_id='financial_role') == {
+    assert users_without_rl.user_access_check(user_id='testUser1', role_id='admin_role') == {
                 'access': users_without_rl.user_status_allow,
                 'permissions': users_without_rl.user_status_allow
     }
 
 
-@pytest.mark.order(13)
+@pytest.mark.order(4)
+def test_check_entrypoint_rl_enabled(users, timestamp_pattern):
+    """
+    Verify response when rate limiting is enabled.
+    """
+    response = users.user_access_check(user_id='testUser1', role_id='admin_role')
+    assert response['access'] == users.user_status_allow
+    assert response['permissions'] == users.user_status_allow
+    assert re.match(timestamp_pattern, str(response['rate_limits'])) is not None
+    assert isinstance(response['rate_limits'], datetime.datetime)
+
+
+### TEST CASES FOR EXIST AND DOESNT EXIST ROLES ###
+
+
+
+
+
+
+
 def test_check_entrypoint_authn_allowed(users):
     """
     Verify that the main entry point for user verification handles the case

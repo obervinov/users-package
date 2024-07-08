@@ -236,7 +236,7 @@ class Users:
                 'chat_id': kwargs.get('chat_id', 'undefined'),
                 'message_id': kwargs.get('message_id', 'undefined'),
                 'authentication': user_info['access'],
-                'authorization': user_info.get('permissions', 'undefined'),
+                'authorization': {'role_id': role_id, 'status': user_info.get('permissions', 'undefined')},
                 'rate_limits': user_info.get('rate_limits', 'undefined')
             }
         )
