@@ -7,6 +7,7 @@ import time
 import requests
 import pytest
 import hvac
+import psycopg2
 # pylint: disable=E0401
 from vault import VaultClient
 # pylint: disable=E0611
@@ -145,6 +146,25 @@ def fixture_prepare_vault(vault_url, namespace, policy_path, postgres_url):
     }
 
 
+@pytest.fixture(name="postgres_instance", scope='session')
+def fixture_postgres_instance():
+    """Prepare the postgres database, return the connection and cursor"""
+    with open('postgres/tables.sql', 'r') as sql_file:
+        sql_script = sql_file.read()
+    psql_connection = psycopg2.connect(
+        host='postgres',
+        port=5432,
+        user='postgres',
+        password='postgres',
+        dbname='postgres'
+    )
+    psql_cursor = psql_connection.cursor()
+    psql_cursor.execute(sql_script)
+    psql_connection.commit()
+    return psql_connection, psql_cursor
+    
+
+    
 @pytest.fixture(name="vault_instance", scope='session')
 def fixture_vault_instance(vault_url, namespace, prepare_vault):
     """Returns client of the configurator"""
@@ -168,9 +188,10 @@ def fixture_timestamp_pattern():
 
 
 @pytest.fixture(name="users", scope='function')
-def fixture_users(vault_instance,):
+def fixture_users(vault_instance, postgres_instance):
     """Fill in the configuration and data for the test users"""
     users = [
+        #
         # Test user1
         # - AUTHZ: allowed role1
         # - RATE_LIMIT: limited requests
@@ -184,6 +205,7 @@ def fixture_users(vault_instance,):
                 ('testUser1', 'testMessage1', 'testChat1', 'allowed', '{\'role_id\': \'admin_role\', \'status\': \'allowed\'}', datetime.now())
             ]
         },
+        #
         # Test user2
         # - AUTHZ: allowed role1 and role2
         # - RATE_LIMIT: limited requests
@@ -198,6 +220,7 @@ def fixture_users(vault_instance,):
                 ('testUser2', 'testMessage3', 'testChat2', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hours=2)),
             ]
         },
+        #
         # Test user3
         # - AUTHZ: allowed role1
         # - RATE_LIMIT: limited requests
@@ -215,6 +238,7 @@ def fixture_users(vault_instance,):
                 ('testUser3', 'testMessage2', 'testChat3', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hours=2)),                
             ]
         },
+        #
         # Test user4
         # - AUTHZ: allowed role1
         # - RATE_LIMIT: limited requests
@@ -228,198 +252,58 @@ def fixture_users(vault_instance,):
                 ('testUser4', 'testMessage1', 'testChat4', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hour=4)),
             ]
         },
-        
-        
-        
-        # Test user5 for additional cases in rate limits controller
-        {
-            'name': 'testUser5',
-            'status': 'allowed',
-            'roles': ['financial_role'],
-            'requests': {'requests_per_day': 30, 'requests_per_hour': 3, 'random_shift_minutes': 15}
-        },
-        # Test user6 for additional cases in rate limits controller
-        {
-            'name': 'testUser6',
-            'status': 'allowed',
-            'roles': ['financial_role'],
-            'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
-        },
-        # Test user6 for additional cases in rate limits controller
-        {
-            'name': 'testUser7',
-            'status': 'allowed',
-            'roles': ['financial_role'],
-            'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
-        },
-        # Test user8 for additional cases in rate limits controller
-        {
-            'name': 'testUser8',
-            'status': 'allowed',
-            'roles': ['financial_role'],
-            'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
-        },
-        # Test user9 for additional cases in rate limits controller
-        {
-            'name': 'testUser9',
-            'status': 'allowed',
-            'roles': ['financial_role'],
-            'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
-        },
-        # Test user10 for additional cases in rate limits controller
-        {
-            'name': 'testUser10',
-            'status': 'allowed',
-            'roles': ['financial_role'],
-            'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
-        },
-        # Test user11 for additional cases in rate limits controller (timer_watcher)
-        {
-            'name': 'testUser11',
-            'status': 'allowed',
-            'roles': ['financial_role'],
-            'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15}
-        },
-        # Test user12 for additional cases in rate limits controller (timer_watcher)
-        {
-            'name': 'testUser12',
-            'status': 'allowed',
-            'roles': ['financial_role'],
-            'requests': {'requests_per_day': 30, 'requests_per_hour': 3, 'random_shift_minutes': 15}
-        }
-        ## NEED USER WITHOUT ROLES BUT WITH ACCESS!!!!!!
-        # Test user4
-        # - forbidden access for user
-        {
-            'name': 'testUser4',
+
+        # Test user20
+        # - AUTHN: denied
+        # - AUTHZ: denied
+        'testUser20': {
             'status': 'denied',
             'roles': [],
-            'requests': {}
+            'requests': []
         },
-
-    ]
-    for configuration in configurations:
-        for key, value in configuration.items():
-            if key in ['requests', 'roles']:
-                _ = vault_instance.write_secret(
-                    path=f'configuration/users/{configuration["name"]}',
-                    key=key,
-                    value=json.dumps(value)
-                )
-            else:
-                _ = vault_instance.write_secret(
-                    path=f'configuration/users/{configuration["name"]}',
-                    key=key,
-                    value=value
-                )
-
-
-
-
-
-
-
-
-
-        # Test user4: EMPTY (because configuration is forbidden access)
-
-        # Test user5: exist rate limit timestamp
-        # - the request limit has been reset to zero
-        # - restrictions on requests apply
-        {
-            'name': 'testUser5',
-            'requests_history': [],
-            'requests_ratelimits': {'end_time': f"{datetime.now() + timedelta(hours=1)}"}
-        },
-
-        # Test user6: EMPTY (because configuration is forbidden access)
-
-        # Test user7: detect and setup rate limits timestamps (for requests_per_day)
-        # - request limit exceeded
-        # - restrictions on requests have not yet been applied
-        {
-            'name': 'testUser7',
-            'requests_history': [str(datetime.now() - timedelta(hours=i)) for i in range(2, 13)],
-            'requests_ratelimits': {'end_time': None}
-        },
-        # Test user8: detect and setup rate limits timestamps (for requests_per_hour)
-        # - request limit exceeded
-        # - restrictions on requests have not yet been applied
-        {
-            'name': 'testUser8',
-            'requests_history': [
-                str(datetime.now() - timedelta(minutes=10*i)) for i in range(1, 2)
-            ] + [
-                str(datetime.now() - timedelta(hours=i)) for i in range(2, 3)
-            ],
-            'requests_ratelimits': {'end_time': None}
-        },
-        # Test user9: detect and setup rate limits timestamps (for both: requests_per_day and requests_per_hour)
-        # - request limit exceeded
-        # - restrictions on requests have not yet been applied
-        {
-            'name': 'testUser9',
-            'requests_history': [
-                str(datetime.now() - timedelta(minutes=10*i)) for i in range(1, 2)
-            ] + [
-                str(datetime.now() - timedelta(hours=i)) for i in range(2, 13)
-            ],
-            'requests_ratelimits': {'end_time': None}
-        },
-        # Test user10: reset expired rate limit
-        # - the counter is reset to zero
-        # - the speed limit timer has expired
-        {
-            'name': 'testUser10',
-            'requests_history': [],
-            'requests_ratelimits': {'end_time': str(datetime.now() - timedelta(hours=1))}
-        },
-        # Test user11: reset expired rate limit
-        # - the counter is reset to zero
-        # - the speed limit timer has expired
-        {
-            'name': 'testUser11',
-            'requests_history': [
-                str(datetime.now() - timedelta(minutes=15*i)) for i in range(1, 5)
-            ] + [
-                str(datetime.now() - timedelta(hours=i)) for i in range(20, 26)
-            ],
-            'requests_ratelimits': {'end_time': None}
-        },
-        # Test user12: reset expired rate limit
-        # - the counter is reset to zero
-        # - the speed limit timer has expired
-        {
-            'name': 'testUser12',
-            'requests_history': [
-                str(datetime.now() - timedelta(minutes=10*i)) for i in range(1, 2)
-            ] + [
-                str(datetime.now() - timedelta(hours=i)) for i in range(22, 34)
-            ],
-            'requests_ratelimits': {'end_time': None}
+        # Test user21
+        # - AUTHN: allowed
+        # - AUTHZ: denied
+        'testUser21': {
+            'status': 'allowed',
+            'roles': [],
+            'requests': []
         }
     ]
-    for user in data:
+    psql_connection, psql_cursor = postgres_instance
+    for user in users:
         for key, value in user.items():
-            if key in ['requests_history', 'requests_ratelimits']:
-                _ = vault_instance.write_secret(
-                    path=f'data/users/{user["name"]}',
+            if key in ['requests', 'roles']:
+                _ = vault_instance.kv2engine.write_secret(
+                    path=f'configuration/users/{user}',
                     key=key,
                     value=json.dumps(value)
                 )
-            else:
+            elif key == 'status':
                 _ = vault_instance.write_secret(
-                    path=f'data/users/{user["name"]}',
+                    path=f'configuration/users/{user}',
                     key=key,
                     value=value
                 )
+            elif key == 'requests_history' and len(key) > 0:
+                for row in value:
+                    if len(row) == 6:
+                        user_id, message_id, chat_id, authentication, authorization, timestamp = row
+                        _ = psql_cursor.execute(
+                            f"INSERT INTO users_requests (user_id, message_id, chat_id, authentication, authorization, timestamp) VALUES ('{user_id}', '{message_id}', '{chat_id}', '{authentication}', '{authorization}', '{timestamp}')"
+                        )
+                    elif len(row) == 7:
+                        user_id, message_id, chat_id, authentication, authorization, timestamp, rate_limits = row
+                        _ = psql_cursor.execute(
+                            f"INSERT INTO users_requests (user_id, message_id, chat_id, authentication, authorization, timestamp, rate_limits) VALUES ('{user_id}', '{message_id}', '{chat_id}', '{authentication}', '{authorization}', '{timestamp}', '{rate_limit_timestamp}')"
+                        )
+                    psql_connection.commit()
 
 
 @pytest.fixture(name="users", scope='function')
-def fixture_users(vault_instance, users_attributes, users_data):
+def fixture_users(vault_instance, users):
     """Returns an instance of the Users class with the rate limit controller enabled"""
-    _ = users_attributes
-    _ = users_data
+    _ = users
     return Users(
         vault=vault_instance,
         rate_limits=True
@@ -427,8 +311,7 @@ def fixture_users(vault_instance, users_attributes, users_data):
 
 
 @pytest.fixture(name="users_without_rl", scope='function')
-def fixture_users_without_rl(vault_instance, users_attributes, users_data):
+def fixture_users_without_rl(vault_instance, users):
     """Returns an instance of the Users class with the rate limit controller disabled"""
-    _ = users_attributes
-    _ = users_data
+    _ = users
     return Users(vault=vault_instance)

@@ -2,8 +2,8 @@
 A test that checks the function of the user's entry point.
 """
 import re
-import pytest
 import datetime
+import pytest
 
 
 @pytest.mark.order(1)
@@ -11,7 +11,12 @@ def test_users_doesnt_exist_user(users):
     """
     Verify behavior when the user does not exist in the Vault configuration (without rate limiting).
     """
-    assert users.user_access_check(user_id='testUser99') == {'access': users.user_status_deny}
+    user_info = users.user_access_check(user_id='testUser99')
+    user_info_with_role = users.user_access_check(user_id='testUser99', role_id='admin_role') 
+    assert user_info['access'] == users.user_status_deny
+    assert user_info.get('permissions', None) is None
+    assert user_info_with_role['access'] == users.user_status_deny
+    assert user_info_with_role.get('permissions', None) is None
 
 
 @pytest.mark.order(2)
@@ -45,91 +50,46 @@ def test_check_entrypoint_rl_enabled(users, timestamp_pattern):
     assert isinstance(response['rate_limits'], datetime.datetime)
 
 
-### TEST CASES FOR EXIST AND DOESNT EXIST ROLES ###
-
-
-
-
-
-
-
-def test_check_entrypoint_authn_allowed(users):
+@pytest.mark.order(5)
+def test_authorization_exist_roles(users):
     """
-    Verify that the main entry point for user verification handles the case
-    where authentication is allowed.
+    Verify response when the user has the role.
     """
-    user = 'testUser2'
-    assert users.user_access_check(user_id=user, role_id='financial_role') == {
-                'access': users.user_status_allow,
-                'permissions': users.user_status_allow,
-                'rate_limits': {'end_time': None}
-    }
+    assert users.user_access_check(user_id='testUser1', role_id='admin_role')['permissions'] == users.user_status_allow
+    assert users.user_access_check(user_id='testUser2', role_id='financial_role')['permissions'] == users.user_status_allow
+    assert users.user_access_check(user_id='testUser2', role_id='goals_role')['permissions'] == users.user_status_allow
 
 
-@pytest.mark.order(14)
-def test_check_entrypoint_authn_denied(users):
+@pytest.mark.order(5)
+def test_authorization_doesnt_exist_roles(users):
     """
-    Verify that the main entry point for user verification handles the case
-    where authentication is denied.
+    Verify response when the user does not have the role.
     """
-    user = 'testUser4'
-    assert users.user_access_check(user_id=user) == {
-                'access': users.user_status_deny
-    }
+    assert users.user_access_check(user_id='testUser2', role_id='admin_role')['permissions'] == users.user_status_deny
+    assert users.user_access_check(user_id='testUser2', role_id='guest_role')['permissions'] == users.user_status_deny
+    assert users.user_access_check(user_id='testUser2')['permissions'] == users.user_status_deny
+    assert users.user_access_check(user_id='testUser3', role_id='admin_role')['permissions'] == users.user_status_deny
+    assert users.user_access_check(user_id='testUser3', role_id='guest_role')['permissions'] == users.user_status_deny
+    assert users.user_access_check(user_id='testUser3')['permissions'] == users.user_status_deny
+    assert users.user_access_check(user_id='testUser4', role_id='admin_role')['permissions'] == users.user_status_deny
+    assert users.user_access_check(user_id='testUser4', role_id='guest_role')['permissions'] == users.user_status_deny
+    assert users.user_access_check(user_id='testUser4')['permissions'] == users.user_status_deny
 
 
-@pytest.mark.order(15)
-def test_check_entrypoint_authz_allowed(users):
+@pytest.mark.order(6)
+def test_authentication_user_denied(users):
     """
-    Verify that the main entry point for user verification handles the case
-    where authorization is allowed.
+    Verify response when the user is denied access.
     """
-    user = 'testUser2'
-    assert users.user_access_check(user_id=user, role_id='financial_role') == {
-                'access': users.user_status_allow,
-                'permissions': users.user_status_allow,
-                'rate_limits': {'end_time': None}
-    }
+    assert users.user_access_check(user_id='testUser20')['access'] == users.user_status_deny
+    assert users.user_access_check(user_id='testUser20', role_id='admin_role')['access'] == users.user_status_deny
 
 
-@pytest.mark.order(16)
-def test_check_entrypoint_authz_denied(users):
+@pytest.mark.order(7)
+def test_authorization_user_denied(users):
     """
-    Verify that the main entry point for user verification handles the case
-    where authorization is denied.
+    Verify response when the user is denied access.
     """
-    user = 'testUser2'
-    assert users.user_access_check(user_id=user, role_id='admin_role') == {
-                'access': users.user_status_allow,
-                'permissions': users.user_status_deny
-    }
-
-
-@pytest.mark.order(17)
-def test_check_entrypoint_rl_applied(users, timestamp_pattern):
-    """
-    Verify that the main entry point for user verification correctly applies rate limits
-    and matches the end_time using a regular expression.
-    """
-    user = 'testUser5'
-    result = users.user_access_check(user_id=user, role_id='financial_role')
-
-    assert result['access'] == users.user_status_allow
-    assert result['permissions'] == users.user_status_allow
-
-    end_time = result['rate_limits']['end_time']
-    assert re.match(timestamp_pattern, end_time) is not None
-
-
-@pytest.mark.order(18)
-def test_check_entrypoint_rl_not_applied(users):
-    """
-    Verify that the main entry point for user verification correctly handles the case
-    where rate limits are not applied.
-    """
-    user = 'testUser2'
-    assert users.user_access_check(user_id=user, role_id='financial_role') == {
-                'access': users.user_status_allow,
-                'permissions': users.user_status_allow,
-                'rate_limits': {'end_time': None}
-    }
+    assert users.user_access_check(user_id='testUser21')['access'] == users.user_status_allowed
+    assert users.user_access_check(user_id='testUser21')['permissions'] == users.user_status_allowed
+    assert users.user_access_check(user_id='testUser21', role_id='admin_role')['permissions'] == users.user_status_deny

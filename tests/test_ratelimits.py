@@ -158,3 +158,33 @@ def test_check_rl_counters_watching_decrease_per_day(vault_instance):
         key="requests_counters"
     )
     assert json.loads(requests_counters) == {'requests_per_day': 3, 'requests_per_hour': 1}
+
+
+@pytest.mark.order(17)
+def test_check_entrypoint_rl_applied(users, timestamp_pattern):
+    """
+    Verify that the main entry point for user verification correctly applies rate limits
+    and matches the end_time using a regular expression.
+    """
+    user = 'testUser5'
+    result = users.user_access_check(user_id=user, role_id='financial_role')
+
+    assert result['access'] == users.user_status_allow
+    assert result['permissions'] == users.user_status_allow
+
+    end_time = result['rate_limits']['end_time']
+    assert re.match(timestamp_pattern, end_time) is not None
+
+
+@pytest.mark.order(18)
+def test_check_entrypoint_rl_not_applied(users):
+    """
+    Verify that the main entry point for user verification correctly handles the case
+    where rate limits are not applied.
+    """
+    user = 'testUser2'
+    assert users.user_access_check(user_id=user, role_id='financial_role') == {
+                'access': users.user_status_allow,
+                'permissions': users.user_status_allow,
+                'rate_limits': {'end_time': None}
+    }
