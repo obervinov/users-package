@@ -223,8 +223,8 @@ def fixture_users(vault_instance, postgres_instance):
             'roles': ['financial_role', 'goals_role'],
             'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
             'requests_history': [
-                ('testUser2', 'testMessage2', 'testChat2', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hours=1)),
-                ('testUser2', 'testMessage3', 'testChat2', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hours=2)),
+                ('testUser2', 'testMessage2', 'testChat2', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hourss=1)),
+                ('testUser2', 'testMessage3', 'testChat2', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hourss=2)),
             ]
         },
         #
@@ -242,8 +242,8 @@ def fixture_users(vault_instance, postgres_instance):
             'requests_history': [
                 ('testUser3', 'testMessage1', 'testChat3', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now()),
                 ('testUser3', 'testMessage1', 'testChat3', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(minutes=10)),
-                ('testUser3', 'testMessage2', 'testChat3', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hours=1)),
-                ('testUser3', 'testMessage2', 'testChat3', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hours=2)),
+                ('testUser3', 'testMessage2', 'testChat3', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hourss=1)),
+                ('testUser3', 'testMessage2', 'testChat3', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hourss=2)),
             ]
         },
         #
@@ -257,8 +257,8 @@ def fixture_users(vault_instance, postgres_instance):
             'roles': ['financial_role'],
             'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 60},
             'requests_history': [
-                ('testUser4', 'testMessage1', 'testChat4', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hour=3), datetime.now() + timedelta(hour=1)),
-                ('testUser4', 'testMessage1', 'testChat4', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hour=4)),
+                ('testUser4', 'testMessage1', 'testChat4', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hours=3), datetime.now() + timedelta(hours=1)),
+                ('testUser4', 'testMessage1', 'testChat4', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hours=4)),
             ]
         },
         #
