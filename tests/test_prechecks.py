@@ -11,7 +11,7 @@ def test_check_init_vault_conf(users_instance):
     """
     assert isinstance(users_instance.vault, object)
     print(users_instance.vault)
-    assert users_instance.vault.kv2engine.read_secret(path='data/users/testUser1') is not None
+    assert users_instance.vault.kv2engine.read_secret(path='configuration/users/testUser1') is not None
 
 
 @pytest.mark.order(20)
