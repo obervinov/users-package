@@ -52,7 +52,7 @@ def fixture_vault_url():
 @pytest.fixture(name="namespace", scope='session')
 def fixture_name():
     """Returns the project namespace"""
-    return "pytest"
+    return "pytests"
 
 
 @pytest.fixture(name="policy_path", scope='session')
@@ -138,8 +138,8 @@ def fixture_prepare_vault(vault_url, namespace, policy_path, postgres_url):
     # Create role for the database
     role = client.secrets.database.create_role(
         name="test-role",
-        db_name="postgres",
-        creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; GRANT ALL PRIVILEGES ON DATABASE postgres TO \"{{name}}\";",
+        db_name="postgresql",
+        creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; GRANT ALL PRIVILEGES ON DATABASE pytests TO \"{{name}}\";",
         default_ttl="1h",
         max_ttl="24h"
     )
@@ -155,8 +155,7 @@ def fixture_prepare_vault(vault_url, namespace, policy_path, postgres_url):
 @pytest.fixture(name="postgres_instance", scope='session')
 def fixture_postgres_instance(psql_tables_path):
     """Prepare the postgres database, return the connection and cursor"""
-    with open(psql_tables_path, 'r', encoding='utf-8') as sql_file:
-        sql_script = sql_file.read()
+    # Prepare database for tests
     psql_connection = psycopg2.connect(
         host='0.0.0.0',
         port=5432,
@@ -165,8 +164,20 @@ def fixture_postgres_instance(psql_tables_path):
         dbname='postgres'
     )
     psql_cursor = psql_connection.cursor()
-    psql_cursor.execute(sql_script)
-    psql_connection.commit()
+    psql_cursor.execute("CREATE DATABASE pytests; CREATE USER pytests WITH PASSWORD 'pytests'; GRANT ALL PRIVILEGES ON DATABASE pytests TO pytests;")
+    # Switch to test database and create tables
+    psql_connection = psycopg2.connect(
+        host='0.0.0.0',
+        port=5432,
+        user='pytests',
+        password='pytests',
+        dbname='pytests'
+    )
+    psql_cursor = psql_connection.cursor()
+    with open(psql_tables_path, 'r', encoding='utf-8') as sql_file:
+        sql_script = sql_file.read()
+        psql_cursor.execute(sql_script)
+        psql_connection.commit()
     return psql_connection, psql_cursor
 
 
@@ -199,7 +210,7 @@ def fixture_database_secret(vault_instance):
     _ = vault_instance.kv2engine.write_secret(
         path=secret_path,
         key='dbname',
-        value='postgres'
+        value='pytests'
     )
     _ = vault_instance.kv2engine.write_secret(
         path=secret_path,
