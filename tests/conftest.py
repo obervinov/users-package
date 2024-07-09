@@ -339,7 +339,7 @@ def fixture_users(vault_instance, postgres_instance):
 def fixture_users_instance(vault_instance, users, database_secret):
     """Returns an instance of the Users class with the rate limit controller enabled"""
     _ = users
-    _= database_secret
+    _ = database_secret
     return Users(
         vault=vault_instance,
         rate_limits=True,
