@@ -163,11 +163,14 @@ def fixture_postgres_instance(psql_tables_path):
         password='postgres',
         dbname='postgres'
     )
+    psql_connection.autocommit = True
     psql_cursor = psql_connection.cursor()
     psql_cursor.execute("CREATE DATABASE pytests;")
     psql_cursor.execute("CREATE USER pytests WITH PASSWORD 'pytests';")
     psql_cursor.execute("GRANT ALL PRIVILEGES ON DATABASE pytests TO pytests;")
-    psql_cursor.commit()
+    psql_cursor.close()
+    psql_connection.close()
+
     # Switch to test database and create tables
     psql_connection = psycopg2.connect(
         host='0.0.0.0',
