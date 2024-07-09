@@ -51,7 +51,8 @@ class Users:
     def __init__(
         self,
         vault: any = None,
-        rate_limits: bool = False
+        rate_limits: bool = False,
+        storage: dict = None
     ) -> None:
         """
         Create a new Users instance.
@@ -61,6 +62,8 @@ class Users:
                 - (object) VaultClient instance for interacting with the Vault API.
                 - (dict) Configuration for initializing a VaultClient instance in this class.
             :param rate_limits (bool): Enable rate limit functionality. Default is False.
+            :param storage (dict): Configuration for initializing the Storage instance.
+                - (str) db_role: The database role for generating credentials from Vault.
 
         Raises:
             VaultInstanceNotSet: If the vault instance is not set.
@@ -83,7 +86,10 @@ class Users:
             raise VaultInstanceNotSet("Vault instance is not set. Please provide a valid Vault instance as instance or dictionary.")
 
         self.rate_limits = rate_limits
-        self.storage = Storage(vault_client=self.vault)
+        self.storage = Storage(
+            vault_client=self.vault,
+            db_role=storage.get('db_role', None)
+        )
         self._user_status_allow = USER_STATUS_ALLOW
         self._user_status_deny = USER_STATUS_DENY
         self._vault_config_path = USERS_VAULT_CONFIG_PATH

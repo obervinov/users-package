@@ -320,7 +320,8 @@ def fixture_users_instance(vault_instance, users):
     _ = users
     return Users(
         vault=vault_instance,
-        rate_limits=True
+        rate_limits=True,
+        storage={'db_role': 'test-role'}
     )
 
 
@@ -328,4 +329,7 @@ def fixture_users_instance(vault_instance, users):
 def fixture_users_instance_without_rl(vault_instance, users):
     """Returns an instance of the Users class with the rate limit controller disabled"""
     _ = users
-    return Users(vault=vault_instance)
+    return Users(
+        vault=vault_instance,
+        storage={'db_role': 'test-role'}
+    )

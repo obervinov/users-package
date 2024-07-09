@@ -34,3 +34,8 @@ path "pytest/config" {
 path "pytest/data/configuration/*" {
   capabilities = ["create", "read", "update", "list"]
 }
+
+# To work with database engine
+path "database/creds/*" {
+  capabilities = ["create", "read", "update", "list", "delete"]
+}
