@@ -163,22 +163,6 @@ def fixture_postgres_instance(psql_tables_path):
         password='postgres',
         dbname='postgres'
     )
-    psql_connection.autocommit = True
-    psql_cursor = psql_connection.cursor()
-    psql_cursor.execute("CREATE DATABASE pytests;")
-    psql_cursor.execute("CREATE USER pytests WITH PASSWORD 'pytests';")
-    psql_cursor.execute("GRANT ALL PRIVILEGES ON DATABASE pytests TO pytests;")
-    psql_cursor.close()
-    psql_connection.close()
-
-    # Switch to test database and create tables
-    psql_connection = psycopg2.connect(
-        host='0.0.0.0',
-        port=5432,
-        user='pytests',
-        password='pytests',
-        dbname='pytests'
-    )
     psql_cursor = psql_connection.cursor()
     with open(psql_tables_path, 'r', encoding='utf-8') as sql_file:
         sql_script = sql_file.read()
