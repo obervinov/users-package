@@ -34,8 +34,8 @@ class Storage:
         if database_connection and database_credentials:
             if not database_connection.get('dbname', None) or not database_connection.get('host', None) or not database_connection.get('port', None):
                 raise FailedStorageConnection("Invalid database connection configuration. Check keys 'dbname', 'host' and 'port'")
-            if not database_credentials.get('user', None) or not database_credentials.get('password', None):
-                raise FailedStorageConnection("Invalid database credentials configuration. Check keys 'user' and 'password'")
+            if not database_credentials.get('username', None) or not database_credentials.get('password', None):
+                raise FailedStorageConnection("Invalid database credentials configuration. Check keys 'username' and 'password'")
         else:
             log.error('[Users]: Failed to initialize the storage class: database_connection %s, database_credentials %s', database_connection, database_credentials)
             raise FailedStorageConnection("Failed to get the database connection or credentials from Vault")
@@ -43,7 +43,7 @@ class Storage:
         self.connection = psycopg2.connect(
             host=database_connection['host'],
             port=database_connection['port'],
-            user=database_credentials['user'],
+            user=database_credentials['username'],
             password=database_credentials['password'],
             dbname=database_connection['dbname']
         )
