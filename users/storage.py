@@ -31,9 +31,9 @@ class Storage:
         database_connection = vault_client.kv2engine.read_secret(path="configuration/database")
         database_credentials = vault_client.dbengine.generate_credentials(role=db_role)
 
-        if not database_connection['dbname'] or not database_connection['host'] or not database_connection['port']:
+        if not database_connection.get('dbname', None) or not database_connection.get('host', None) or not database_connection.get('port', None):
             raise FailedStorageConnection("Invalid database connection configuration. Check keys 'dbname', 'host' and 'port'")
-        if not database_credentials['user'] or not database_credentials['password']:
+        if not database_credentials.get('user', None) or not database_credentials.get('password', None):
             raise FailedStorageConnection("Invalid database credentials configuration. Check keys 'user' and 'password'")
 
         self.connection = psycopg2.connect(

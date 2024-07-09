@@ -192,6 +192,27 @@ def fixture_timestamp_pattern():
     return r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+$'
 
 
+@pytest.fixture(name="database_secret", scope='session')
+def fixture_database_secret(vault_instance):
+    """Returns the database secret"""
+    secret_path = 'configuration/database'
+    _ = vault_instance.kv2engine.write_secret(
+        path=secret_path,
+        key='dbname',
+        value='postgres'
+    )
+    _ = vault_instance.kv2engine.write_secret(
+        path=secret_path,
+        key='host',
+        value='0.0.0.0'
+    )
+    _ = vault_instance.kv2engine.write_secret(
+        path=secret_path,
+        key='port',
+        value='5432'
+    )
+
+
 @pytest.fixture(name="users", scope='function')
 def fixture_users(vault_instance, postgres_instance):
     """Fill in the configuration and data for the test users"""
