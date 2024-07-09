@@ -292,7 +292,7 @@ def fixture_users(vault_instance, postgres_instance):
                     value=json.dumps(value)
                 )
             elif key == 'status':
-                _ = vault_instance.write_secret(
+                _ = vault_instance.kv2engine.write_secret(
                     path=f'configuration/users/{user["name"]}',
                     key=key,
                     value=value
