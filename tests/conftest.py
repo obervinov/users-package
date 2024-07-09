@@ -165,6 +165,7 @@ def fixture_postgres_instance(psql_tables_path):
     )
     psql_cursor = psql_connection.cursor()
     psql_cursor.execute("CREATE DATABASE pytests; CREATE USER pytests WITH PASSWORD 'pytests'; GRANT ALL PRIVILEGES ON DATABASE pytests TO pytests;")
+    psql_cursor.commit()
     # Switch to test database and create tables
     psql_connection = psycopg2.connect(
         host='0.0.0.0',
