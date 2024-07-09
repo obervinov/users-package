@@ -31,7 +31,7 @@ class Storage:
         database_connection = vault_client.kv2engine.read_secret(path="configuration/database")
         database_credentials = vault_client.dbengine.generate_credentials(role=db_role)
 
-        if database_connection is None or database_credentials is None:
+        if database_connection and database_credentials:
             if not database_connection.get('dbname', None) or not database_connection.get('host', None) or not database_connection.get('port', None):
                 raise FailedStorageConnection("Invalid database connection configuration. Check keys 'dbname', 'host' and 'port'")
             if not database_credentials.get('user', None) or not database_credentials.get('password', None):
