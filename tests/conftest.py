@@ -164,7 +164,6 @@ def fixture_postgres_instance():
     return psql_connection, psql_cursor
     
 
-    
 @pytest.fixture(name="vault_instance", scope='session')
 def fixture_vault_instance(vault_url, namespace, prepare_vault):
     """Returns client of the configurator"""
