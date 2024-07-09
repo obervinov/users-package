@@ -9,7 +9,7 @@ CREATE TABLE users (
 -- Schema for the users_requests table
 CREATE TABLE users_requests (
     id serial PRIMARY KEY,
-    user_id VARCHAR (50) UNIQUE NOT NULL,
+    user_id VARCHAR (50) NOT NULL,
     message_id VARCHAR (50),
     chat_id VARCHAR (50),
     authentication VARCHAR (50) NOT NULL,
