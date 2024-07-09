@@ -197,7 +197,8 @@ def fixture_users(vault_instance, postgres_instance):
         # - RATE_LIMIT: limited requests
         # - RATE_LIMIT: requests limit PER HOUR exceeded
         # - RATE_LIMIT: restrictions on requests have not yet been applied
-        'testUser1': {
+        {
+            'name': 'testUser1',
             'status': 'allowed',
             'roles': ['admin_role'],
             'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15},
@@ -211,7 +212,8 @@ def fixture_users(vault_instance, postgres_instance):
         # - RATE_LIMIT: limited requests
         # - RATE_LIMIT: requests limit PER DAY exceeded
         # - RATE_LIMIT: restrictions on requests have not yet been applied
-        'testUser2': {
+        {
+            'name': 'testUser2',
             'status': 'allowed',
             'roles': ['financial_role', 'goals_role'],
             'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
@@ -227,7 +229,8 @@ def fixture_users(vault_instance, postgres_instance):
         # - RATE_LIMIT: requests limit PER DAY exceeded
         # - RATE_LIMIT: requests limit PER HOUR exceeded
         # - RATE_LIMIT: restrictions on requests have not yet been applied
-        'testUser3': {
+        {
+            'name': 'testUser3',
             'status': 'allowed',
             'roles': ['financial_role'],
             'requests': {'requests_per_day': 3, 'requests_per_hour': 2, 'random_shift_minutes': 60},
@@ -235,7 +238,7 @@ def fixture_users(vault_instance, postgres_instance):
                 ('testUser3', 'testMessage1', 'testChat3', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now()),
                 ('testUser3', 'testMessage1', 'testChat3', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(minutes=10)),
                 ('testUser3', 'testMessage2', 'testChat3', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hours=1)),
-                ('testUser3', 'testMessage2', 'testChat3', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hours=2)),                
+                ('testUser3', 'testMessage2', 'testChat3', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hours=2)),
             ]
         },
         #
@@ -243,7 +246,8 @@ def fixture_users(vault_instance, postgres_instance):
         # - AUTHZ: allowed role1
         # - RATE_LIMIT: limited requests
         # - RATE_LIMIT: rate limit timestamp exists for requests_per_hour but is expired (reset rate limit)
-        'testUser4': {
+        {
+            'name': 'testUser4',
             'status': 'allowed',
             'roles': ['financial_role'],
             'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 60},
@@ -252,19 +256,22 @@ def fixture_users(vault_instance, postgres_instance):
                 ('testUser4', 'testMessage1', 'testChat4', 'allowed', '{\'role_id\': \'financial_role\', \'status\': \'allowed\'}', datetime.now() - timedelta(hour=4)),
             ]
         },
-
+        #
         # Test user20
         # - AUTHN: denied
         # - AUTHZ: denied
-        'testUser20': {
+        {
+            'name': 'testUser20',
             'status': 'denied',
             'roles': [],
             'requests': []
         },
+        #
         # Test user21
         # - AUTHN: allowed
         # - AUTHZ: denied
-        'testUser21': {
+        {
+            'name': 'testUser21',
             'status': 'allowed',
             'roles': [],
             'requests': []
@@ -275,13 +282,13 @@ def fixture_users(vault_instance, postgres_instance):
         for key, value in user.items():
             if key in ['requests', 'roles']:
                 _ = vault_instance.kv2engine.write_secret(
-                    path=f'configuration/users/{user}',
+                    path=f'configuration/users/{user["name"]}',
                     key=key,
                     value=json.dumps(value)
                 )
             elif key == 'status':
                 _ = vault_instance.write_secret(
-                    path=f'configuration/users/{user}',
+                    path=f'configuration/users/{user["name"]}',
                     key=key,
                     value=value
                 )
@@ -290,18 +297,20 @@ def fixture_users(vault_instance, postgres_instance):
                     if len(row) == 6:
                         user_id, message_id, chat_id, authentication, authorization, timestamp = row
                         _ = psql_cursor.execute(
-                            f"INSERT INTO users_requests (user_id, message_id, chat_id, authentication, authorization, timestamp) VALUES ('{user_id}', '{message_id}', '{chat_id}', '{authentication}', '{authorization}', '{timestamp}')"
+                            "INSERT INTO users_requests (user_id, message_id, chat_id, authentication, authorization, timestamp) "
+                            f"VALUES ('{user_id}', '{message_id}', '{chat_id}', '{authentication}', '{authorization}', '{timestamp}')"
                         )
                     elif len(row) == 7:
                         user_id, message_id, chat_id, authentication, authorization, timestamp, rate_limits = row
                         _ = psql_cursor.execute(
-                            f"INSERT INTO users_requests (user_id, message_id, chat_id, authentication, authorization, timestamp, rate_limits) VALUES ('{user_id}', '{message_id}', '{chat_id}', '{authentication}', '{authorization}', '{timestamp}', '{rate_limit_timestamp}')"
+                            "INSERT INTO users_requests (user_id, message_id, chat_id, authentication, authorization, timestamp, rate_limits) "
+                            f"VALUES ('{user_id}', '{message_id}', '{chat_id}', '{authentication}', '{authorization}', '{timestamp}', '{rate_limits}')"
                         )
                     psql_connection.commit()
 
 
-@pytest.fixture(name="users", scope='function')
-def fixture_users(vault_instance, users):
+@pytest.fixture(name="users_instance", scope='function')
+def fixture_users_instance(vault_instance, users):
     """Returns an instance of the Users class with the rate limit controller enabled"""
     _ = users
     return Users(
@@ -310,8 +319,8 @@ def fixture_users(vault_instance, users):
     )
 
 
-@pytest.fixture(name="users_without_rl", scope='function')
-def fixture_users_without_rl(vault_instance, users):
+@pytest.fixture(name="users_instance_without_rl", scope='function')
+def fixture_users_instance_without_rl(vault_instance, users):
     """Returns an instance of the Users class with the rate limit controller disabled"""
     _ = users
     return Users(vault=vault_instance)
