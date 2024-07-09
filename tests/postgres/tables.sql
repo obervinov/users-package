@@ -13,7 +13,7 @@ CREATE TABLE users_requests (
     message_id VARCHAR (50),
     chat_id VARCHAR (50),
     authentication VARCHAR (50) NOT NULL,
-    authorization VARCHAR (255) NOT NULL,
+    "authorization" VARCHAR (255) NOT NULL,
     timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     rate_limits TIMESTAMP
 );
