@@ -61,6 +61,12 @@ def fixture_policy_path():
     return "tests/vault/policy.hcl"
 
 
+@pytest.fixture(name="psql_tables_path", scope='session')
+def fixture_psql_tables_path():
+    """Returns the path to the postgres sql file with tables"""
+    return "tests/postgres/tables.sql"
+
+
 @pytest.fixture(name="postgres_url", scope='session')
 def fixture_postgres_url():
     """Returns the postgres url"""
@@ -147,9 +153,9 @@ def fixture_prepare_vault(vault_url, namespace, policy_path, postgres_url):
 
 
 @pytest.fixture(name="postgres_instance", scope='session')
-def fixture_postgres_instance():
+def fixture_postgres_instance(psql_tables_path):
     """Prepare the postgres database, return the connection and cursor"""
-    with open('postgres/tables.sql', 'r') as sql_file:
+    with open(psql_tables_path, 'r') as sql_file:
         sql_script = sql_file.read()
     psql_connection = psycopg2.connect(
         host='postgres',
@@ -162,7 +168,7 @@ def fixture_postgres_instance():
     psql_cursor.execute(sql_script)
     psql_connection.commit()
     return psql_connection, psql_cursor
-    
+
 
 @pytest.fixture(name="vault_instance", scope='session')
 def fixture_vault_instance(vault_url, namespace, prepare_vault):

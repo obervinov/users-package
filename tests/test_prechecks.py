@@ -18,7 +18,7 @@ def test_check_init_vault_conf(vault_instance):
 
 
 @pytest.mark.order(20)
-def test_check_init_postgres_instance(vault_instance):
+def test_check_init_postgres_data(vault_instance):
     """
     Checking the functionality of the init method of the class when the Postgres test data is passed
     """
