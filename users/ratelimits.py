@@ -9,7 +9,7 @@ from typing import Union
 from datetime import datetime, timedelta
 from logger import log
 from vault import VaultClient
-from .constants import VAULT_CONFIG_PATH
+from .constants import USERS_VAULT_CONFIG_PATH
 from .storage import Storage
 from .exceptions import WrongUserConfiguration, VaultInstanceNotSet, FailedDeterminateRateLimit, StorageInstanceNotSet
 
@@ -81,7 +81,7 @@ class RateLimiter:
 
         # Extract required parameters
         self.user_id = user_id
-        self._vault_config_path = VAULT_CONFIG_PATH
+        self._vault_config_path = USERS_VAULT_CONFIG_PATH
 
         # Read general user configuration from Vault and extract requests configuration
         user_configuration = self.vault.kv2engine.read_secret(path=f"{self.vault_config_path}/{self.user_id}")

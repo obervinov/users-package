@@ -5,7 +5,7 @@ authentication, authorization and request limiting.
 import json
 from logger import log
 from vault import VaultClient
-from .constants import VAULT_CONFIG_PATH, USER_STATUS_ALLOW, USER_STATUS_DENY
+from .constants import USERS_VAULT_CONFIG_PATH, USER_STATUS_ALLOW, USER_STATUS_DENY
 from .ratelimits import RateLimiter
 from .storage import Storage
 from .exceptions import VaultInstanceNotSet
@@ -86,7 +86,7 @@ class Users:
         self.storage = Storage(vault_client=self.vault)
         self._user_status_allow = USER_STATUS_ALLOW
         self._user_status_deny = USER_STATUS_DENY
-        self._vault_config_path = VAULT_CONFIG_PATH
+        self._vault_config_path = USERS_VAULT_CONFIG_PATH
 
     @property
     def user_status_allow(self) -> str:
