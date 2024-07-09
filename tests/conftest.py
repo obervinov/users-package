@@ -155,10 +155,10 @@ def fixture_prepare_vault(vault_url, namespace, policy_path, postgres_url):
 @pytest.fixture(name="postgres_instance", scope='session')
 def fixture_postgres_instance(psql_tables_path):
     """Prepare the postgres database, return the connection and cursor"""
-    with open(psql_tables_path, 'r') as sql_file:
+    with open(psql_tables_path, 'r', encoding='utf-8') as sql_file:
         sql_script = sql_file.read()
     psql_connection = psycopg2.connect(
-        host='postgres',
+        host='0.0.0.0',
         port=5432,
         user='postgres',
         password='postgres',
