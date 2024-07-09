@@ -31,10 +31,14 @@ class Storage:
         database_connection = vault_client.kv2engine.read_secret(path="configuration/database")
         database_credentials = vault_client.dbengine.generate_credentials(role=db_role)
 
-        if not database_connection.get('dbname', None) or not database_connection.get('host', None) or not database_connection.get('port', None):
-            raise FailedStorageConnection("Invalid database connection configuration. Check keys 'dbname', 'host' and 'port'")
-        if not database_credentials.get('user', None) or not database_credentials.get('password', None):
-            raise FailedStorageConnection("Invalid database credentials configuration. Check keys 'user' and 'password'")
+        if database_connection is None or database_credentials is None:
+            if not database_connection.get('dbname', None) or not database_connection.get('host', None) or not database_connection.get('port', None):
+                raise FailedStorageConnection("Invalid database connection configuration. Check keys 'dbname', 'host' and 'port'")
+            if not database_credentials.get('user', None) or not database_credentials.get('password', None):
+                raise FailedStorageConnection("Invalid database credentials configuration. Check keys 'user' and 'password'")
+        else:
+            log.error('[Users]: Failed to initialize the storage class: database_connection %s, database_credentials %s', database_connection, database_credentials)
+            raise FailedStorageConnection("Failed to get the database connection or credentials from Vault")
 
         self.connection = psycopg2.connect(
             host=database_connection['host'],
@@ -69,9 +73,9 @@ class Storage:
         try:
             self.cursor.execute(f"INSERT INTO users (user_id, chat_id, status) VALUES ('{user_id}', '{chat_id}', '{status}')")
             self.connection.commit()
-            log.info(f"[Users]: {user_id} has been successfully registered in the database.")
+            log.info('[Users]: %s has been successfully registered in the database.', user_id)
         except psycopg2.errors.UniqueViolation:
-            log.info(f"[Users]: {user_id} already exists in the database. Updating the chat ID and status.")
+            log.info('[Users]: %s already exists in the database. Updating the chat ID and status.', user_id)
             self.cursor.execute(f"UPDATE users SET chat_id='{chat_id}', status='{status}' WHERE user_id='{user_id}'")
             self.connection.rollback()
 
