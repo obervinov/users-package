@@ -278,11 +278,11 @@ def fixture_users(vault_instance, postgres_instance):
         {
             'name': 'testUser5',
             'status': 'allowed',
-            'roles': ['financial_role'],
+            'roles': ['admin_role'],
             'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
             'requests_history': [
-                ('testUser5', 'testMessage1', 'testChat5', 'allowed', '{"role_id": "financial_role", "status": "allowed"}', datetime.now() - timedelta(hours=3)),
-                ('testUser5', 'testMessage1', 'testChat5', 'allowed', '{"role_id": "financial_role", "status": "allowed"}', datetime.now() - timedelta(hours=3), datetime.now() + timedelta(hours=1)),
+                ('testUser5', 'testMessage1', 'testChat5', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=3)),
+                ('testUser5', 'testMessage1', 'testChat5', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=3), datetime.now() + timedelta(hours=1)),
             ]
         },
         #

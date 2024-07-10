@@ -184,17 +184,13 @@ class Users:
             (dict) {
                 'access': self.user_status_allow / self.user_status_deny,
                 'permissions': self.user_status_allow / self.user_status_deny,
-                'rate_limits': {
-                    'end_time': '2023-08-06 11:47:09.440933'
-                }
+                'rate_limits': 2023-08-06 11:47:09.440933
             }
                 or
             (dict) {
                 'access': self.user_status_allow / self.user_status_deny,
                 'permissions': self.user_status_allow / self.user_status_deny,
-                'rate_limits': {
-                    'end_time': None,
-                }
+                'rate_limits': None
             }
 
         Examples:
