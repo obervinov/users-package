@@ -243,7 +243,7 @@ class Users:
                 'message_id': kwargs.get('message_id', 'undefined'),
                 'authentication': user_info['access'],
                 'authorization': {'role_id': role_id, 'status': user_info.get('permissions', 'undefined')},
-                'rate_limits': user_info.get('rate_limits', 'undefined')
+                'rate_limits': user_info.get('rate_limits', None)
             }
         )
         return user_info
