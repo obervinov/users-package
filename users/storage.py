@@ -1,4 +1,5 @@
 """This module contains the storage class for the storage of user data: requests, access logs, etc."""
+import json
 import psycopg2
 from logger import log
 from .exceptions import FailedStorageConnection
@@ -102,8 +103,8 @@ class Storage:
             >>> storage.log_user_request("user1", {"type": "GET", "path": "/users"})
         """
         self.cursor.execute(
-            "INSERT INTO users_requests (user_id, message_id, chat_id, authentication, authorization, rate_limits) VALUES "
-            f"('{user_id}', '{request['message_id']}', '{request['chat_id']}', '{request['authentication']}', '{request['authorization']}', '{request['rate_limits']}')"
+            "INSERT INTO users_requests (user_id, message_id, chat_id, authentication, \"authorization\", rate_limits) VALUES "
+            f"('{user_id}', '{request['message_id']}', '{request['chat_id']}', '{request['authentication']}', '{json.loads(request['authorization'])}', '{request['rate_limits']}')"
         )
         self.connection.commit()
 
