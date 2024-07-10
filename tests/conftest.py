@@ -136,10 +136,15 @@ def fixture_prepare_vault(vault_url, namespace, policy_path, postgres_url):
     print(f"Configured database engine: {configuration}")
 
     # Create role for the database
+    statement = (
+        "CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; "
+        "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"{{name}}\"; "
+        "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO \"{{name}}\";" 
+    )
     role = client.secrets.database.create_role(
         name="test-role",
         db_name="postgresql",
-        creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"{{name}}\";",
+        creation_statements=statement,
         default_ttl="1h",
         max_ttl="24h"
     )
