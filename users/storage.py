@@ -104,14 +104,19 @@ class Storage:
         """
         # Prepare values for the database
         request['authorization'] = json.dumps(request['authorization'])
-        if not request['rate_limits']:
-            request['rate_limits'] = 'NULL'
+        if request['rate_limits']:
+            sql_query = (
+               "INSERT INTO users_requests (user_id, message_id, chat_id, authentication, \"authorization\", rate_limits) VALUES "
+               f"('{user_id}', '{request['message_id']}', '{request['chat_id']}', '{request['authentication']}', '{request['authorization']}', '{request['rate_limits']}')"
+            )
+        else:
+            sql_query = (
+                "INSERT INTO users_requests (user_id, message_id, chat_id, authentication, \"authorization\") VALUES "
+                f"('{user_id}', '{request['message_id']}', '{request['chat_id']}', '{request['authentication']}', '{request['authorization']}')"
+            )
 
         # Insert the user request into the database
-        self.cursor.execute(
-            "INSERT INTO users_requests (user_id, message_id, chat_id, authentication, \"authorization\", rate_limits) VALUES "
-            f"('{user_id}', '{request['message_id']}', '{request['chat_id']}', '{request['authentication']}', '{request['authorization']}', '{request['rate_limits']}')"
-        )
+        self.cursor.execute(sql_query)
         self.connection.commit()
 
     def get_user_requests(
