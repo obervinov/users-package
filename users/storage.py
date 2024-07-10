@@ -77,8 +77,8 @@ class Storage:
             log.info('[Users]: %s has been successfully registered in the database.', user_id)
         except psycopg2.errors.UniqueViolation:
             log.info('[Users]: %s already exists in the database. Updating the chat ID and status.', user_id)
-            self.cursor.execute(f"UPDATE users SET chat_id='{chat_id}', status='{status}' WHERE user_id='{user_id}'")
             self.connection.rollback()
+            self.cursor.execute(f"UPDATE users SET chat_id='{chat_id}', status='{status}' WHERE user_id='{user_id}'")
 
     def log_user_request(
         self,
