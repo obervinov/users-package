@@ -75,7 +75,7 @@ class Storage:
             self.cursor.execute(f"INSERT INTO users (user_id, chat_id, status) VALUES ('{user_id}', '{chat_id}', '{status}')")
             self.connection.commit()
             log.info('[Users]: %s has been successfully registered in the database.', user_id)
-        # pylint: disable=no-name-in-module
+        # pylint: disable=no-member
         except psycopg2.errors.UniqueViolation:
             log.info('[Users]: %s already exists in the database. Updating the chat ID and status.', user_id)
             self.connection.rollback()
