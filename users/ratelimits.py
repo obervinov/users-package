@@ -258,7 +258,7 @@ class RateLimiter:
         user_requests = self.storage.get_user_requests(user_id=self.user_id)
         if user_requests:
             for request in user_requests:
-                request_timestamp = datetime.strptime(request[1], '%Y-%m-%d %H:%M:%S.%f')
+                request_timestamp = request[1]
                 if request_timestamp >= datetime.now() - timedelta(hours=1):
                     requests_per_hour = requests_per_hour + 1
                 if request_timestamp >= datetime.now() - timedelta(days=1):
