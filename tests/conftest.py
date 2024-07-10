@@ -139,7 +139,7 @@ def fixture_prepare_vault(vault_url, namespace, policy_path, postgres_url):
     role = client.secrets.database.create_role(
         name="test-role",
         db_name="postgresql",
-        creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; GRANT ALL PRIVILEGES ON DATABASE pytests TO \"{{name}}\";",
+        creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"{{name}}\";",
         default_ttl="1h",
         max_ttl="24h"
     )
