@@ -13,7 +13,7 @@ def test_check_rl_counters_exceed_per_hour(timestamp_pattern, users_instance):
     """
     user = users_instance.user_access_check(user_id='testUser5', role_id='admin_role')
     assert user['rate_limits'] is not None
-    assert re.match(timestamp_pattern, user['rate_limits']['end_time']) is not None
+    assert re.match(timestamp_pattern, str(user['rate_limits'])) is not None
     assert isinstance(user['rate_limits'], datetime.datetime)
     assert user['rate_limits'] >= datetime.datetime.now() + datetime.timedelta(hours=1)
     assert user['rate_limits'] < datetime.datetime.now() + datetime.timedelta(hours=24)
