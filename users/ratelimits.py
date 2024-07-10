@@ -148,7 +148,8 @@ class RateLimiter:
         user_requests = self.storage.get_user_requests(user_id=self.user_id, order="rate_limits DESC")
         if user_requests:
             # If rate limits is active (compared the last request with the current time)
-            if datetime.strptime(user_requests[0][2], '%Y-%m-%d %H:%M:%S.%f') >= datetime.now():
+            exist_rate_limit = user_requests[0][2]
+            if exist_rate_limit and datetime.strptime(exist_rate_limit, '%Y-%m-%d %H:%M:%S.%f') >= datetime.now():
                 rate_limits = self._validate_rate_limit()
             # If rate limits need to apply
             elif (
