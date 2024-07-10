@@ -309,7 +309,7 @@ class Users:
                 or
             (str) self.user_status_deny
         """
-        roles = self.vault.read_secret(
+        roles = self.vault.kv2engine.read_secret(
             path=f"{self.vault_config_path}/{user_id}",
             key='roles'
         )
