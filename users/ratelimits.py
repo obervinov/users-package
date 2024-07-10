@@ -263,7 +263,6 @@ class RateLimiter:
                     requests_per_hour = requests_per_hour + 1
                 if request_timestamp >= datetime.now() - timedelta(days=1):
                     requests_per_day = requests_per_day + 1
-        log.info('[Users.RateLimiter]: Current request counters: %s', self.requests_counters)
         return {
             'requests_per_hour': requests_per_hour,
             'requests_per_day': requests_per_day
