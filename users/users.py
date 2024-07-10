@@ -228,6 +228,7 @@ class Users:
                     user_id=user_id,
                     role_id=role_id
                 )
+
                 if user_info['permissions'] == self.user_status_allow and self.rate_limits:
                     rl_controller = RateLimiter(
                         vault=self.vault,

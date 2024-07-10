@@ -67,13 +67,13 @@ def test_authorization_doesnt_exist_roles(users_instance):
     """
     assert users_instance.user_access_check(user_id='testUser2', role_id='admin_role')['permissions'] == users_instance.user_status_deny
     assert users_instance.user_access_check(user_id='testUser2', role_id='guest_role')['permissions'] == users_instance.user_status_deny
-    assert users_instance.user_access_check(user_id='testUser2')['permissions'] == users_instance.user_status_deny
+    assert users_instance.user_access_check(user_id='testUser2') == {'access': users_instance.user_status_deny}
     assert users_instance.user_access_check(user_id='testUser3', role_id='admin_role')['permissions'] == users_instance.user_status_deny
     assert users_instance.user_access_check(user_id='testUser3', role_id='guest_role')['permissions'] == users_instance.user_status_deny
-    assert users_instance.user_access_check(user_id='testUser3')['permissions'] == users_instance.user_status_deny
+    assert users_instance.user_access_check(user_id='testUser3') == {'access': users_instance.user_status_deny}
     assert users_instance.user_access_check(user_id='testUser4', role_id='admin_role')['permissions'] == users_instance.user_status_deny
     assert users_instance.user_access_check(user_id='testUser4', role_id='guest_role')['permissions'] == users_instance.user_status_deny
-    assert users_instance.user_access_check(user_id='testUser4')['permissions'] == users_instance.user_status_deny
+    assert users_instance.user_access_check(user_id='testUser4') == {'access': users_instance.user_status_deny}
 
 
 @pytest.mark.order(6)
