@@ -195,6 +195,7 @@ class RateLimiter:
             return None
 
         if per_day_exceeded or per_hour_exceeded:
+            new_rate_limit = None
             # Case1: If the counter exceeds the configuration per DAY
             if per_day_exceeded:
                 if latest_rate_limit_timestamp:

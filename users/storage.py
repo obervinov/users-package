@@ -2,7 +2,6 @@
 import json
 import psycopg2
 from logger import log
-from psycopg2.errors import UniqueViolation
 from .exceptions import FailedStorageConnection
 
 
@@ -76,7 +75,8 @@ class Storage:
             self.cursor.execute(f"INSERT INTO users (user_id, chat_id, status) VALUES ('{user_id}', '{chat_id}', '{status}')")
             self.connection.commit()
             log.info('[Users]: %s has been successfully registered in the database.', user_id)
-        except UniqueViolation:
+        # pylint: disable=protected-access
+        except psycopg2.errors.UniqueViolation:
             log.info('[Users]: %s already exists in the database. Updating the chat ID and status.', user_id)
             self.connection.rollback()
             self.cursor.execute(f"UPDATE users SET chat_id='{chat_id}', status='{status}' WHERE user_id='{user_id}'")
