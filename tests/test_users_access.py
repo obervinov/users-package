@@ -91,5 +91,5 @@ def test_authorization_user_denied(users_instance):
     Verify response when the user is denied access.
     """
     assert users_instance.user_access_check(user_id='testUser21')['access'] == users_instance.user_status_allow
-    assert users_instance.user_access_check(user_id='testUser21')['permissions'] == users_instance.user_status_allow
-    assert users_instance.user_access_check(user_id='testUser21', role_id='admin_role')['permissions'] == users_instance.user_status_deny
+    assert users_instance.user_access_check(user_id='testUser21') == {'access': users_instance.user_status_allow}
+    assert users_instance.user_access_check(user_id='testUser21', role_id='admin_role') == users_instance.user_status_deny
