@@ -236,8 +236,6 @@ def fixture_users(vault_instance, postgres_instance):
         # Test user2
         # - AUTHZ: allowed role1 and role2
         # - RATE_LIMIT: limited requests
-        # - RATE_LIMIT: requests limit PER DAY exceeded
-        # - RATE_LIMIT: restrictions on requests have not yet been applied
         {
             'name': 'testUser2',
             'status': 'allowed',
@@ -283,6 +281,22 @@ def fixture_users(vault_instance, postgres_instance):
             'requests_history': [
                 ('testUser5', 'testMessage1', 'testChat5', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=3)),
                 ('testUser5', 'testMessage1', 'testChat5', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=3), datetime.now() + timedelta(hours=1)),
+            ]
+        },
+        # Test user6
+        # - RATE_LIMIT: limited requests
+        # - RATE_LIMIT: requests limit PER DAY exceeded
+        # - RATE_LIMIT: restrictions on requests have not yet been applied
+        {
+            'name': 'testUser5',
+            'status': 'allowed',
+            'roles': ['admin_role'],
+            'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
+            'requests_history': [
+                ('testUser6', 'testMessage1', 'testChat6', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=1)),
+                ('testUser6', 'testMessage1', 'testChat6', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=2)),
+                ('testUser6', 'testMessage1', 'testChat6', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=3)),
+                ('testUser6', 'testMessage1', 'testChat6', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=4), datetime.now() + timedelta(hours=24)),
             ]
         },
         #
