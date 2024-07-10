@@ -8,9 +8,7 @@ import requests
 import pytest
 import hvac
 import psycopg2
-# pylint: disable=E0401
 from vault import VaultClient
-# pylint: disable=E0611
 from users import Users
 
 
@@ -227,16 +225,12 @@ def fixture_users(vault_instance, postgres_instance):
         # Test user1
         # - AUTHZ: allowed role1
         # - RATE_LIMIT: limited requests
-        # - RATE_LIMIT: requests limit PER HOUR exceeded
-        # - RATE_LIMIT: restrictions on requests have not yet been applied
         {
             'name': 'testUser1',
             'status': 'allowed',
             'roles': ['admin_role'],
-            'requests': {'requests_per_day': 10, 'requests_per_hour': 1, 'random_shift_minutes': 15},
-            'requests_history': [
-                ('testUser1', 'testMessage1', 'testChat1', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now())
-            ]
+            'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
+            'requests_history': []
         },
         #
         # Test user2
@@ -249,10 +243,7 @@ def fixture_users(vault_instance, postgres_instance):
             'status': 'allowed',
             'roles': ['financial_role', 'goals_role'],
             'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
-            'requests_history': [
-                ('testUser2', 'testMessage2', 'testChat2', 'allowed', '{"role_id": "financial_role", "status": "allowed"}', datetime.now() - timedelta(hours=1)),
-                ('testUser2', 'testMessage3', 'testChat2', 'allowed', '{"role_id": "financial_role", "status": "allowed"}', datetime.now() - timedelta(hours=2)),
-            ]
+            'requests_history': []
         },
         #
         # Test user3
@@ -265,13 +256,8 @@ def fixture_users(vault_instance, postgres_instance):
             'name': 'testUser3',
             'status': 'allowed',
             'roles': ['financial_role'],
-            'requests': {'requests_per_day': 3, 'requests_per_hour': 2, 'random_shift_minutes': 60},
-            'requests_history': [
-                ('testUser3', 'testMessage1', 'testChat3', 'allowed', '{"role_id": "financial_role", "status": "allowed"}', datetime.now()),
-                ('testUser3', 'testMessage1', 'testChat3', 'allowed', '{"role_id": "financial_role", "status": "allowed"}', datetime.now() - timedelta(minutes=10)),
-                ('testUser3', 'testMessage2', 'testChat3', 'allowed', '{"role_id": "financial_role", "status": "allowed"}', datetime.now() - timedelta(hours=1)),
-                ('testUser3', 'testMessage2', 'testChat3', 'allowed', '{"role_id": "financial_role", "status": "allowed"}', datetime.now() - timedelta(hours=2)),
-            ]
+            'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
+            'requests_history': []
         },
         #
         # Test user4
@@ -282,10 +268,21 @@ def fixture_users(vault_instance, postgres_instance):
             'name': 'testUser4',
             'status': 'allowed',
             'roles': ['financial_role'],
-            'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 60},
+            'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
+            'requests_history': []
+        },
+        # Test user5
+        # - RATE_LIMIT: limited requests
+        # - RATE_LIMIT: requests limit PER HOUR exceeded
+        # - RATE_LIMIT: restrictions on requests have not yet been applied
+        {
+            'name': 'testUser5',
+            'status': 'allowed',
+            'roles': ['financial_role'],
+            'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
             'requests_history': [
-                ('testUser4', 'testMessage1', 'testChat4', 'allowed', '{"role_id": "financial_role", "status": "allowed"}', datetime.now() - timedelta(hours=3), datetime.now() + timedelta(hours=1)),
-                ('testUser4', 'testMessage1', 'testChat4', 'allowed', '{"role_id": "financial_role", "status": "allowed"}', datetime.now() - timedelta(hours=4)),
+                ('testUser5', 'testMessage1', 'testChat5', 'allowed', '{"role_id": "financial_role", "status": "allowed"}', datetime.now() - timedelta(hours=3)),
+                ('testUser5', 'testMessage1', 'testChat5', 'allowed', '{"role_id": "financial_role", "status": "allowed"}', datetime.now() - timedelta(hours=3), datetime.now() + timedelta(hours=1)),
             ]
         },
         #

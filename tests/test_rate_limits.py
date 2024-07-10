@@ -1,34 +1,22 @@
-# """
-# A test that checks the user request limit control function.
-# """
-# import re
-# import json
-# import pytest
-# from users import RateLimiter
+"""
+A test that checks the user request limit control function.
+"""
+import re
+import datetime
+import pytest
 
 
-# @pytest.mark.order(6)
-# def test_check_rl_counters_exceed(timestamp_pattern, vault_instance):
-#     """
-#     The function checks the situation of who the request counter is above.
-#     """
-#     users_cases = [
-#         'testUser1',
-#         'testUser7',
-#         'testUser8'
-#     ]
-#     for user in users_cases:
-#         rl_controller = RateLimiter(
-#             vault=vault_instance,
-#             user_id=user
-#         )
-#         result = rl_controller.determine_rate_limit()
-#         end_time = result.get('end_time', None)
-#         assert end_time is not None, f"end_time is not present in the result for {user}"
-#         assert re.match(
-#             timestamp_pattern,
-#             end_time
-#         ), f"end_time '{end_time}' does not match the expected pattern for {user}"
+@pytest.mark.order(11)
+def test_check_rl_counters_exceed_per_hour(timestamp_pattern, users_instance):
+    """
+    Checking behaviour when the user request counter is exhausted per hour.
+    """
+    user = users_instance.user_access_check(user_id='testUser5', role_id='admin_role')
+    assert user['rate_limits'] is not None
+    assert re.match(timestamp_pattern, user['rate_limits']['end_time']) is not None
+    assert isinstance(user['rate_limits'], datetime.datetime)
+    assert user['rate_limits'] >= datetime.datetime.now() + datetime.timedelta(hours=1)
+    assert user['rate_limits'] < datetime.datetime.now() + datetime.timedelta(hours=24)
 
 
 # @pytest.mark.order(7)
