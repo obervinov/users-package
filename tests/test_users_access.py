@@ -12,7 +12,7 @@ def test_users_doesnt_exist_user(users_instance):
     Verify behavior when the user does not exist in the Vault configuration (without rate limiting).
     """
     user_info = users_instance.user_access_check(user_id='testUser99')
-    user_info_with_role = users_instance.user_access_check(user_id='testUser99', role_id='admin_role') 
+    user_info_with_role = users_instance.user_access_check(user_id='testUser99', role_id='admin_role')
     assert user_info['access'] == users_instance.user_status_deny
     assert user_info.get('permissions', None) is None
     assert user_info_with_role['access'] == users_instance.user_status_deny

@@ -194,24 +194,27 @@ class RateLimiter:
             log.info('[Users.RateLimiter]: The rate limit %s for user ID %s has expired and will be reset', latest_rate_limit_timestamp, self.user_id)
             return None
 
-        # Case1: If the counter exceeds the configuration per DAY
-        if per_day_exceeded:
-            if latest_rate_limit_timestamp:
-                new_rate_limit = datetime.strptime(latest_rate_limit_timestamp, '%Y-%m-%d %H:%M:%S.%f') + timedelta(days=1)
-            else:
-                new_rate_limit = datetime.now() + timedelta(days=1)
+        if per_day_exceeded or per_hour_exceeded:
+            # Case1: If the counter exceeds the configuration per DAY
+            if per_day_exceeded:
+                if latest_rate_limit_timestamp:
+                    new_rate_limit = datetime.strptime(latest_rate_limit_timestamp, '%Y-%m-%d %H:%M:%S.%f') + timedelta(days=1)
+                else:
+                    new_rate_limit = datetime.now() + timedelta(days=1)
 
-        # Case2: If the counter exceeds the configuration per HOUR
-        elif per_hour_exceeded:
-            shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
-            if latest_rate_limit_timestamp:
-                new_rate_limit = datetime.strptime(latest_rate_limit_timestamp, '%Y-%m-%d %H:%M:%S.%f') + timedelta(hours=1, minutes=shift_minutes)
-            else:
-                new_rate_limit = datetime.now() + timedelta(hours=1, minutes=shift_minutes)
+            # Case2: If the counter exceeds the configuration per HOUR
+            elif per_hour_exceeded:
+                shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
+                if latest_rate_limit_timestamp:
+                    new_rate_limit = datetime.strptime(latest_rate_limit_timestamp, '%Y-%m-%d %H:%M:%S.%f') + timedelta(hours=1, minutes=shift_minutes)
+                else:
+                    new_rate_limit = datetime.now() + timedelta(hours=1, minutes=shift_minutes)
 
-        log.info('[Users.RateLimiter]: The rate limit already applied for user ID %s. Updated rate limit: %s', self.user_id, str(new_rate_limit))
+            log.info('[Users.RateLimiter]: The rate limit already applied for user ID %s. Rate limit: %s', self.user_id, str(new_rate_limit))
+            return new_rate_limit
 
-        return new_rate_limit
+        log.error('[Users.RateLimiter]: Failed to validate rate limit for user ID %s:\nConfiguration: %s\nCounters: %s', self.user_id, self.requests_configuration, self.requests_counters)
+        raise FailedDeterminateRateLimit("Failed to determinate rate limit for the user ID.")
 
     def _apply_rate_limit(self) -> Union[datetime, None]:
         """

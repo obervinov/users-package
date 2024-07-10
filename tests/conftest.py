@@ -327,16 +327,14 @@ def fixture_users(vault_instance, postgres_instance):
             elif key == 'requests_history' and len(key) > 0:
                 for row in value:
                     if len(row) == 6:
-                        user_id, message_id, chat_id, authentication, authorization, timestamp = row
                         _ = psql_cursor.execute(
                             "INSERT INTO users_requests (user_id, message_id, chat_id, authentication, \"authorization\", timestamp) "
-                            f"VALUES ('{user_id}', '{message_id}', '{chat_id}', '{authentication}', '{authorization}', '{timestamp}')"
+                            f"VALUES ('{row[0]}', '{row[1]}', '{row[2]}', '{row[3]}', '{row[4]}', '{row[5]}')"
                         )
                     elif len(row) == 7:
-                        user_id, message_id, chat_id, authentication, authorization, timestamp, rate_limits = row
                         _ = psql_cursor.execute(
                             "INSERT INTO users_requests (user_id, message_id, chat_id, authentication, \"authorization\", timestamp, rate_limits) "
-                            f"VALUES ('{user_id}', '{message_id}', '{chat_id}', '{authentication}', '{authorization}', '{timestamp}', '{rate_limits}')"
+                            f"VALUES ('{row[0]}', '{row[1]}', '{row[2]}', '{row[3]}', '{row[4]}', '{row[5]}', '{row[6]}')"
                         )
                     psql_connection.commit()
 
