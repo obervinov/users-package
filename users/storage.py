@@ -79,6 +79,7 @@ class Storage:
             log.info('[Users]: %s already exists in the database. Updating the chat ID and status.', user_id)
             self.connection.rollback()
             self.cursor.execute(f"UPDATE users SET chat_id='{chat_id}', status='{status}' WHERE user_id='{user_id}'")
+            self.connection.commit()
 
     def log_user_request(
         self,
