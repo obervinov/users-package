@@ -102,9 +102,15 @@ class Storage:
             >>> storage = Storage(database_connection, database_credentials)
             >>> storage.log_user_request("user1", {"type": "GET", "path": "/users"})
         """
+        # Prepare values for the database
+        request['authorization'] = json.dumps(request['authorization'])
+        if not request['rate_limits']:
+            request['rate_limits'] = 'NULL'
+
+        # Insert the user request into the database
         self.cursor.execute(
             "INSERT INTO users_requests (user_id, message_id, chat_id, authentication, \"authorization\", rate_limits) VALUES "
-            f"('{user_id}', '{request['message_id']}', '{request['chat_id']}', '{request['authentication']}', '{json.dumps(request['authorization'])}', '{request['rate_limits']}')"
+            f"('{user_id}', '{request['message_id']}', '{request['chat_id']}', '{request['authentication']}', '{request['authorization']}', '{request['rate_limits']}')"
         )
         self.connection.commit()
 
