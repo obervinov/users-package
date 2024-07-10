@@ -200,7 +200,7 @@ def fixture_database_secret(vault_instance):
     _ = vault_instance.kv2engine.write_secret(
         path=secret_path,
         key='dbname',
-        value='pytests'
+        value='postgres'
     )
     _ = vault_instance.kv2engine.write_secret(
         path=secret_path,
