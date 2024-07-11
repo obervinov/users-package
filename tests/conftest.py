@@ -288,7 +288,7 @@ def fixture_users(vault_instance, postgres_instance):
         # - RATE_LIMIT: requests limit PER DAY exceeded
         # - RATE_LIMIT: restrictions on requests have not yet been applied
         {
-            'name': 'testUser5',
+            'name': 'testUser6',
             'status': 'allowed',
             'roles': ['admin_role'],
             'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
