@@ -247,9 +247,6 @@ def fixture_users(vault_instance, postgres_instance):
         # Test user3
         # - AUTHZ: allowed role1
         # - RATE_LIMIT: limited requests
-        # - RATE_LIMIT: requests limit PER DAY exceeded
-        # - RATE_LIMIT: requests limit PER HOUR exceeded
-        # - RATE_LIMIT: restrictions on requests have not yet been applied
         {
             'name': 'testUser3',
             'status': 'allowed',
@@ -269,6 +266,7 @@ def fixture_users(vault_instance, postgres_instance):
             'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
             'requests_history': []
         },
+        #
         # Test user5
         # - RATE_LIMIT: limited requests
         # - RATE_LIMIT: requests limit PER HOUR exceeded
@@ -283,6 +281,7 @@ def fixture_users(vault_instance, postgres_instance):
                 ('testUser5', 'testMessage1', 'testChat5', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=3), datetime.now() + timedelta(hours=1)),
             ]
         },
+        #
         # Test user6
         # - RATE_LIMIT: limited requests
         # - RATE_LIMIT: requests limit PER DAY exceeded
@@ -293,10 +292,28 @@ def fixture_users(vault_instance, postgres_instance):
             'roles': ['admin_role'],
             'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
             'requests_history': [
-                ('testUser6', 'testMessage1', 'testChat6', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=1)),
-                ('testUser6', 'testMessage1', 'testChat6', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=2)),
                 ('testUser6', 'testMessage1', 'testChat6', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=3)),
-                ('testUser6', 'testMessage1', 'testChat6', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=4), datetime.now() + timedelta(hours=24)),
+                ('testUser6', 'testMessage1', 'testChat6', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=4)),
+                ('testUser6', 'testMessage1', 'testChat6', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=5)),
+                ('testUser6', 'testMessage1', 'testChat6', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=6), datetime.now() + timedelta(hours=24)),
+            ]
+        },
+        #
+        # Test user7
+        # - RATE_LIMIT: limited requests
+        # - RATE_LIMIT: requests limit PER DAY exceeded
+        # - RATE_LIMIT: requests limit PER HOUR exceeded
+        # - RATE_LIMIT: restrictions on requests have not yet been applied
+        {
+            'name': 'testUser7',
+            'status': 'allowed',
+            'roles': ['admin_role'],
+            'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
+            'requests_history': [
+                ('testUser7', 'testMessage1', 'testChat7', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=1)),
+                ('testUser7', 'testMessage1', 'testChat7', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=1), datetime.now() + timedelta(hours=1, minutes=15)),
+                ('testUser7', 'testMessage1', 'testChat7', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=3)),
+                ('testUser7', 'testMessage1', 'testChat7', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=4), datetime.now() + timedelta(hours=24)),
             ]
         },
         #
