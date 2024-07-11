@@ -15,8 +15,8 @@ def test_check_rl_counters_exceed_per_hour(timestamp_pattern, users_instance):
     assert user['rate_limits'] is not None
     assert re.match(timestamp_pattern, str(user['rate_limits'])) is not None
     assert isinstance(user['rate_limits'], datetime.datetime)
-    assert user['rate_limits'] >= datetime.datetime.now() + datetime.timedelta(hours=1)
-    assert user['rate_limits'] < datetime.datetime.now() + datetime.timedelta(hours=24)
+    assert user['rate_limits'] >= (datetime.datetime.now() + datetime.timedelta(hours=1))
+    assert user['rate_limits'] < (datetime.datetime.now() + datetime.timedelta(hours=24))
 
 
 @pytest.mark.order(12)
@@ -28,8 +28,8 @@ def test_check_rl_counters_exceed_per_day(timestamp_pattern, users_instance):
     assert user['rate_limits'] is not None
     assert re.match(timestamp_pattern, str(user['rate_limits'])) is not None
     assert isinstance(user['rate_limits'], datetime.datetime)
-    assert user['rate_limits'] >= datetime.datetime.now() + datetime.timedelta(hours=25)
-    assert user['rate_limits'] <= datetime.datetime.now() + datetime.timedelta(hours=48)
+    assert user['rate_limits'] >= (datetime.datetime.now() + datetime.timedelta(hours=25))
+    assert user['rate_limits'] <= (datetime.datetime.now() + datetime.timedelta(hours=48))
 
 
 @pytest.mark.order(13)
@@ -41,8 +41,8 @@ def test_check_rl_counters_exceed_both(timestamp_pattern, users_instance):
     assert user['rate_limits'] is not None
     assert re.match(timestamp_pattern, str(user['rate_limits'])) is not None
     assert isinstance(user['rate_limits'], datetime.datetime)
-    assert user['rate_limits'] >= datetime.datetime.now() + datetime.timedelta(hours=25)
-    assert user['rate_limits'] <= datetime.datetime.now() + datetime.timedelta(hours=48)
+    assert user['rate_limits'] >= (datetime.datetime.now() + datetime.timedelta(hours=25))
+    assert user['rate_limits'] <= (datetime.datetime.now() + datetime.timedelta(hours=48))
 
 
 # @pytest.mark.order(7)
