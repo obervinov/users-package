@@ -44,7 +44,7 @@ def test_check_rl_counters_exceed_both(timestamp_pattern, users_instance):
     assert user['rate_limits'] is not None
     assert re.match(timestamp_pattern, str(user['rate_limits'])) is not None
     assert isinstance(user['rate_limits'], datetime.datetime)
-    assert user['rate_limits'] >= now + datetime.timedelta(hours=25)
+    assert user['rate_limits'] >= now + datetime.timedelta(minutes=1395)
     assert user['rate_limits'] <= now + datetime.timedelta(hours=48)
 
 

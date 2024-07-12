@@ -260,7 +260,6 @@ class RateLimiter:
         requests_per_hour = 0
         requests_per_day = 0
         user_requests = self.storage.get_user_requests(user_id=self.user_id)
-        log.info('[Users.RateLimiter]: User requests for user ID %s: %s', self.user_id, user_requests)
         if user_requests:
             for request in user_requests:
                 request_timestamp = request[1]
@@ -269,8 +268,8 @@ class RateLimiter:
                 if request_timestamp >= datetime.now() - timedelta(days=1):
                     requests_per_day = requests_per_day + 1
         log.debug(
-            '[Users.RateLimiter]: Calculated request counters for user ID %s: %s',
-            self.user_id, {'requests_per_hour': requests_per_hour, 'requests_per_day': requests_per_day}
+            '[Users.RateLimiter]: User ID %s: Counters %s, Requests %s',
+            self.user_id, user_requests, {'requests_per_hour': requests_per_hour, 'requests_per_day': requests_per_day}
         )
         return {
             'requests_per_hour': requests_per_hour,
