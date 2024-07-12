@@ -257,7 +257,6 @@ class RateLimiter:
             >>> ratelimits = RateLimits()
             >>> ratelimits._calculate_requests_counters()
         """
-        log.debug('[Users.RateLimiter]: Calculating of request counters for user ID %s', self.user_id)
         requests_per_hour = 0
         requests_per_day = 0
         user_requests = self.storage.get_user_requests(user_id=self.user_id)
@@ -269,7 +268,7 @@ class RateLimiter:
                     requests_per_hour = requests_per_hour + 1
                 if request_timestamp >= datetime.now() - timedelta(days=1):
                     requests_per_day = requests_per_day + 1
-        log.info(
+        log.debug(
             '[Users.RateLimiter]: Calculated request counters for user ID %s: %s',
             self.user_id, {'requests_per_hour': requests_per_hour, 'requests_per_day': requests_per_day}
         )

@@ -142,6 +142,5 @@ class Storage:
             >>> storage = Storage(database_connection, database_credentials)
             >>> storage.get_user_requests(user_id="user1", limit=10, order="timestamp DESC")
         """
-        # self.cursor.execute(f"SELECT id, timestamp, rate_limits FROM users_requests WHERE user_id='{user_id}' ORDER BY {order} LIMIT {limit}")
-        self.cursor.execute(f"SELECT id, timestamp, rate_limits, user_id, chat_id, message_id, authentication, \"authorization\" FROM users_requests WHERE user_id='{user_id}' ORDER BY {order} LIMIT {limit}")
+        self.cursor.execute(f"SELECT id, timestamp, rate_limits FROM users_requests WHERE user_id='{user_id}' ORDER BY {order} LIMIT {limit}")
         return self.cursor.fetchall()

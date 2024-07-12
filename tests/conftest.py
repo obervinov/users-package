@@ -217,7 +217,7 @@ def fixture_database_secret(vault_instance):
     )
 
 
-@pytest.fixture(name="users", scope='function')
+@pytest.fixture(name="users", scope='session')
 def fixture_users(vault_instance, postgres_instance):
     """Fill in the configuration and data for the test users"""
     users = [
