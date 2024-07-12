@@ -77,7 +77,6 @@ class Storage:
             log.info('[Users]: %s has been successfully registered in the database.', user_id)
         # pylint: disable=no-member
         except psycopg2.errors.UniqueViolation:
-            log.info('[Users]: %s already exists in the database. Updating the chat ID and status.', user_id)
             self.connection.rollback()
             self.cursor.execute(f"UPDATE users SET chat_id='{chat_id}', status='{status}' WHERE user_id='{user_id}'")
             self.connection.commit()
@@ -143,5 +142,5 @@ class Storage:
             >>> storage = Storage(database_connection, database_credentials)
             >>> storage.get_user_requests(user_id="user1", limit=10, order="timestamp DESC")
         """
-        self.cursor.execute(f"SELECT id, timestamp, rate_limits FROM users_requests WHERE user_id='{user_id}' ORDER BY {order} LIMIT {limit}")
+        self.cursor.execute(f"SELECT id, timestamp, rate_limits, user_id FROM users_requests WHERE user_id='{user_id}' ORDER BY {order} LIMIT {limit}")
         return self.cursor.fetchall()
