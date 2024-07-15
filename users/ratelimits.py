@@ -96,7 +96,7 @@ class RateLimiter:
             log.error('[Users.RateLimiter]: No requests configuration found for user ID %s', self.user_id)
             raise WrongUserConfiguration("User configuration in Vault is wrong. Please provide a valid configuration for rate limits.")
 
-        self.requests_counters = self._calculate_requests_counters()
+        self.requests_counters = self.get_user_request_counters()
 
     @property
     def vault_config_path(
@@ -243,7 +243,7 @@ class RateLimiter:
 
         return rate_limit
 
-    def _calculate_requests_counters(self) -> dict:
+    def get_user_request_counters(self) -> dict:
         """
         Calculate the user request counters: per hour and per day.
 
@@ -255,7 +255,7 @@ class RateLimiter:
 
         Examples:
             >>> ratelimits = RateLimits()
-            >>> ratelimits._calculate_requests_counters()
+            >>> ratelimits.get_user_request_counters()
         """
         requests_per_hour = 0
         requests_per_day = 0
