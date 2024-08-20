@@ -92,4 +92,7 @@ def test_authorization_user_denied(users_instance):
     """
     assert users_instance.user_access_check(user_id='testUser21')['access'] == users_instance.user_status_allow
     assert users_instance.user_access_check(user_id='testUser21') == {'access': users_instance.user_status_allow}
-    assert users_instance.user_access_check(user_id='testUser21', role_id='admin_role') == {'access': users_instance.user_status_allow, 'permissions': users_instance.user_status_deny}
+    assert users_instance.user_access_check(user_id='testUser21', role_id='admin_role') == {
+        'access': users_instance.user_status_allow,
+        'permissions': users_instance.user_status_deny
+    }
