@@ -16,12 +16,6 @@ class Users:
     This class provides authentication, authorization, and user attribute management
     for Telegram bots.
 
-    Args:
-        :param vault (any): Configuration for initializing the Vault client.
-            - (object) VaultClient instance for interacting with the Vault API.
-            - (dict) Configuration for initializing a VaultClient instance in this class.
-        :param rate_limits (bool): Enable rate limit functionality. Default is False.
-
     Attributes:
         vault (any): The initialized VaultClient instance or None if initialization failed.
         rate_limits (bool): Enable or disable rate limit functionality.
@@ -29,24 +23,13 @@ class Users:
         user_status_deny (str): A constant representing denied user status.
         vault_config_path (str): Path to the configuration data in Vault.
 
+    Methods:
+        user_access_check: The main entry point for authentication, authorization, and request rate limit verification.
+        _authentication: Checks if the specified user ID has access to the bot.
+        _authorization: Checks if the specified user ID has the specified role.
+
     Raises:
         VaultInstanceNotSet: If the vault instance is not set.
-
-    Examples:
-        >>> users_with_ratelimits = Users(vault=vault_client, rate_limits=True)
-
-        >>> users = Users(vault=vault_client)
-
-        >>> vault_config = {
-                "namespace": "my_project",
-                "url": "https://vault.example.com",
-                "auth": {
-                    "type": "approle",
-                    "role_id": "role_id",
-                    "secret_id": "secret_id"
-                }
-           }
-        >>> users_with_dict_vault = Users(vault=vault_config)
     """
     def __init__(
         self,
@@ -65,13 +48,19 @@ class Users:
             :param storage (dict): Configuration for initializing the Storage instance.
                 - (str) db_role: The database role for generating credentials from Vault.
 
-        Raises:
-            VaultInstanceNotSet: If the vault instance is not set.
-
-        Returns:
-            None
-
-        See the class docstring for more details and examples.
+        Examples:
+            >>> users_with_ratelimits = Users(vault=vault_client, rate_limits=True)
+            >>> users = Users(vault=vault_client)
+            >>> vault_config = {
+                    "namespace": "my_project",
+                    "url": "https://vault.example.com",
+                    "auth": {
+                        "type": "approle",
+                        "role_id": "role_id",
+                        "secret_id": "secret_id"
+                    }
+            }
+            >>> users_with_dict_vault = Users(vault=vault_config)
         """
         if isinstance(vault, VaultClient):
             self.vault = vault

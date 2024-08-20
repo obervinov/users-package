@@ -20,29 +20,24 @@ class RateLimiter:
     The RateLimiter class provides the rate limit functionality for requests
     to the Telegram bot in the context of a specific user.
 
-    Args:
-        :param vault (VaultClient): VaultClient instance for interacting with the Vault API.
-        :param storage (Storage): Storage instance for storing user data.
-        :param user_id (str): User ID for checking rate limits.
-
-    Returns:
-        None
-
     Attributes:
         vault (VaultClient): VaultClient instance for interacting with the Vault API.
         storage (Storage): Storage instance for storing user data.
         vault_config_path (str): Path to the configuration data in Vault.
-        requests_configuration (dict): Configuration for rate limits from Vault.
-        user_requests (list): List of user requests from the storage.
-        requests_counters (dict): Counters for user requests.
+        user_id (str): User ID for checking rate limits.
+        requests_configuration (dict): The user requests configuration.
+        requests_counters (dict): The user request counters.
+
+    Methods:
+        determine_rate_limit: Determine the rate limit status for the user ID.
+        _validate_rate_limit: Check and handle active rate limits for the user ID.
+        _apply_rate_limit: Apply rate limits to the user ID and return the rate limit timestamp.
+        get_user_request_counters: Calculate the user request counters: per hour and per day.
 
     Raises:
         VaultInstanceNotSet: If the Vault instance is not set.
         WrongUserConfiguration: If the user configuration in Vault is wrong.
         FailedDeterminateRateLimit: If the rate limit for the user ID cannot be determined.
-
-    Examples:
-        >>> limiter = RateLimiter(vault=vault_client, storage=storage_client, user_id='user_id')
     """
     def __init__(
         self,
@@ -58,12 +53,8 @@ class RateLimiter:
             :param storage (Storage): Storage instance for storing user data.
             :param user_id (str): User ID for checking rate limits.
 
-        Raises:
-            VaultInstanceNotSet: If the Vault instance is not set.
-            WrongUserConfiguration: If the user configuration in Vault is wrong.
-            StorageInstanceNotSet: If the Storage instance is not set.
-
-        See the class docstring for more details and examples.
+        Examples:
+            >>> limiter = RateLimiter(vault=vault_client, storage=storage_client, user_id='user_id')
         """
         # Extract the Vault instance
         if isinstance(vault, VaultClient):
@@ -127,20 +118,14 @@ class RateLimiter:
         """
         Determine the rate limit status for the user ID.
 
-        Args:
-            None
-
-        Raises:
-            FailedDeterminateRateLimit: If the rate limit for the user ID cannot be determined.
-
-        Examples:
-            >>> rl_status = limiter.determine_rate_limit()
-
         Returns:
             (datetime | None): Rate limit timestamp for the user ID.
             2023-08-07 10:39:00.000000
                 or
             None
+
+        Examples:
+            >>> rl_status = limiter.determine_rate_limit()
         """
         rate_limits = None
 
@@ -175,9 +160,6 @@ class RateLimiter:
     def _validate_rate_limit(self) -> Union[datetime, None]:
         """
         Check and handle active rate limits for the user ID.
-
-        Args:
-            None
 
         Returns:
             (datetime | None): Rate limit timestamp for the user ID or None if the time has already expired.
@@ -224,9 +206,6 @@ class RateLimiter:
         """
         Apply rate limits to the user ID and return the rate limit timestamp.
 
-        Args:
-            None
-
         Returns:
             (datetime | None): Rate limit timestamp for the user ID, or None if not applicable.
             2023-08-07 10:39:00.000000
@@ -250,11 +229,9 @@ class RateLimiter:
         """
         Calculate the user request counters: per hour and per day.
 
-        Args:
-            None
-
         Returns:
-            A dictionary containing the updated request counters.
+            (dict): The user request counters.
+            {'requests_per_hour': 0, 'requests_per_day': 0}
 
         Examples:
             >>> ratelimits = RateLimits()

@@ -6,7 +6,21 @@ from .exceptions import FailedStorageConnection
 
 
 class Storage:
-    """The storage class for the storage of user data: requests, access logs, etc."""
+    """
+    The storage class for the storage of user data: requests, access logs, etc.
+
+    Attributes:
+        connection (object): The database connection object.
+        cursor (object): The database cursor object.
+
+    Methods:
+        register_user: Register the user in the
+        log_user_request: Write the user requests to the database.
+        get_user_requests: Get the user requests from the database.
+
+    Raises:
+        FailedStorageConnection: An error occurred when the storage connection fails.
+    """
     def __init__(
         self,
         vault_client: object = None,
@@ -18,12 +32,6 @@ class Storage:
         Args:
             vault_client (object): The Vault client object.
             db_role (str): The database role for generating credentials from Vault.
-
-        Returns:
-            None
-
-        Raises:
-            FailedStorageConnection: An error occurred when the storage connection fails.
 
         Example:
             >>> storage = Storage(database_connection, database_credentials)
@@ -64,9 +72,6 @@ class Storage:
             chat_id (str): The chat ID.
             status (str): The user state.
 
-        Returns:
-            None
-
         Example:
             >>> storage = Storage(database_connection, database_credentials)
             >>> storage.register_user("user1", "chat1", "allowed")
@@ -92,12 +97,6 @@ class Storage:
         Args:
             user_id (str): The user ID.
             request (dict): The user request details.
-
-        Parameters:
-
-
-        Returns:
-            None
 
         Example:
             >>> storage = Storage(database_connection, database_credentials)
@@ -137,7 +136,7 @@ class Storage:
 
         Returns:
             list: The list of user requests.
-            >>> [(id, timestamp, rate_limits), ...]
+            [(id, timestamp, rate_limits), ...]
 
         Example:
             >>> storage = Storage(database_connection, database_credentials)
