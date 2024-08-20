@@ -277,7 +277,10 @@ def fixture_users(vault_instance, postgres_instance):
             'roles': ['admin_role'],
             'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
             'requests_history': [
-                ('testUser5', 'testMessage1', 'testChat5', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now())
+                (
+                    'testUser5', 'testMessage1', 'testChat5', 'allowed',
+                    '{"role_id": "admin_role", "status": "allowed"}', datetime.now()
+                )
             ]
         },
         #
@@ -291,10 +294,22 @@ def fixture_users(vault_instance, postgres_instance):
             'roles': ['admin_role'],
             'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
             'requests_history': [
-                ('testUser6', 'testMessage1', 'testChat6', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=3)),
-                ('testUser6', 'testMessage2', 'testChat6', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=4)),
-                ('testUser6', 'testMessage3', 'testChat6', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=5)),
-                ('testUser6', 'testMessage4', 'testChat6', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=6), datetime.now() + timedelta(hours=24)),
+                (
+                    'testUser6', 'testMessage1', 'testChat6', 'allowed',
+                    '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=3)
+                ),
+                (
+                    'testUser6', 'testMessage2', 'testChat6', 'allowed',
+                    '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=4)
+                ),
+                (
+                    'testUser6', 'testMessage3', 'testChat6', 'allowed',
+                    '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=5)
+                ),
+                (
+                    'testUser6', 'testMessage4', 'testChat6', 'allowed',
+                    '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=6), datetime.now() + timedelta(hours=24)
+                ),
             ]
         },
         #
@@ -309,10 +324,21 @@ def fixture_users(vault_instance, postgres_instance):
             'roles': ['admin_role'],
             'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
             'requests_history': [
-                ('testUser7', 'testMessage1', 'testChat7', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=1)),
-                ('testUser7', 'testMessage2', 'testChat7', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=1), datetime.now() + timedelta(hours=1, minutes=15)),
-                ('testUser7', 'testMessage3', 'testChat7', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=3)),
-                ('testUser7', 'testMessage4', 'testChat7', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=4), datetime.now() + timedelta(hours=24)),
+                (
+                    'testUser7', 'testMessage1', 'testChat7', 'allowed',
+                    '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=1)
+                ),
+                (
+                    'testUser7', 'testMessage2', 'testChat7', 'allowed',
+                    '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=1), datetime.now() + timedelta(hours=1, minutes=15)
+                ),
+                (
+                    'testUser7', 'testMessage3', 'testChat7', 'allowed',
+                    '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=3)),
+                (
+                    'testUser7', 'testMessage4', 'testChat7', 'allowed',
+                    '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=4), datetime.now() + timedelta(hours=24)
+                ),
             ]
         },
         # Test user8
@@ -333,9 +359,18 @@ def fixture_users(vault_instance, postgres_instance):
             'roles': ['admin_role'],
             'requests': {'requests_per_day': 10, 'requests_per_hour': 3, 'random_shift_minutes': 15},
             'requests_history': [
-                ('testUser9', 'testMessage1', 'testChat9', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=2)),
-                ('testUser9', 'testMessage2', 'testChat9', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=2, minutes=10)),
-                ('testUser9', 'testMessage3', 'testChat9', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=2, minutes=15))
+                (
+                    'testUser9', 'testMessage1', 'testChat9', 'allowed',
+                    '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=2)
+                ),
+                (
+                    'testUser9', 'testMessage2', 'testChat9', 'allowed',
+                    '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=2, minutes=10)
+                ),
+                (
+                    'testUser9', 'testMessage3', 'testChat9', 'allowed',
+                    '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=2, minutes=15)
+                )
             ]
         },
         # Test user10
@@ -347,9 +382,18 @@ def fixture_users(vault_instance, postgres_instance):
             'roles': ['admin_role'],
             'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
             'requests_history': [
-                ('testUser10', 'testMessage1', 'testChat10', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=25)),
-                ('testUser10', 'testMessage2', 'testChat10', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=27)),
-                ('testUser10', 'testMessage3', 'testChat10', 'allowed', '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=29))
+                (
+                    'testUser10', 'testMessage1', 'testChat10', 'allowed',
+                    '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=25)
+                ),
+                (
+                    'testUser10', 'testMessage2', 'testChat10', 'allowed',
+                    '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=27)
+                ),
+                (
+                    'testUser10', 'testMessage3', 'testChat10', 'allowed',
+                    '{"role_id": "admin_role", "status": "allowed"}', datetime.now() - timedelta(hours=29)
+                )
             ]
         },
         #
