@@ -214,7 +214,10 @@ class RateLimiter:
             log.info('[Users.RateLimiter]: The rate limit already applied for user ID %s. Rate limit: %s', self.user_id, str(new_rate_limit))
             return new_rate_limit
 
-        log.error('[Users.RateLimiter]: Failed to validate rate limit for user ID %s:\nConfiguration: %s\nCounters: %s', self.user_id, self.requests_configuration, self.requests_counters)
+        log.error(
+            '[Users.RateLimiter]: Failed to validate rate limit for user ID %s:\nConfiguration: %s\nCounters: %s',
+            self.user_id, self.requests_configuration, self.requests_counters
+        )
         raise FailedDeterminateRateLimit("Failed to determinate rate limit for the user ID.")
 
     def _apply_rate_limit(self) -> Union[datetime, None]:

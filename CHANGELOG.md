@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## v3.0.0 - 2024-07-15
+## v3.0.0 - 2024-08-20
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.5...v3.0.0 by @obervinov in https://github.com/obervinov/users-package/pull/43
 #### 💥 Breaking Changes
@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 * Changed returns in `determine_rate_limit()` method. More details in the [documentation](DEPRECATED.md)
 * Changed logger level to `INFO` for messages when the user rate limit is exceeded
 #### 🚀 Features
-* Bump workflow `_templates` version to `v1.2.6`
+* Bump workflow `_templates` version to `v1.2.8`
 * Bump vault-package version to `v3.0.0`
 * Bump transitive dependencies
 * [Feature request: Add an additional backend - `Postgres` to store historical user data](https://github.com/obervinov/users-package/issues/41)

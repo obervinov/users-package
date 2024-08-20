@@ -12,7 +12,7 @@
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/book.png" width="25" title="about"> About this project
 **Project Description**
 
-This Python module is designed to simplify user management in Telegram bots, providing the necessary functionality for tasks such as user authentication, authorization and compliance with speed limits, ensuring effective management of user attributes and access rights.
+This Python module is designed to simplify user management in __Telegram Bots__ by providing necessary functionality such as: `authentication`, `authorization` and `request limitation`, providing efficient management of user attributes and access rights.
 
 **Key Features**
 
@@ -617,4 +617,4 @@ poetry install
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/github-actions.png" width="25" title="github-actions"> GitHub Actions
 | Name  | Version |
 | ------------------------ | ----------- |
-| GitHub Actions Templates | [v1.2.6](https://github.com/obervinov/_templates/tree/v1.2.6) |
+| GitHub Actions Templates | [v1.2.8](https://github.com/obervinov/_templates/tree/v1.2.8) |
