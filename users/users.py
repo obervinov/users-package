@@ -157,8 +157,8 @@ class Users:
             :param role_id (str): Required role ID for the specified user ID.
 
         Keyword Args:
-            :param chat_id (str): Required chat ID.
-            :param message_id (str): Required message ID.
+            :param chat_id (str): Required chat ID. Additional information for logging.
+            :param message_id (str): Required message ID. Additional information for logging.
 
         Returns:
             (dict) {

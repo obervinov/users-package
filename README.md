@@ -18,35 +18,40 @@ This Python module is designed to simplify user management in __Telegram Bots__ 
 
 - This module is designed primarily for Telegram bots but can be adapted for various projects that require user management, role-based access control, and request rate limiting.
 
-- This module requires certain dependencies related to [Vault](https://www.vaultproject.io)
-    - [Vault Server](docker-compose.ymla) for storing user configurations and historical data
-    - [Additional Module](https://github.com/obervinov/vault-package ) to interact with the Vault API
-    - [Vault Policy](tests/vault/policy.hcl) with access rights to the Vault Server
+- This module requires certain dependencies related to
+    - [Vault](https://www.vaultproject.io)
+      - [Vault Server](docker-compose.ymla) for storing user configurations and historical data
+      - [Additional Module](https://github.com/obervinov/vault-package ) to interact with the Vault API
+      - [Vault Policy](tests/vault/policy.hcl) with access rights to the Vault Server
+    - [PostgreSQL](https://www.postgresql.org)
+      - [PostgreSQL Server](docker-compose.yml) for storing user data and historical records
+      - [PostgreSQL Schema](tests/postgres/tables.sql) for creating tables in the database
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="21" title="constants"> Description of module Constants
 
 This module contains constant values
 
-| Constant Name       | Description                                       | Default Value   |
-|---------------------|---------------------------------------------------|-----------------|
-| `VAULT_CONFIG_PATH` | Path for configuration data in Vault.             | `"configuration/users"` |
-| `VAULT_DATA_PATH`   | Path for historical data in Vault.                | `"data/users"`  |
-| `USER_STATUS_ALLOW` | User access status for allowed access.            | `"allowed"`     |
-| `USER_STATUS_DENY`  | User access status for denied access.             | `"denied"`      |
+| Constant Name             | Description                                       | Default Value           |
+|---------------------------|---------------------------------------------------|-------------------------|
+| `USERS_VAULT_CONFIG_PATH` | Path for configuration data in Vault.             | `"configuration/users"` |
+| `USER_STATUS_ALLOW`       | User access status for allowed access.            | `"allowed"`             |
+| `USER_STATUS_DENY`        | User access status for denied access.             | `"denied"`              |
 
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="21" title="exceptions"> Description of module Exceptions
-| Exception                    | Describe                              | Usage Example                                    | Tips |
-|------------------------------|---------------------------------------|--------------------------------------------------|------|
-| `WrongUserConfiguration`     | Raised when user configuration is wrong. | ```python<br>try:<br>    raise WrongUserConfiguration("Incorrect user configuration")<br>except WrongUserConfiguration as e:<br>    print(e)<br>``` | Please, see the configuration example: https://github.com/obervinov/users-package?tab=readme-ov-file#-structure-of-configuration-and-statistics-data-in-vault |
-| `VaultInstanceNotSet`        | Raised when the Vault instance is not set. | ```python<br>try:<br>    raise VaultInstanceNotSet("Vault instance not set")<br>except VaultInstanceNotSet as e:<br>    print(e)<br>``` | Please, see documentation for the initialization of the class: https://github.com/obervinov/users-package?tab=readme-ov-file#class-initialization |
-| `FailedDeterminateRateLimit` | Raised when the rate limit cannot be determined. | ```python<br>try:<br>    raise FailedDeterminateRateLimit("Failed to determine the rate limit")<br>except FailedDeterminateRateLimit as e:<br>    print(e)<br>``` | Please, check misconfiguration between configuration and historical data in Vault. |
+| Exception                    | Describe                              | Tips |
+|------------------------------|---------------------------------------|------|
+| `WrongUserConfiguration`     | Raised when user configuration is wrong. | Please, see the configuration [example](#-structure-of-configuration-and-statistics-data-in-vault) |
+| `VaultInstanceNotSet`        | Raised when the Vault instance is not set. | Please, see [documentation](#class-initialization) |
+| `FailedDeterminateRateLimit` | Raised when the rate limit cannot be determined. | Please, check misconfiguration between configuration and users requests in PostgreSQL |
+| `StorageInstanceNotSet`      | Raised when the storage instance (PostgreSQL) is not set. | Please, see [documentation](#class-initialization) |
+| `FailedStorageConnection`    | Raised when the connection to the storage (PostgreSQL) failed. | Please, check the connection to the PostgreSQL server |
 
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/build.png" width="25" title="class"> Users class
 ### Class Initialization
 
-The `Users` class provides authentication, authorization and management of user attributes for Telegram bots. You can initialize it using various options
+The `Users` class provides authentication, authorization, user attribute management and user request logging for Telegram bots. You can initialize it with different options
 
 - `vault (any)`: Configuration for initializing the Vault client.
   - `(VaultClient)`: an already initialized instance for interacting with the Vault API.
@@ -54,44 +59,50 @@ The `Users` class provides authentication, authorization and management of user 
 
 - `rate_limits (bool)`: Enable rate limit functionality.
 
+- `storage (dict)`: Configuration for initializing the storage client.
+  - `db_role (str)`: The role name for the Vault database engine.
+
 - **Examples:**
 
   - Initialize with `VaultClient` and without `rate_limits`:
     ```python
-    users_without_ratelimits = Users(vault=vault_client, rate_limits=False)
+    users_without_ratelimits = Users(vault=vault_client, rate_limits=False, storage={'db_role': 'my_role'})
     ```
 
   - Initialize with `VaultClient` and with `rate_limits`:
     ```python
-    users_with_ratelimits = Users(vault=vault_client)
+    users_with_ratelimits = Users(vault=vault_client, storage={'db_role': 'my_role'})
     ```
 
   - Initialize with Vault `configuration dictionary`:
     ```python
     vault_config = {
-      "name": "my_project",
-      "url": "https://vault.example.com",
-      "approle": {
-          "id": "my_approle",
-          "secret-id": "my_secret"
+      'namespace': 'my_project',
+      'url': 'https://vault.example.com',
+      'auth': {
+          'type': 'approle',
+          'role_id': 'my_role_id',
+          'secret_id': 'my_secret_id'
       }
     }
-    users_with_dict_vault = Users(vault=vault_config)
+    users_with_dict_vault = Users(vault=vault_config, storage={'db_role': 'my_role'})
     ```
 
-For more details and examples, see the class docstring.
+### method: User Access Check
 
-### User Access Check
-
-The `user_access_check` method is the main entry point for authentication, authorization, and request rate limit verification. It is used to control the request rate (limits) for a specific user.
+The `user_access_check()` method is the main entry point for authentication, authorization, and request rate limit verification. It is used to control the request rate (limits) for a specific user.
 
 - **Arguments:**
   - `user_id (str)`: Required user ID.
   - `role_id (str)`: Required role ID for the specified user ID.
 
+- **Keyword Arguments:**
+  - `chat_id (str)`: Required chat ID for the specified user ID. Additional context for logging.
+  - `message_id (str)`: Required message ID for the specified user ID. Additional context for logging.
+
 - **Examples:**
   ```python
-  user_access_check(user_id='user1', role_id='admin_role')
+  user_access_check(user_id='user1', role_id='admin_role', chat_id='chat1', message_id='msg1')
   ```
 
 - **Returns:**
@@ -100,76 +111,19 @@ The `user_access_check` method is the main entry point for authentication, autho
     {
       'access': self.user_status_allow / self.user_status_deny,
       'permissions': self.user_status_allow / self.user_status_deny,
-      'rate_limits': {
-          'end_time': '2023-08-06 11:47:09.440933'
-      }
+      'rate_limits': '2023-08-06 11:47:09.440933' / None
     }
     ```
-For more details, see the method docstring.
-
-### Authentication
-
-The `authentication` method checks if the specified user ID has access to the bot.
-
-- **Arguments:**
-  - `user_id (str)`: Required user ID.
-
-- **Example:**
-  ```python
-  authentication(user_id='user1')
-  ```
-
-- **Returns:**
-  - `self.user_status_allow` if access is granted.
-  - `self.user_status_deny` if access is denied.
-
-### Authorization
-
-The `authorization` method checks whether the user has the specified role.
-
-- **Arguments:**
-  - `user_id (str)`: Required user ID.
-  - `role_id (str)`: Required role ID for the specified user ID.
-
-- **Example:**
-  ```python
-  authorization(user_id='user1', role_id='admin_role')
-  ```
-
-- **Returns:**
-  - `self.user_status_allow` if the user has the role.
-  - `self.user_status_deny` if the user does not have the role.
-
 
 ### Description of class attributes
 | Data Type | Attribute           | Purpose                                                      | Default Value           |
 |-----------|---------------------|--------------------------------------------------------------|-------------------------|
 | `object`  | `vault`             | Vault instance for interacting with the Vault API.           | `None`                  |
+| `dict`    | `storage`           | Configuration for initializing the storage client.           | `None`                  |
 | `bool`    | `rate_limits`       | Enable request rate limit functionality.                     | `True`                  |
 | `str`     | `user_status_allow` | User access status: allowed.                                 | `"allowed"`             |
 | `str`     | `user_status_deny`  | User access status: denied.                                  | `"denied"`              |
 | `str`     | `vault_config_path` | The prefix of the configuration path in the Vault.           | `"configuration/users"` |
-| `str`     | `vault_data_path`   | The prefix of the path of historical data in the Vault.      | `"data/users"`          |
-
-
-## Description of class methods
-
-| Method Name       | Description                                                       | Arguments                                          | Usage Examples                                            | Returns Examples                                      | Configuration Path                                                            | History Path                                                                   |
-|-------------------|-------------------------------------------------------------------|---------------------------------------------------|----------------------------------------------------------|--------------------------------------------------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------------|
-| `__init__`        | Creates a new Users instance.                                      | `vault (any)`: Configuration for initializing the Vault client. `rate_limits (bool)`: Enable rate limit functionality. | `Users(vault=vault_client)`                                | N/A                                                    | N/A                                                                         | N/A                                                                             |
-| `user_access_check` | Main entry point for authentication, authorization, and rate limit verification. | `user_id (str)`: Required user ID. `role_id (str)`: Required role ID for the specified user ID. | `user_access_check(user_id='user1', role_id='admin_role')` | `{'access': self.user_status_allow, 'permissions': self.user_status_allow, 'rate_limits': {'end_time': '2023-08-06 11:47:09.440933'}}` | N/A                                                                         | N/A                                                                             |
-| `authentication`  | Checks if the specified user ID has access to the bot.              | `user_id (str)`: Required user ID.                    | `authentication(user_id='user1')`                         | `self.user_status_allow` or `self.user_status_deny`   | `{self.vault_config_path}/{user_id}:status` reads configuration in Vault to determine access status. | `{self.vault_data_path}/{user_id}:authentication` writes authentication data to Vault. |
-| `authorization`   | Checks whether the user ID has the specified role ID.               | `user_id (str)`: Required user ID. `role_id (str)`: Required role ID for the specified user ID. | `authorization(user_id='user1', role_id='admin_role')`    | `self.user_status_allow` or `self.user_status_deny`   | `{self.vault_config_path}/{user_id}:roles` reads configuration in Vault to determine role ID status. | `{self.vault_data_path/{user_id}:authorization` writes authorization data to Vault. |
-| `vault`           | Getter for the 'vault' attribute.                                  | N/A                                               | `vault = users_instance.vault`                             | VaultClient instance or None                          | N/A                                                                         | N/A                                                                             |
-| `vault`           | Setter for the 'vault' attribute.                                  | `vault (any)`: Configuration for initializing the Vault client. | `users_instance.vault = vault_client`                     | N/A                                                    | N/A                                                                         | N/A                                                                             |
-| `user_status_allow` | Getter for the 'user_status_allow' attribute.                      | N/A                                               | `status = users_instance.user_status_allow`                | `str` (User status for allowed access)                  | N/A                                                                         | N/A                                                                             |
-| `user_status_allow` | Setter for the 'user_status_allow' attribute.                      | `user_status_allow (str)`: User status for allowed access. | `users_instance.user_status_allow = 'custom_status'`        | N/A                                                    | N/A                                                                         | N/A                                                                             |
-| `user_status_deny`  | Getter for the 'user_status_deny' attribute.                       | N/A                                               | `status = users_instance.user_status_deny`                 | `str` (User status for denied access)                   | N/A                                                                         | N/A                                                                             |
-| `user_status_deny`  | Setter for the 'user_status_deny' attribute.                       | `user_status_deny (str)`: User status for denied access. | `users_instance.user_status_deny = 'custom_status'`        | N/A                                                    | N/A                                                                         | N/A                                                                             |
-| `vault_config_path` | Getter for the 'vault_config_path' attribute.                      | N/A                                               | `path = users_instance.vault_config_path`                   | `str` (Path to the configuration data in Vault)         | N/A                                                                         | N/A                                                                             |
-| `vault_config_path` | Setter for the 'vault_config_path' attribute.                      | `vault_config_path (str)`: Path to the configuration data in Vault. | `users_instance.vault_config_path = 'custom_path'`        | N/A                                                    | N/A                                                                         | N/A                                                                             |
-| `vault_data_path`   | Getter for the 'vault_data_path' attribute.                        | N/A                                               | `path = users_instance.vault_data_path`                     | `str` (Path to the data in Vault)                       | N/A                                                                         | N/A                                                                             |
-| `vault_data_path`   | Setter for the 'vault_data_path' attribute.                        | `vault_data_path (str)`: Path to the data in Vault.      | `users_instance.vault_data_path = 'custom_path'`           | N/A                                                    | N/A                                                                         | N/A                                                                             |
 
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/build.png" width="25" title="class"> RateLimiter class
