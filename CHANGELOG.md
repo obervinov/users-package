@@ -3,20 +3,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## v3.0.0 - 2024-08-21
+## v3.0.0 - 2024-08-22
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.5...v3.0.0 by @obervinov in https://github.com/obervinov/users-package/pull/43
 #### 💥 Breaking Changes
-* Bump vault-package version to `v3.0.0` (this version contains major changes)
 * [Feature request: Add an additional backend - `Postgres` to store historical user data](https://github.com/obervinov/users-package/issues/41)
-* `authentication()` and `authorization()` methods are private now
-* `rate limit` functions are now switched off by default and need to be switched on explicitly
+* Bump vault-package version to `3.0.0` (this version contains major changes)
+* Detailed information about the deprecated methods, constants, arguments, properties, and return values can be found in the [DEPRECATED.md](DEPRECATED.md) file
+* `RateLimit` functions are now __switched off__ by default and need to be switched on explicitly
+* Changed logger level to `INFO` for messages when the user `RateLimit` is exceeded
 * Removed unused option to manually set `vault_client` attributes
-* Changed returns in `determine_rate_limit()` method. More details in the [documentation](DEPRECATED.md)
-* Changed logger level to `INFO` for messages when the user rate limit is exceeded
 #### 🚀 Features
-* Bump workflow `_templates` version to `v1.2.8`
-* Bump vault-package version to `v3.0.0`
+* Bump workflows version to `1.2.8`
+* Bump vault-package version to `3.0.0`
 * Bump transitive dependencies
 * [Feature request: Add an additional backend - `Postgres` to store historical user data](https://github.com/obervinov/users-package/issues/41)
 

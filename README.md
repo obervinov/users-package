@@ -14,6 +14,16 @@
 
 This Python module is designed to simplify user management in __Telegram Bots__ by providing necessary functionality such as: `authentication`, `authorization` and `request limitation`, providing efficient management of user attributes and access rights.
 
+Interaction Model 1: Using a Unified Entrypoint (Method: `user_access_check()`)
+```mermaid
+sequenceDiagram
+    participant Bot
+    participant Users-Module
+    Bot->>Users-Module: Create Users-Module instance with rate limits
+    Bot->>Users-Module: Call user_access_check(user_id, role_id)
+    Users-Module-->>Bot: Return access, permissions, and rate limits
+```
+
 **Key Features**
 
 - This module is designed primarily for Telegram bots but can be adapted for various projects that require user management, role-based access control, and request rate limiting.
@@ -129,41 +139,22 @@ The `user_access_check()` method is the main entry point for authentication, aut
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/build.png" width="25" title="class"> RateLimiter class
 ### Class Initialization
 
-The `RateLimiter` class provides the speed limit functionality for requests to the Telegram bot in the context of a specific user.
+The `RateLimiter` class provides restriction functionality for user requests to the Telegram bot in the context of a specific user.
 
-- `vault (any)`: Configuration for initializing the Vault client.
-  - `(VaultClient)`: an already initialized instance for interacting with the Vault API.
-  - `(dict)`: configuration for initializing a VaultClient instance in this class.
+- `vault (VaultClient)`: An already initialized instance for interacting with the Vault API or a configuration dictionary for initializing a VaultClient instance in this class.
+
+- storage (Storage): An already initialized instance for interacting with the storage (PostgreSQL) or a configuration dictionary for initializing a Storage instance in this class.
 
 - `user_id (str)`: User ID for checking speed limits.
 
 - **Examples:**
+  ```python
+  limiter = RateLimiter(vault=vault_client, storage=storage_client, user_id='User1')
+  ```
 
-  - Initialize with a `VaultClient` instance:
-    ```python
-    limiter = RateLimiter(vault=vault_client, user_id='User1')
-    ```
+### method: Rate Limit Determination
 
-  - Initialize with a Vault configuration `dictionary`:
-    ```python
-    vault_config = {
-      "name": "my_project",
-      "url": "https://vault.example.com",
-      "approle": {
-          "id": "my_approle",
-          "secret-id": "my_secret"
-      }
-    }
-    limiter = RateLimiter(vault=vault_config, user_id='User1')
-    ```
-
-For more details and examples, see the class docstring.
-
-### Rate Limit Determination
-
-The `determine_rate_limit` method is the main entry point for checking restrictions on requests to the bot for the specified user. It returns information about whether the request rate limits are active.
-- **Arguments:**
-  - None
+The `determine_rate_limit()` method is the main entry point for checking bot request limits for the specified user. It returns information about whether the request rate limits are active and when they expire 
 
 - **Examples:**
   ```python
@@ -171,109 +162,43 @@ The `determine_rate_limit` method is the main entry point for checking restricti
   ```
 
 - **Returns:**
-  - Dictionary with a `timestamp` of the end of restrictions on requests or `None` if rate limit is not applied.
+  - String with a `timestamp` of the end of restrictions on requests or `None` if rate limit is not applied.
     ```python
-    (dict | None)
-    {"end_time": "2023-08-07 10:39:00.000000"}
-    ```
-For more details, see the method docstring.
-
-### Active Rate Limit
-
-The `_active_rate_limit` method is used for a situation when restrictions on requests are already applied and the `user ID` has a `timestamp` of the end of restrictions. The method checks whether it is time to reset the request rate limit.
-
-- **Arguments:**
-  - None
-
-- **Example:**
-  ```python
-  _active_rate_limit()
-  ```
-
-- **Returns:**
-  - A dictionary with a `timestamp` - if it has not expired yet and the restrictions on requests continue, or `None` - if the time for limiting requests has expired and you need to reset the restrictions.
-    ```python
-      (dict | None)
-      {"end_time": "2023-08-07 10:39:00.000000"}
+    ("2023-08-07 10:39:00.000000" | None)
     ```
 
-### Apply Rate Limit
+### method: Get User Requests Counters
 
-The `_apply_rate_limit` method is used if the request limit counters is full and it is necessary to apply request limits for the specified user.
+The `get_user_request_counters()` method calculates the number of requests made by the user and returns the number of requests per day and per hour.
 
-- **Arguments:**
-  - None
-
-- **Example:**
+- **Examples:**
   ```python
-  _apply_rate_limit()
+  get_user_request_counters()
   ```
 
 - **Returns:**
-  - Dictionary with the `end time` of restrictions on requests for the specified user.
+  - A dictionary with the number of requests per day and per hour.
     ```python
-      (dict | None)
-      {"end_time": "2023-08-07 10:39:00.000000"}
+    {
+      'requests_per_day': 9,
+      'requests_per_hour': 1
+    }
     ```
-
-### Recalculating request counters from the `requests_history`
-The `_update_requests_counters` method recalculates the request counters based on the historical user data (`per_hour` and `per_day`).
-- **Arguments:**
-  - None
-
-- **Example:**
-  ```python
-  _update_requests_counters()
-  ```
-
-- **Returns:**
-  - None
-
-### Consideration of the users requests time
-The `_update_requests_history` method added current request timestamp to the requests history list in the Vault.
-- **Arguments:**
-  - None
-
-- **Example:**
-  ```python
-  _update_requests_history()
-  ```
-- **Returns:**
-  - None
-
 
 ### Description of Class Attributes
-| Data Type | Attribute                | Purpose                                                                  | Default Value                   |
-|-----------|--------------------------|--------------------------------------------------------------------------|---------------------------------|
-| `any`     | `_vault`                 | The initialized VaultClient instance or `None` if initialization failed. | N/A                             |
-| `str`     | `user_id`                | The user ID for which rate limits are applied.                           | N/A                             |
-| `str`     | `vault_config_path`      | Path to the configuration data in Vault.                                 | `"configuration/users"`         |
-| `str`     | `vault_data_path`        | Path to the data in Vault.                                               | `"data/users"`                  |
-| `dict`    | `requests_configuration` | Configuration for rate limits from Vault.                                | Value from Vault Secret         |
-| `dict`    | `requests_counters`      | Counters for user's requests.                                            | Value from Vault Secret         |
-| `dict`    | `requests_ratelimits`    | Rate limit information for the user.                                     | Value from Vault Secret         |
-| `list`    | `requests_history`       | Historical data with timestamps of user requests.                        | Value from Vault Secret         |
+| Data Type      | Attribute                | Purpose                                                                  | Default Value                   |
+|----------------|--------------------------|--------------------------------------------------------------------------|---------------------------------|
+| `VaultClient`  | `vault`                  | Vault instance for interacting with the Vault API.                       | `None`                          |
+| `Storage`      | `storage`                | Storage instance for interacting with the storage (PostgreSQL).          | `None`                          |
+| `str`          | `user_id`                | User ID for checking speed limits.                                       | `None`                          |
+| `str`          | `vault_config_path`      | The prefix of the configuration path in the Vault.                       | `"configuration/users"`         |
+| `dict`         | `requests_configuration` | User request limits configuration.                                       | `None`                          |
+| `dict`         | `requests_counters`      | Counters for the number of requests per day and per hour.                | `None`                          |
 
 
-### Description of Class Methods
-| Method Name       | Description                                                       | Arguments                                          | Usage Examples                                            | Returns Examples                                      | Configuration Path                                                            | History Path                                                                   |
-|-------------------|-------------------------------------------------------------------|---------------------------------------------------|----------------------------------------------------------|--------------------------------------------------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------------|
-| `__init__`          | Creates a new RateLimiter instance.                                 | `vault (any)`: Configuration for initializing the Vault client. `user_id (str)`: The user ID for which rate limits are applied. | `RateLimiter(vault=vault_client, user_id='12345')`                            | N/A                                                                          | `{self.vault_config_path}/{user_id}:requests` reads requests configuration in Vault to determine rate limit parameters. | `{self.vault_data_path}/{user_id}:requests_counters` and `{self.vault_data_path}/{user_id}:requests_ratelimits` reads requests historical data in Vault to determine rate limits state. |
-| `vault`             | Getter for the 'vault' attribute.                                  | N/A                                                                                                                 | `vault = limiter.vault`                                                     | VaultClient instance or `None`                                                | N/A | N/A |
-| `vault`             | Setter for the 'vault' attribute.                                  | `vault (any)`: Configuration for initializing the Vault client.                                                   | `limiter.vault = vault_client`                                                | N/A                                                                          | N/A | N/A |
-| `vault_config_path` | Getter for the 'vault_config_path' attribute.                      | N/A                                                                                                                 | `path = limiter.vault_config_path`                                          | `str` (Path to the configuration data in Vault)                                 | N/A | N/A |
-| `vault_config_path` | Setter for the 'vault_config_path' attribute.                      | `vault_config_path (str)`: Path to the configuration data in Vault.                                                  | `limiter.vault_config_path = 'custom_path'`                                | N/A                                                                          | N/A | N/A |
-| `vault_data_path`   | Getter for the 'vault_data_path' attribute.                        | N/A                                                                                                                 | `path = limiter.vault_data_path`                                            | `str` (Path to the data in Vault)                                               | N/A | N/A |
-| `vault_data_path`   | Setter for the 'vault_data_path' attribute.                        | `vault_data_path (str)`: Path to the data in Vault.                                                              | `limiter.vault_data_path = 'custom_path'`                                    | N/A                                                                          | N/A | N/A |
-| `determine_rate_limit` | Determine the rate limit status for the specified user ID.                    | N/A                                                                                                                 | `rate_limits = limiter.determine_rate_limit()`                               | `dict` (Rate limit timestamp for the user ID) or `None`                        | N/A | N/A |
-| `_active_rate_limit` | Check and handle active rate limits for the user.                   | N/A                                                                                                                 | `rate_limits = limiter._active_rate_limit()`                                   | `dict` (Rate limit timestamp for the user ID) or `None` (if rate limit has been reset)                        | N/A | `{self.vault_data_path}/{user_id}:requests_ratelimits`  writes or delete rate limit timestamp in Vault. | 
-| `_apply_rate_limit`  | Apply rate limits to the user ID and reset request counters.                  | N/A                                                                                                                 | `rate_limits = limiter._apply_rate_limit()`                                    | `dict` (Rate limit timestamp for the user ID) or `None`                         | N/A | `{self.vault_data_path}/{user_id}:requests_ratelimits`  writes rate limit timestamp in Vault. | 
-| `_update_requests_counters` | Update the request counters based on the historical user data.              | N/A                                                                                                                 | `limiter._update_requests_counters()`                               | `None`                        | N/A | Read `{self.vault_data_path}/{user_id}:requests_history` and updates `{self.vault_data_path}/{user_id}:requests_counters` in the Vault. | N/A |
-| `_update_requests_history` | Update the request history based on the user's requests in the Vault.              | N/A                                                                                                                 | `limiter._update_requests_history()`                               | `None`                        | N/A |`{self.vault_data_path}/{user_id}:requests_history` writes current request timestamp to requests list in the Vault. | N/A |
 
-
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/requirements.png" width="25" title="data-structure"> Structure of configuration and statistics data in vault
-This project uses a Vault server with the KV2 engine to store and retrieve configuration data.
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/requirements.png" width="25" title="configuration-structure"> Structure of configuration in Vault
+This project uses a Vault server with the KV2 engine and Database Engine for storing user configurations and database connection data.
 It supports user configurations to define system access rights, roles, and request restrictions.
 
 ### Users Configuration
@@ -288,14 +213,6 @@ It supports user configurations to define system access rights, roles, and reque
       - `requests_per_hour`
       - `random_shift_time` (additional, random shift in minutes from 0 to the specified number) in minutes
 
-    ```json
-    {
-      "requests_per_day": 10,
-      "requests_per_hour": 1,
-      "random_shift_minutes": 15
-    }
-    ```
-
 - **example of a secret with configuration**:
 ```json
 {
@@ -308,130 +225,40 @@ It supports user configurations to define system access rights, roles, and reque
   }
 }
 ```
-### Users Data and Historical Records
-- **path to the secret**: `data/users/{user_id}`
+
+### Database Configuration
+- **path to the secret**: `configuration/database`
+
 - **keys and values**:
-  - `requests_counters`: Historical data with statistics on user requests. It includes counters for the number of requests
-      - `requests_per_day`
-      - `requests_per_hour`
+  - `host`: The host of the PostgreSQL server.
+  - `port`: The port of the PostgreSQL server.
+  - `database`: The name of the PostgreSQL database.
+  - `user`: The username for the PostgreSQL database.
+  - `password`: The password for the PostgreSQL database.
 
-      ```json
-      {
-        "requests_per_day": 9,
-        "requests_per_hour": 1
-      }
-      ```
+  ```json
+  {
+    "host": "localhost",
+    "port": 5432,
+    "database": "mydatabase",
+    "user": "myuser",
+    "password": "mypassword",
+  }
+  ```
 
-  - `requests_ratelimits`: Information about rate limits, including the
-      - `end_time` of the rate limit
- 
-      ```json
-      {
-        "end_time": "2023-08-07 10:39:00.000000"
-      }
-      ```
-      or
-      ```json
-      {
-        "end_time": None
-      }
-      ```
-  - `requests_history`: Historical data with timestamps of user requests
-      - `list` of timestamps of user requests
- 
-      ```json
-      [
-        "2023-08-07 10:39:00.000000",
-        "2023-08-07 10:40:00.000000",
-        "2023-08-06 10:00:00.000000"
-      ]
-      ```
-  - `authorization`: Details about the authorization process, including the time, status
-      - `timestamp`
-      - `self.user_status_allow` or `self.user_status_deny`
-      - `role ID`
 
-    ```json
-    {
-      "time": "2023-08-07 10:39:00.000000",
-      "status": "allowed",
-      "role": "role1"
-    }
-    ```
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/requirements.png" width="25" title="data-structure"> Structure of historical data in PostgreSQL
+This project uses a PostgreSQL database to store historical data about user requests and access events. It supports user request logging to track user activity and access rights.
+The detailed table schema can be found in this [sql file](tests/postgres/tables.sql).
 
-  - `authentication`: Records of the authentication process, indicating the time and status
-      - `timestamp`
-      - `self.user_status_allow` or `self.user_status_deny`
+### Users Requests Table
+Contains records of user requests, access permission, access level, and apply limits on the number of requests.
 
-    ```json
-    {
-      "time": "2023-08-07 10:39:00.000000",
-      "status": "allowed"
-    }
-    ```
-- **example of a secret with historical data**:
-    ```json
-    "requests_counters": {
-      "requests_per_day": 9,
-      "requests_per_hour": 1
-    }
-    ```
-    ```json
-    "requests_ratelimits": {"end_time": "2023-08-07 10:39:00.000000"}
-    ```
-    ```json
-    "requests_history": [
-      "2023-08-07 10:39:00.000000",
-      "2023-08-07 10:40:00.000000",
-      "2023-08-06 10:00:00.000000"
-    ]
-    ```
-    ```json
-    "authorization": {
-      "time": "2023-08-07 10:39:00.000000",
-      "status": "allowed",
-      "role": "role1"
-    }
-    ```
-    ```json
-    "authentication": {
-      "time": "2023-08-07 10:39:00.000000",
-      "status": "allowed"
-    }
-    ```
+### Users Table
+Contains records of user metadata for the Telegram bot, such as user ID, chat ID, and message ID.
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/config.png" width="25" title="usage"> Additional usage example
-Interaction Model 1: Using a Unified Entrypoint (Method: `user_access_check()`)
-```mermaid
-sequenceDiagram
-    participant User
-    participant Users
-    User->>Users: Create Users instance with rate limits
-    User->>Users: Call user_access_check(user_id, role_id)
-    Users-->>User: Return access, permissions, and rate limits
-```
-
-Interaction Model 2: Using Separate Methods for Authentication, Authorization, and Rate Limits
-```mermaid
-sequenceDiagram
-    participant User
-    participant Users
-    User->>Users: Create Users instance with rate limits
-    User->>Users: Call authentication(user_id)
-    Users-->>User: Return access status
-    User->>Users: Call authorization(user_id, role_id)
-    Users-->>User: Return permissions status
-```
-```mermaid
-sequenceDiagram
-    participant User
-    participant RateLimiter
-    User->>RateLimiter: Create RateLimiter instance with user_id
-    User->>RateLimiter: Call determine_rate_limit()
-    RateLimiter-->>User: Return rate limit timestamp for user_id (or None)
-```
-
-Example 1 - With Entrypoint and Rate Limits:
+Example 1 - With Rate Limits
 ```python
 # import modules
 from vault import VaultClient
@@ -440,27 +267,24 @@ from users import Users
 # create the vault client
 vault_client = VaultClient(
   url='http://0.0.0.0:8200',
-  name='mybot1',
-  approle={
-      'id': id,
-      'secret-id': secret-id
+  namespace='my_project',
+  auth={
+      'type': 'approle',
+      'role_id': 'my_role',
+      'secret_id': 'my_secret_id'
   }
 )
 
-# create the Users instance of the class with rate limits
-users = Users(vault=vault_client)
+# create the Users instance of the class with rate limits and get user information
+users = Users(vault=vault_client, rate_limits=True, storage={'db_role': 'my_vault_db_role'})
+user_info = users.user_access_check(user_id=message.chat.id, role_id="admin_role", chat_id=message.chat.id, message_id=message.message_id)
 
-# use the main entrypoint
-user_info = users.user_access_check(
-  user_id=message.chat.id,
-  role_id="admin_role"
-)
 # check permissions, roles, and rate limits
 if user_info["access"] == users.user_status_allow:
     print("Hi, you can use the bot!")
     if user_info["permissions"] == users.user_status_allow:
-        if user_info["rate_limits"]["end_time"]:
-            print(f"You have sent too many requests, the limit is applied until {user_info['rate_limits']['end_time']}")
+        if user_info["rate_limits"]:
+            print(f"You have sent too many requests, the limit is applied until {user_info['rate_limits']}")
         else:
             print("You have admin's rights")
     else:
@@ -469,7 +293,7 @@ else:
     print("Access denied, goodbye!")
 ```
 
-Example 2 - With Entrypoint and Without Rate Limits:
+Example 2 - Without Rate Limits
 ```python
 # import modules
 from vault import VaultClient
@@ -477,75 +301,28 @@ from users import Users
 
 # create the vault client
 vault_client = VaultClient(
-  url='http://0.0.0.0:8200',
-  name='mybot1',
-  approle={
-      'id': id,
-      'secret-id': secret-id
+  url='http://vault.example.com',
+  namespace='my_project',
+  auth={
+      'type': 'approle',
+      'role_id': 'my_role',
+      'secret_id': 'my_secret_id'
   }
 )
 
-# create the Users instance of the class without rate limits
-users = Users(
-  vault=vault_client,
-  rate_limits=False
-)
+# create the Users instance of the class without rate limits and get user information
+users = Users(vault=vault_client, storage={'db_role': 'my_vault_db_role'})
+user_info = users.user_access_check(user_id=message.chat.id, role_id="admin_role", chat_id=message.chat.id, message_id=message.message_id)
 
-# use the main entrypoint
-user_info = users.user_access_check(
-  user_id=message.chat.id,
-  role_id="admin_role"
-)
-# check permissions, roles, and rate limits
+# check permissions and roles
 if user_info["access"] == users.user_status_allow:
     print("Hi, you can use the bot!")
-
     if user_info["permissions"] == users.user_status_allow:
         print("You have admin's rights")
     else:
         print("You do not have access rights to this function")
-
 else:
     print("Access denied, goodbye!")
-```
-
-Example 3 - Without Entrypoint:
-```python
-# import modules
-from vault import VaultClient
-from users import Users
-
-# create the vault client
-vault_client = VaultClient(
-  url='http://0.0.0.0:8200',
-  name='mybot1',
-  approle={
-      'id': id,
-      'secret-id': secret-id
-  }
-)
-
-# create the Users instance of the class
-users = Users(vault=vault_client)
-
-# check access to the bot
-if users.authentication(user_id='user1') == users.user_status_allow:
-    print("You can use this bot")
-
-# check user role
-if users.authorization(
-  user_id='user1',
-  role_id='admin_role'
-) == users.user_status_allow:
-    print("You have admin's permissions")
-
-# check rate limit for user_id
-limiter = RateLimiter(
-  vault=vault_client,
-  user_id='user1'
-)
-if limiter.determine_rate_limit()['end_time']:
-    print(f"You have sent too many requests, the limit is applied until {user_info['rate_limits']['end_time']}")
 ```
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="20" title="install"> Installing
@@ -558,7 +335,7 @@ description = ""
 
 [tool.poetry.dependencies]
 python = "^3.10"
-users = { git = "https://github.com/obervinov/users-package.git", tag = "v2.0.4" }
+users = { git = "https://github.com/obervinov/users-package.git", tag = "v3.0.0" }
 
 [build-system]
 requires = ["poetry-core"]
