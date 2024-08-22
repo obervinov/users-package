@@ -10,7 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 * [Feature request: Add an additional backend - `Postgres` to store historical user data](https://github.com/obervinov/users-package/issues/41)
 * Bump vault-package version to `3.0.0` (this version contains major changes)
 * Detailed information about the deprecated methods, constants, arguments, properties, and return values can be found in the [DEPRECATED.md](DEPRECATED.md) file
-* `RateLimit` functions are now __switched off__ by default and need to be switched on explicitly
 * Changed logger level to `INFO` for messages when the user `RateLimit` is exceeded
 * Removed unused option to manually set `vault_client` attributes
 #### 🚀 Features

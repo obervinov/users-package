@@ -25,9 +25,13 @@ This document provides information about deprecated methods in the project.
 | Method | Reason for Deprecation | Date of Deprecation | Old Argument | New Argument |
 | ------------------------------------ | ------------------------------------------------------------------------ | ------------------------------------ | -------------------------------------- | -------------------------------------- |
 | `RateLimiter()` | The `Users` class now expects a different type of `vault` argument | 2024-08-23 | `vault: dict` or `vault: object` | `vault: VaultClient` |
+| `Users() ` | The `Users` class now has a different value for the argument `rate_limits` | 2024-08-23 | `True` | `False` |
 
 ## Deprecated Properties
 | Property | Reason for Deprecation | Date of Deprecation | Alternative |
 | ------------------------------------ | ------------------------------------------------------------------------ | ------------------------------------ | -------------------------------------- |
 | `RateLimiter.vault` | The `vault` property has been deleted for lack of use | 2024-08-23 | N/A |
 | `RateLimiter.vault_data_path` | The `vault_data_path` property has been deleted for lack of use | 2024-08-23 | N/A |
+| 'Users.vault` | The `vault` property has been deleted for lack of use | 2024-08-23 | N/A |
+| `Users.vault_data_path` | The `vault_data_path` property has been deleted for lack of use | 2024-08-23 | N/A |
+
