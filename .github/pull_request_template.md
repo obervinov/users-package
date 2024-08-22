@@ -8,7 +8,7 @@ assignees: 'obervinov'
 ---
 ## <version> - <YYYY-MM-DD>
 ### What's Changed
-**Full Changelog**: https://github.com/obervinov/user-package/compare/1...2 by @obervinov in https://github.com/obervinov/user-package/pull/1
+**Full Changelog**: https://github.com/obervinov/users-package/compare/1...2 by @obervinov in https://github.com/obervinov/users-package/pull/1
 #### 🐛 Bug Fixes
 * 
 #### 📚 Documentation

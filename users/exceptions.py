@@ -41,6 +41,25 @@ class VaultInstanceNotSet(Exception):
         super().__init__(message)
 
 
+class StorageInstanceNotSet(Exception):
+    """
+    Raised when the storage instance is not set.
+
+    Args:
+        message (str): The error message.
+
+    Example:
+        >>> try:
+        ...     raise StorageInstanceNotSet("Storage instance not set")
+        ... except StorageInstanceNotSet as e:
+        ...     print(e)
+        Storage instance not set
+    """
+    def __init__(self, message):
+        self.message = message
+        super().__init__(message)
+
+
 class FailedDeterminateRateLimit(Exception):
     """
     Raised when the rate limit cannot be determinated.
@@ -54,6 +73,25 @@ class FailedDeterminateRateLimit(Exception):
         ... except FaildDeterminateRateLimit as e:
         ...     print(e)
         Failed to determinate rate limit
+    """
+    def __init__(self, message):
+        self.message = message
+        super().__init__(message)
+
+
+class FailedStorageConnection(Exception):
+    """
+    Raised when the storage connection fails.
+
+    Args:
+        message (str): The error message.
+
+    Example:
+        >>> try:
+        ...     raise FailedStorageConnection("Failed to connect to storage")
+        ... except FailedStorageConnection as e:
+        ...     print(e)
+        Failed to connect to storage
     """
     def __init__(self, message):
         self.message = message

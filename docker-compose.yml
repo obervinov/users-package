@@ -3,7 +3,7 @@
 version: '3'
 services:
     vault-server:
-        image: hashicorp/vault:1.15.0
+        image: hashicorp/vault:1.17.2
         container_name: vault-users
         command: ["server"]
         environment:
@@ -15,3 +15,17 @@ services:
             - "0.0.0.0:8200:8200"
         cap_add:
             - IPC_LOCK
+    
+    postgres:
+        image: postgres:latest
+        container_name: postgres-users
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: postgres
+        ports:
+            - "5432:5432"
+        volumes:
+            - $PWD/tests/postgres/tables.sql:/docker-entrypoint-initdb.d/tables.sql
+
+
