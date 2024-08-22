@@ -46,3 +46,19 @@ def test_check_rl_counters_exceed_both(timestamp_pattern, users_instance):
     assert isinstance(user['rate_limits'], datetime.datetime)
     assert user['rate_limits'] >= now + datetime.timedelta(minutes=1395)
     assert user['rate_limits'] <= now + datetime.timedelta(hours=48)
+
+
+@pytest.mark.order(14)
+def test_check_rl_counters_do_not_exceed(users_instance):
+    """
+    Checking behaviour when the user request counter does not exceed any of the counters.
+    """
+    # First check
+    user = users_instance.user_access_check(user_id='testUser11', role_id='admin_role')
+    assert user['rate_limits'] is None
+    # Second check
+    user = users_instance.user_access_check(user_id='testUser11', role_id='admin_role')
+    assert user['rate_limits'] is None
+    # Third check
+    user = users_instance.user_access_check(user_id='testUser11', role_id='admin_role')
+    assert user['rate_limits'] is None

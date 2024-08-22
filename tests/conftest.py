@@ -396,6 +396,16 @@ def fixture_users(vault_instance, postgres_instance):
                 )
             ]
         },
+        # Test user11
+        # - RATE_LIMIT: limited requests
+        # - RATE_LIMIT: requests limit PER DAY and PER HOUR counters is empty
+        {
+            'name': 'testUser11',
+            'status': 'allowed',
+            'roles': ['admin_role'],
+            'requests': {'requests_per_day': 100, 'requests_per_hour': 10, 'random_shift_minutes': 15},
+            'requests_history': []
+        },
         #
         # Test user20
         # - AUTHN: denied
