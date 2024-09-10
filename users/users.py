@@ -47,7 +47,6 @@ class Users:
             :param rate_limits (bool): Enable rate limit functionality. Default is False.
             :param storage (dict): Configuration for initializing the Storage instance.
                 - (str) db_role: The database role for generating credentials from Vault.
-                - (str) db_mount_point: The database mount point for generating credentials from Vault.
 
         Examples:
             >>> users_with_ratelimits = Users(vault=vault_client, rate_limits=True)
