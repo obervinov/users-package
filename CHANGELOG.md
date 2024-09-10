@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## v3.0.1 - 2024-09-10
+### What's Changed
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v3.0.0...v3.0.1 by @obervinov in https://github.com/obervinov/users-package/pull/45
+#### 🐛 Bug Fixes
+* replace wrong dependencies `psycopg2` -> `psycopg2-binary` in `pyproject.toml`
+
+
 ## v3.0.0 - 2024-08-22
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v2.0.5...v3.0.0 by @obervinov in https://github.com/obervinov/users-package/pull/43
