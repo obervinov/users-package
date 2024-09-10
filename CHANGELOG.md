@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## v3.0.2 - 2024-09-10
+### What's Changed
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v3.0.1...v3.0.2 by @obervinov in https://github.com/obervinov/users-package/pull/46
+#### 🐛 Bug Fixes
+* fixed hardcoded vault dbengine `mount_point` if vault argument is a dict
+
+
 ## v3.0.1 - 2024-09-10
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v3.0.0...v3.0.1 by @obervinov in https://github.com/obervinov/users-package/pull/45

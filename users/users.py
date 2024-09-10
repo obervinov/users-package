@@ -58,9 +58,13 @@ class Users:
                         "type": "approle",
                         "role_id": "role_id",
                         "secret_id": "secret_id"
+                    },
+                    "dbengine": {
+                        "mount_point": "database",
                     }
             }
-            >>> users_with_dict_vault = Users(vault=vault_config)
+            >>> db_config = {"db_role": "my_project_role"}
+            >>> users_with_dict_vault = Users(vault=vault_config, storage=db_config)
         """
         if isinstance(vault, VaultClient):
             self.vault = vault
@@ -68,17 +72,15 @@ class Users:
             self.vault = VaultClient(
                 url=vault.get('url', None),
                 namespace=vault.get('namespace', None),
-                auth=vault.get('auth', None)
+                auth=vault.get('auth', None),
+                dbengine=vault.get('dbengine', None)
             )
         else:
             log.error('[Users]: wrong vault parameters in Users(vault=%s), see doc-string', vault)
             raise VaultInstanceNotSet("Vault instance is not set. Please provide a valid Vault instance as instance or dictionary.")
 
         self.rate_limits = rate_limits
-        self.storage = Storage(
-            vault_client=self.vault,
-            db_role=storage.get('db_role', None)
-        )
+        self.storage = Storage(vault_client=self.vault, db_role=storage.get('db_role', None))
         self._user_status_allow = USER_STATUS_ALLOW
         self._user_status_deny = USER_STATUS_DENY
         self._vault_config_path = USERS_VAULT_CONFIG_PATH
