@@ -5,7 +5,6 @@ This module provides the rate limit functionality for requests to the Telegram b
 import random
 import json
 from json.decoder import JSONDecodeError
-from typing import Union
 from datetime import datetime, timedelta
 from logger import log
 from vault import VaultClient
@@ -114,7 +113,7 @@ class RateLimiter:
         """
         self._vault_config_path = vault_config_path
 
-    def determine_rate_limit(self) -> Union[datetime, None]:
+    def determine_rate_limit(self) -> datetime | None:
         """
         Determine the rate limit status for the user ID.
 
@@ -157,7 +156,7 @@ class RateLimiter:
                 raise FailedDeterminateRateLimit("Failed to determinate rate limit for the user ID.")
         return rate_limits
 
-    def _validate_rate_limit(self) -> Union[datetime, None]:
+    def _validate_rate_limit(self) -> datetime | None:
         """
         Check and handle active rate limits for the user ID.
 
@@ -202,7 +201,7 @@ class RateLimiter:
         )
         raise FailedDeterminateRateLimit("Failed to determinate rate limit for the user ID.")
 
-    def _apply_rate_limit(self) -> Union[datetime, None]:
+    def _apply_rate_limit(self) -> datetime | None:
         """
         Apply rate limits to the user ID and return the rate limit timestamp.
 

@@ -123,7 +123,7 @@ class Storage:
     def get_user_requests(
         self,
         user_id: str = None,
-        limit: int = 1000,
+        limit: int = 10000,
         order: str = "timestamp DESC"
     ) -> list:
         """
@@ -144,3 +144,38 @@ class Storage:
         """
         self.cursor.execute(f"SELECT id, timestamp, rate_limits FROM users_requests WHERE user_id='{user_id}' ORDER BY {order} LIMIT {limit}")
         return self.cursor.fetchall()
+
+    def get_users(
+        self,
+        only_allowed: bool = True
+    ) -> list:
+        """
+        Get a list of all users in the database.
+        By default, the method returns only allowed users.
+
+        Args:
+            only_allowed (bool): A flag indicating whether to return only allowed users. Default is True.
+
+        Returns:
+            list: The list of users.
+            [{'user_id': '12345', 'chat_id': '67890', 'status': 'denied'}, ...]
+
+        Examples:
+            >>> get_users()
+            [{'user_id': '12345', 'chat_id': '67890', 'status': 'denied'}, {'user_id': '12346', 'chat_id': '67891', 'status': 'allowed'}]
+        """
+        users_list = []
+        base_query = "SELECT user_id, chat_id, status FROM users"
+
+        if only_allowed:
+            condition = "WHERE status = 'allowed'"
+        else:
+            condition = ""
+
+        self.cursor.execute(f"{base_query} {condition}")
+        users = self.cursor.fetchall
+
+        if users:
+            for user in users:
+                users_list.append({'user_id': user[0], 'chat_id': user[1], 'status': user[2]})
+        return users_list

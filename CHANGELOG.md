@@ -3,6 +3,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## v4.0.0 - 2024-10-17
+### What's Changed
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v3.0.2...v4.0.0 by @obervinov in https://github.com/obervinov/users-package/pull/46
+#### 💥 Breaking Changes
+* bump python version to `3.12`
+#### 🚀 Features
+* bump all dependencies to the latest versions
+* bump workflows version to `2.0.0`
+* [Feature request: Add support for a method that returns a dictionary of all users in the table](https://github.com/obervinov/users-package/issues/44)
+
+
 ## v3.0.2 - 2024-09-10
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v3.0.1...v3.0.2 by @obervinov in https://github.com/obervinov/users-package/pull/46
