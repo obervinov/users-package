@@ -17,46 +17,38 @@ class Storage:
         register_user: Register the user in the
         log_user_request: Write the user requests to the database.
         get_user_requests: Get the user requests from the database.
+        get_users: Get a list of all users in the database.
 
     Raises:
         FailedStorageConnection: An error occurred when the storage connection fails.
     """
-    def __init__(
-        self,
-        vault_client: object = None,
-        db_role: str = None
-    ) -> None:
+    def __init__(self, db_connection: any = None) -> None:
         """
         Initialize the storage class with the database connection and credentials.
 
         Args:
-            vault_client (object): The Vault client object.
-            db_role (str): The database role for generating credentials from Vault.
+            db_connection (dict): The database connection object.
 
         Example:
-            >>> storage = Storage(database_connection, database_credentials)
+            >>> import psycopg2
+            >>> conn_pool = psycopg2.pool.SimpleConnectionPool(1, 20, ...)
+            >>> db_conn = conn_pool.getconn()
+            >>> storage = Storage(db_conn)
         """
-        # Extract the database connection and credentials from Vault
-        database_connection = vault_client.kv2engine.read_secret(path="configuration/database")
-        database_credentials = vault_client.dbengine.generate_credentials(role=db_role)
-
-        if database_connection and database_credentials:
-            if not database_connection.get('dbname', None) or not database_connection.get('host', None) or not database_connection.get('port', None):
-                raise FailedStorageConnection("Invalid database connection configuration. Check keys 'dbname', 'host' and 'port'")
-            if not database_credentials.get('username', None) or not database_credentials.get('password', None):
-                raise FailedStorageConnection("Invalid database credentials configuration. Check keys 'username' and 'password'")
-        else:
-            log.error('[Users]: Failed to initialize the storage class: database_connection %s, database_credentials %s', database_connection, database_credentials)
-            raise FailedStorageConnection("Failed to get the database connection or credentials from Vault")
-
-        self.connection = psycopg2.connect(
-            host=database_connection['host'],
-            port=database_connection['port'],
-            user=database_credentials['username'],
-            password=database_credentials['password'],
-            dbname=database_connection['dbname']
-        )
+        self.connection = db_connection
         self.cursor = self.connection.cursor()
+
+        if not self.connection:
+            log.error('[Users]: Failed to connect to the storage')
+            raise FailedStorageConnection("Failed to connect to the storage")
+
+        # Test query to check the connection to the database
+        try:
+            self.cursor.execute("SELECT id FROM users LIMIT 1")
+            log.info('[Users]: Successfully connected to the storage')
+        except Exception as error:
+            log.error('[Users]: Failed to connect to the storage: %s', error)
+            raise FailedStorageConnection("Failed to connect to the storage") from error
 
     def register_user(
         self,
