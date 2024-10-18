@@ -197,7 +197,6 @@ def fixture_timestamp_pattern():
     return r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+$'
 
 
-
 @pytest.fixture(name="users", scope='session')
 def fixture_users(vault_instance, postgres_instance):
     """Fill in the configuration and data for the test users"""
