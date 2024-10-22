@@ -213,12 +213,16 @@ class RateLimiter:
                 or
             None
         """
+        result = self.storage.get_user_requests(user_id=self.user_id, order="rate_limits DESC", limit=1)
+
         # If the rate limit is already applied
         if self.requests_configuration['requests_per_day'] <= self.requests_counters['requests_per_day']:
-            latest_rate_limit_timestamp = self.storage.get_user_requests(user_id=self.user_id, order="rate_limits DESC", limit=1)[0][2]
-            rate_limit = datetime.strptime(latest_rate_limit_timestamp, '%Y-%m-%d %H:%M:%S.%f') + timedelta(days=1)
+            if result and result[0][2] is not None:
+                latest_rate_limit_timestamp = result[0][2]
+                rate_limit = datetime.strptime(latest_rate_limit_timestamp, '%Y-%m-%d %H:%M:%S.%f') + timedelta(days=1)
+            else:
+                rate_limit = datetime.now() + timedelta(days=1)
             log.info('[Users.RateLimiter]: The requests limit per day are exhausted for user ID %s. The rate limit will expire at %s', self.user_id, str(rate_limit))
-
         # If the rate limit is not yet applied
         elif self.requests_configuration['requests_per_hour'] <= self.requests_counters['requests_per_hour']:
             shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
