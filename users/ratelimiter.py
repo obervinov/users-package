@@ -26,6 +26,7 @@ class RateLimiter:
         user_id (str): User ID for checking rate limits.
         requests_configuration (dict): The user requests configuration.
         requests_counters (dict): The user request counters.
+        user_requests (list): The user requests list.
 
     Methods:
         determine_rate_limit: Determine the rate limit status for the user ID.
@@ -86,6 +87,7 @@ class RateLimiter:
             log.error('[Users.RateLimiter]: No requests configuration found for user ID %s', self.user_id)
             raise WrongUserConfiguration("User configuration in Vault is wrong. Please provide a valid configuration for rate limits.")
 
+        self.user_requests = self.storage.get_user_requests(user_id=user_id)
         self.requests_counters = self.get_user_request_counters()
 
     @property
@@ -213,7 +215,8 @@ class RateLimiter:
         """
         # If the rate limit is already applied
         if self.requests_configuration['requests_per_day'] <= self.requests_counters['requests_per_day']:
-            rate_limit = datetime.now() + timedelta(days=1)
+            latest_rate_limit_timestamp = self.storage.get_user_requests(user_id=self.user_id, order="rate_limits DESC", limit=1)[0][2]
+            rate_limit = datetime.strptime(latest_rate_limit_timestamp, '%Y-%m-%d %H:%M:%S.%f') + timedelta(days=1)
             log.info('[Users.RateLimiter]: The requests limit per day are exhausted for user ID %s. The rate limit will expire at %s', self.user_id, str(rate_limit))
 
         # If the rate limit is not yet applied
@@ -238,9 +241,8 @@ class RateLimiter:
         """
         requests_per_hour = 0
         requests_per_day = 0
-        user_requests = self.storage.get_user_requests(user_id=self.user_id)
-        if user_requests:
-            for request in user_requests:
+        if self.user_requests:
+            for request in self.user_requests:
                 request_timestamp = request[1]
                 if request_timestamp >= datetime.now() - timedelta(hours=1):
                     requests_per_hour = requests_per_hour + 1
@@ -248,7 +250,7 @@ class RateLimiter:
                     requests_per_day = requests_per_day + 1
         log.debug(
             '[Users.RateLimiter]: User ID %s: Counters %s, Requests %s',
-            self.user_id, user_requests, {'requests_per_hour': requests_per_hour, 'requests_per_day': requests_per_day}
+            self.user_id, self.user_requests, {'requests_per_hour': requests_per_hour, 'requests_per_day': requests_per_day}
         )
         return {
             'requests_per_hour': requests_per_hour,

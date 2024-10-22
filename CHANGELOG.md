@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## v4.0.0 - 2024-10-18
+## v4.0.0 - 2024-10-22
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v3.0.2...v4.0.0 by @obervinov in https://github.com/obervinov/users-package/pull/46
 #### 💥 Breaking Changes
@@ -14,6 +14,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 * bump workflows version to `2.0.0`
 * [Feature request: Add support for a method that returns a dictionary of all users in the table](https://github.com/obervinov/users-package/issues/44)
 * [Feature request: Storage should not retrieve the database connection data from the vault itself](https://github.com/obervinov/users-package/issues/47)
+#### 🐛 Bug Fixes
+* [Bug: The application tries to use credentials to access the database that have already expired](https://github.com/obervinov/users-package/issues/48)
+* [Configuration `per_day` in RateLimit not working as expected](https://github.com/obervinov/users-package/issues/40)
 
 
 ## v3.0.2 - 2024-09-10
