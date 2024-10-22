@@ -76,12 +76,12 @@ The `Users` class provides authentication, authorization, user attribute managem
 
   - Initialize with `VaultClient` and without `rate_limits`:
     ```python
-    users_without_ratelimits = Users(vault=vault_client, rate_limits=False, storage={'db_role': 'my_role'})
+    users_without_ratelimits = Users(vault=vault_client, rate_limits=False, storage_connection=psycopg2.connect(**db_config))
     ```
 
   - Initialize with `VaultClient` and with `rate_limits`:
     ```python
-    users_with_ratelimits = Users(vault=vault_client, storage={'db_role': 'my_role'})
+    users_with_ratelimits = Users(vault=vault_client, storage_connection=psycopg2.connect(**db_config))
     ```
 
   - Initialize with Vault `configuration dictionary`:
@@ -95,7 +95,7 @@ The `Users` class provides authentication, authorization, user attribute managem
           'secret_id': 'my_secret_id'
       }
     }
-    users_with_dict_vault = Users(vault=vault_config, storage={'db_role': 'my_role'})
+    users_with_dict_vault = Users(vault=vault_config, storage_connection=psycopg2.connect(**db_config))
     ```
 
 ### method: User Access Check
@@ -276,7 +276,7 @@ vault_client = VaultClient(
 )
 
 # create the Users instance of the class with rate limits and get user information
-users = Users(vault=vault_client, rate_limits=True, storage={'db_role': 'my_vault_db_role'})
+users = Users(vault=vault_client, rate_limits=True, storage_connection=psycopg2.connect(**db_config))
 user_info = users.user_access_check(user_id=message.chat.id, role_id="admin_role", chat_id=message.chat.id, message_id=message.message_id)
 
 # check permissions, roles, and rate limits
@@ -311,7 +311,7 @@ vault_client = VaultClient(
 )
 
 # create the Users instance of the class without rate limits and get user information
-users = Users(vault=vault_client, storage={'db_role': 'my_vault_db_role'})
+users = Users(vault=vault_client, storage_connection=psycopg2.connect(**db_config))
 user_info = users.user_access_check(user_id=message.chat.id, role_id="admin_role", chat_id=message.chat.id, message_id=message.message_id)
 
 # check permissions and roles
