@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## v4.0.1 - 2024-10-22
+### What's Changed
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v4.0.0...v4.0.1 by @obervinov in https://github.com/obervinov/users-package/pull/47
+#### 📚 Documentation
+* actualized documentation in the `README.md` file
+
 ## v4.0.0 - 2024-10-22
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v3.0.2...v4.0.0 by @obervinov in https://github.com/obervinov/users-package/pull/46
