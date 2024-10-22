@@ -186,7 +186,8 @@ def fixture_vault_instance(vault_url, namespace, prepare_vault):
                 'id': prepare_vault['id'],
                 'secret-id': prepare_vault['secret-id']
             }
-        }
+        },
+        dbengine={'mount_point': 'database'}
     )
 
 
@@ -194,27 +195,6 @@ def fixture_vault_instance(vault_url, namespace, prepare_vault):
 def fixture_timestamp_pattern():
     """Returns the timestamp pattern for compare date"""
     return r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+$'
-
-
-@pytest.fixture(name="database_secret", scope='session')
-def fixture_database_secret(vault_instance):
-    """Returns the database secret"""
-    secret_path = 'configuration/database'
-    _ = vault_instance.kv2engine.write_secret(
-        path=secret_path,
-        key='dbname',
-        value='postgres'
-    )
-    _ = vault_instance.kv2engine.write_secret(
-        path=secret_path,
-        key='host',
-        value='0.0.0.0'
-    )
-    _ = vault_instance.kv2engine.write_secret(
-        path=secret_path,
-        key='port',
-        value='5432'
-    )
 
 
 @pytest.fixture(name="users", scope='session')
@@ -458,23 +438,35 @@ def fixture_users(vault_instance, postgres_instance):
 
 
 @pytest.fixture(name="users_instance", scope='function')
-def fixture_users_instance(vault_instance, users, database_secret):
+def fixture_users_instance(vault_instance, users):
     """Returns an instance of the Users class with the rate limit controller enabled"""
     _ = users
-    _ = database_secret
+    db_conn = psycopg2.connect(
+        host='0.0.0.0',
+        port=5432,
+        user='postgres',
+        password='postgres',
+        dbname='postgres'
+    )
     return Users(
         vault=vault_instance,
         rate_limits=True,
-        storage={'db_role': 'test-role'}
+        storage_connection=db_conn,
     )
 
 
 @pytest.fixture(name="users_instance_without_rl", scope='function')
-def fixture_users_instance_without_rl(vault_instance, users, database_secret):
+def fixture_users_instance_without_rl(vault_instance, users):
     """Returns an instance of the Users class with the rate limit controller disabled"""
     _ = users
-    _ = database_secret
+    db_conn = psycopg2.connect(
+        host='0.0.0.0',
+        port=5432,
+        user='postgres',
+        password='postgres',
+        dbname='postgres'
+    )
     return Users(
         vault=vault_instance,
-        storage={'db_role': 'test-role'}
+        storage_connection=db_conn,
     )

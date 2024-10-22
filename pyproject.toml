@@ -1,9 +1,9 @@
 [tool.poetry]
 name = "users"
-version = "3.0.2"
+version = "4.0.0"
 description = "This python module is a simple implementation of user management functionality for telegram bots, such as: authentication, authorization and requests limiting."
-authors = ["Bervinov Oleg <obervinov@pm.me>"]
-maintainers = ["Bervinov Oleg <obervinov@pm.me>"]
+authors = ["Bervinov Oleg <bervinov.ob@gmail.com>"]
+maintainers = ["Bervinov Oleg <bervinov.ob@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 packages = [{include = "users"}]
@@ -17,10 +17,10 @@ include = ["CHANGELOG.md"]
 "Bug Tracker" = "https://github.com/obervinov/users-package/issues"
 
 [tool.poetry.dependencies]
-python = "^3.9 || ^3.10 || ^3.11"
+python = "^3.12"
 psycopg2-binary = "^2"
-logger = { git = "https://github.com/obervinov/logger-package.git", tag = "v1.0.6" }
-vault  = { git = "https://github.com/obervinov/vault-package.git", tag = "v3.0.0" }
+logger = { git = "https://github.com/obervinov/logger-package.git", tag = "v2.0.0" }
+vault  = { git = "https://github.com/obervinov/vault-package.git", tag = "v4.0.0" }
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8"
