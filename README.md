@@ -100,7 +100,7 @@ The `Users` class provides authentication, authorization, user attribute managem
 
 ### decorator: Access Control
 
-The `access_control` decorator is used to control access to specific functions based on user roles and permissions.
+The `access_control()` decorator is used to control access to specific functions based on user roles and permissions.
 
 - **Arguments:**
   - `user_id (str)`: Required user ID.
@@ -109,7 +109,7 @@ The `access_control` decorator is used to control access to specific functions b
     - `auth` for authentication
     - `authz` for authorization
 - **Keyword Arguments:**
-  - `**additional (dict)`: Additional context for logging.
+  - `additional (dict)`: Additional context for logging.
     - `message_id`: Required message ID for the specified user ID.
     - `chat_id`: Required chat ID for the specified user ID.
 - **Examples:**

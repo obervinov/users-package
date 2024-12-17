@@ -169,20 +169,17 @@ class Users:
                 """
                 The wrapper function for the decorator.
                 """
-                user = self.user_access_check(
+                user_info = self.user_access_check(
                     user_id=user_id, role_id=role_id,
                     chat_id=additional.get('chat_id', 'unknown'),
                     message_id=additional.get('message_id', 'unknown')
                 )
-                if (
-                    flow == 'auth' and user.get('access', None) == self.user_status_allow
-                    or
-                    flow == 'authz' and user.get('permissions', None) == self.user_status_allow
-                ):
-                    # Call the decorated function
-                    return func(*args, **kwargs)
-
-                # If access is denied, abort execution
+                access_allowed = (
+                    (flow == 'auth' and user_info.get('access') == self.user_status_allow) or
+                    (flow == 'authz' and user_info.get('permissions') == self.user_status_allow)
+                )
+                if access_allowed:
+                    return func(*args, **kwargs, user_info=user_info)
                 return None
             return wrapper
         return decorator
