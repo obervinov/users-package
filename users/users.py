@@ -203,27 +203,14 @@ class Users:
         """
         user_info = {}
         user_info['access'] = self._authentication(user_id=user_id)
+        self.storage.register_user(user_id=user_id, status=user_info['access'], chat_id=kwargs.get('chat_id', 'unknown'))
 
-        if user_info['access'] == self.user_status_allow:
-            self.storage.register_user(
-                user_id=user_id,
-                status=user_info['access'],
-                chat_id=kwargs.get('chat_id', 'undefined')
-            )
+        if user_info['access'] == self.user_status_allow and role_id:
+            user_info['permissions'] = self._authorization(user_id=user_id, role_id=role_id)
 
-            if role_id:
-                user_info['permissions'] = self._authorization(
-                    user_id=user_id,
-                    role_id=role_id
-                )
-
-                if user_info['permissions'] == self.user_status_allow and self.rate_limits:
-                    rl_controller = RateLimiter(
-                        vault=self.vault,
-                        storage=self.storage,
-                        user_id=user_id
-                    )
-                    user_info['rate_limits'] = rl_controller.determine_rate_limit()
+            if user_info['permissions'] == self.user_status_allow and self.rate_limits:
+                rl_controller = RateLimiter(vault=self.vault, storage=self.storage, user_id=user_id)
+                user_info['rate_limits'] = rl_controller.determine_rate_limit()
 
         self.storage.log_user_request(
             user_id=user_id,
