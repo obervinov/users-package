@@ -115,7 +115,8 @@ The `access_control()` decorator is used to control access to specific functions
 - **Examples:**
   ```python
     @access_control(user_id='user1', role_id='admin_role', flow='authz')
-    def my_function():
+    def my_function(user_info: str = None):
+        print(f"User permissions: {user_info}")
         pass
   ```
 - **Returns:**
