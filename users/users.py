@@ -146,10 +146,9 @@ class Users:
         """
         self._vault_config_path = vault_config_path
 
-    @staticmethod
-    def access_control(user_id: str = None, role_id: str = None, flow: str = 'auth', **additional):
+    def access_control(self, user_id: str = None, role_id: str = None, flow: str = 'auth', **additional):
         """
-        Static method that acts as a decorator factory for access control.
+        Instance method that acts as a decorator factory for access control.
 
         Args:
             user_id (str): The user to check against.
@@ -169,25 +168,16 @@ class Users:
             def wrapper(*args, **kwargs):
                 """
                 The wrapper function for the decorator.
-
-                Args:
-                    *args: The arguments passed to the function.
-                    **kwargs: The keyword arguments passed to the function.
-
-                Returns:
-                    function: The decorated function.
                 """
-                # Get an instance of Users from the arguments
-                instance: Users = args[0].users
-                user = instance.user_access_check(
+                user = self.user_access_check(
                     user_id=user_id, role_id=role_id,
                     chat_id=additional.get('chat_id', 'unknown'),
                     message_id=additional.get('message_id', 'unknown')
                 )
                 if (
-                    flow == 'auth' and user.get('access', None) == instance.user_status_allow
+                    flow == 'auth' and user.get('access', None) == self.user_status_allow
                     or
-                    flow == 'authz' and user.get('permissions', None) == instance.user_status_allow
+                    flow == 'authz' and user.get('permissions', None) == self.user_status_allow
                 ):
                     # Call the decorated function
                     return func(*args, **kwargs)
