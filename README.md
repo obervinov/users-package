@@ -98,6 +98,29 @@ The `Users` class provides authentication, authorization, user attribute managem
     users_with_dict_vault = Users(vault=vault_config, storage_connection=psycopg2.connect(**db_config))
     ```
 
+### decorator: Access Control
+
+The `access_control` decorator is used to control access to specific functions based on user roles and permissions.
+
+- **Arguments:**
+  - `user_id (str)`: Required user ID.
+  - `role_id (str)`: Required role ID for the specified user ID.
+  - `flow (str)`: The flow of the function, which can be either
+    - `auth` for authentication
+    - `authz` for authorization
+- **Keyword Arguments:**
+  - `**additional (dict)`: Additional context for logging.
+    - `message_id`: Required message ID for the specified user ID.
+    - `chat_id`: Required chat ID for the specified user ID.
+- **Examples:**
+  ```python
+    @access_control(user_id='user1', role_id='admin_role', flow='authz')
+    def my_function():
+        pass
+  ```
+- **Returns:**
+  - Breaks the function and returns an error message if the user does not have the required role or permission.
+
 ### method: User Access Check
 
 The `user_access_check()` method is the main entry point for authentication, authorization, and request rate limit verification. It is used to control the request rate (limits) for a specific user.
