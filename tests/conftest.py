@@ -417,7 +417,25 @@ def fixture_users(vault_instance, postgres_instance):
             'status': 'denied',
             'roles': [],
             'requests': []
-        }
+        },
+        # Test user24
+        # - AUTHN: allowed
+        # - AUTHZ: denied
+        {
+            'name': 'testUser24',
+            'status': 'allowed',
+            'roles': ['admin_role'],
+            'requests': []
+        },
+        # Test user25
+        # - AUTHN: denied
+        # - AUTHZ: denied
+        {
+            'name': 'testUser25',
+            'status': 'denied',
+            'roles': [],
+            'requests': []
+        },
     ]
     psql_connection, psql_cursor = postgres_instance
     for user in users:

@@ -146,6 +146,56 @@ class Users:
         """
         self._vault_config_path = vault_config_path
 
+    @staticmethod
+    def access_control(user_id: str = None, role_id: str = None, flow: str = 'auth', **kwargs):
+        """
+        Static method that acts as a decorator factory for access control.
+
+        Args:
+            user_id (str): The user to check against.
+            role_id (str): The role to check against.
+            flow (str): The type of access control:
+                - 'auth': Authentication.
+                - 'authz': Authorization.
+        
+        Keyword Args:
+            chat_id (str): The chat ID.
+            message_id (str): The message ID.
+
+        Returns:
+            function: The decorator.
+        """
+        def decorator(func):
+            def wrapper(*args, **kwargs):
+                """
+                The wrapper function for the decorator.
+
+                Args:
+                    *args: The arguments passed to the function.
+                    **kwargs: The keyword arguments passed to the function.
+
+                Returns:
+                    function: The decorated function.
+                """
+                # Get an instance of Users from the arguments
+                instance: Users = args[0].users
+                user = instance.user_access_check(
+                    user_id=user_id, role_id=role_id,
+                    chat_id=kwargs.get('chat_id', 'unknown'), message_id=kwargs.get('message_id', 'unknown')
+                )
+                if (
+                    flow == 'auth' and user.get('access', None) == instance.user_status_allow
+                    or
+                    flow == 'authz' and user.get('permissions', None) == instance.user_status_allow
+                ):
+                    # Call the decorated function
+                    return func(*args, **kwargs)
+
+                # If access is denied, abort execution
+                return None
+            return wrapper
+        return decorator
+
     def user_access_check(
         self,
         user_id: str = None,
