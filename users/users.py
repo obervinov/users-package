@@ -147,7 +147,7 @@ class Users:
         self._vault_config_path = vault_config_path
 
     @staticmethod
-    def access_control(user_id: str = None, role_id: str = None, flow: str = 'auth', **kwargs):
+    def access_control(user_id: str = None, role_id: str = None, flow: str = 'auth', **additional):
         """
         Static method that acts as a decorator factory for access control.
 
@@ -157,8 +157,8 @@ class Users:
             flow (str): The type of access control:
                 - 'auth': Authentication.
                 - 'authz': Authorization.
-        
-        Keyword Args:
+
+        Keyword Args (additional):
             chat_id (str): The chat ID.
             message_id (str): The message ID.
 
@@ -181,7 +181,8 @@ class Users:
                 instance: Users = args[0].users
                 user = instance.user_access_check(
                     user_id=user_id, role_id=role_id,
-                    chat_id=kwargs.get('chat_id', 'unknown'), message_id=kwargs.get('message_id', 'unknown')
+                    chat_id=additional.get('chat_id', 'unknown'),
+                    message_id=additional.get('message_id', 'unknown')
                 )
                 if (
                     flow == 'auth' and user.get('access', None) == instance.user_status_allow
