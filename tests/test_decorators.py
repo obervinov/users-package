@@ -1,7 +1,8 @@
 """
-A test that 
+A test that verifies the decorators in the users module.
 """
 import pytest
+
 
 @pytest.mark.order(12)
 def test_access_control_decorator(users_instance):
