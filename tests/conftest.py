@@ -407,7 +407,7 @@ def fixture_users(vault_instance, postgres_instance):
             'name': 'testUser22',
             'status': 'allowed',
             'roles': [],
-            'requests': []
+            'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
         },
         # Test user23
         # - AUTHN: denied
@@ -416,7 +416,7 @@ def fixture_users(vault_instance, postgres_instance):
             'name': 'testUser23',
             'status': 'denied',
             'roles': [],
-            'requests': []
+            'requests': {},
         },
         # Test user24
         # - AUTHN: allowed
@@ -425,7 +425,7 @@ def fixture_users(vault_instance, postgres_instance):
             'name': 'testUser24',
             'status': 'allowed',
             'roles': ['admin_role'],
-            'requests': []
+            'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
         },
         # Test user25
         # - AUTHN: denied
@@ -434,7 +434,7 @@ def fixture_users(vault_instance, postgres_instance):
             'name': 'testUser25',
             'status': 'denied',
             'roles': [],
-            'requests': []
+            'requests': {}
         },
     ]
     psql_connection, psql_cursor = postgres_instance
