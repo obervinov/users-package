@@ -350,6 +350,37 @@ else:
     print("Access denied, goodbye!")
 ```
 
+Example 3 - Decorator Usage
+```python
+# import modules
+from vault import VaultClient
+from users import Users
+
+# create the vault client
+vault_client = VaultClient(
+  url='http://vault.example.com',
+  namespace='my_project',
+  auth={
+      'type': 'approle',
+      'role_id': 'my_role',
+      'secret_id':
+  }
+)
+
+# create the Users instance of the class with rate limits
+users = Users(vault=vault_client, rate_limits=True, storage_connection=psycopg2.connect(**db_config))
+
+# create a function with the access_control decorator
+@users.access_control(user_id='user1', role_id='admin_role', flow='authz')
+def my_function(user_info: str = None):
+    print(f"User permissions: {user_info}")
+    pass
+
+# call the function
+my_function()
+```
+
+
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="20" title="install"> Installing
 ```bash
 tee -a pyproject.toml <<EOF

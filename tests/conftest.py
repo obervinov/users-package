@@ -407,7 +407,7 @@ def fixture_users(vault_instance, postgres_instance):
             'name': 'testUser22',
             'status': 'allowed',
             'roles': [],
-            'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
+            'requests': {'requests_per_day': 3, 'requests_per_hour': 3, 'random_shift_minutes': 15},
         },
         # Test user23
         # - AUTHN: denied
@@ -425,7 +425,7 @@ def fixture_users(vault_instance, postgres_instance):
             'name': 'testUser24',
             'status': 'allowed',
             'roles': ['admin_role'],
-            'requests': {'requests_per_day': 3, 'requests_per_hour': 1, 'random_shift_minutes': 15},
+            'requests': {'requests_per_day': 3, 'requests_per_hour': 3, 'random_shift_minutes': 15},
         },
         # Test user25
         # - AUTHN: denied
