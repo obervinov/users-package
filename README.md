@@ -101,25 +101,33 @@ The `Users` class provides authentication, authorization, user attribute managem
 ### decorator: Access Control
 
 The `access_control()` decorator is used to control access to specific functions based on user roles and permissions.
+Working with the pyTelegramBotAPI objects: `telegram.telegram_types.Message` and `telegram.telegram_types.CallbackQuery`.
 
 - **Arguments:**
-  - `user_id (str)`: Required user ID.
   - `role_id (str)`: Required role ID for the specified user ID.
   - `flow (str)`: The flow of the function, which can be either
     - `auth` for authentication
     - `authz` for authorization
-- **Keyword Arguments:**
-  - `additional (dict)`: Additional context for logging.
-    - `message_id`: Required message ID for the specified user ID.
-    - `chat_id`: Required chat ID for the specified user ID.
 - **Examples:**
+  Role-based access control
   ```python
-    @access_control(user_id='user1', role_id='admin_role', flow='authz')
-    # Decorator returns user information about access, permissions, and rate limits into user_info argument
-    def my_function(user_info: str = None):
-        print(f"User permissions: {user_info}")
+    @telegram.message_handler(commands=['start'])
+    @access_control(role_id='admin_role', flow='authz')
+    # Decorator returns user information about access, permissions, and rate limits into access_result argument
+    def my_function(message: telegram.telegram_types.Message, access_result: dict = None):
+        print(f"User permissions: {access_result}")
         pass
   ```
+  Just authentication
+  ```python
+    @telegram.message_handler(commands=['start'])
+    @access_control(flow='auth')
+    # Decorator returns user information about access, permissions, and rate limits into access_result argument
+    def my_function(message: telegram.telegram_types.Message, access_result: dict = None):
+        print(f"User permissions: {access_result}")
+        pass
+  ```
+
 - **Returns:**
   - Breaks the function and returns an error message if the user does not have the required role or permission.
 
@@ -371,9 +379,11 @@ vault_client = VaultClient(
 users = Users(vault=vault_client, rate_limits=True, storage_connection=psycopg2.connect(**db_config))
 
 # create a function with the access_control decorator
-@users.access_control(user_id='user1', role_id='admin_role', flow='authz')
-def my_function(user_info: str = None):
-    print(f"User permissions: {user_info}")
+@telegram.message_handler(commands=['start'])
+@access_control(flow='auth')
+# Decorator returns user information about access, permissions, and rate limits into access_result argument
+def my_function(message: telegram.telegram_types.Message, access_result: dict = None):
+    print(f"User permissions: {access_result}")
     pass
 
 # call the function

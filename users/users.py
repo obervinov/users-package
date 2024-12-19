@@ -146,40 +146,50 @@ class Users:
         """
         self._vault_config_path = vault_config_path
 
-    def access_control(self, user_id: str = None, role_id: str = None, flow: str = 'auth', **additional):
+    def access_control(self, role_id: str = None, flow: str = 'auth'):
         """
         Instance method that acts as a decorator factory for access control.
+        Working with the pyTelegramBotAPI objects: telegram.telegram_types.Message and telegram.telegram_types.CallbackQuery.
 
         Args:
-            user_id (str): The user to check against.
             role_id (str): The role to check against.
             flow (str): The type of access control:
                 - 'auth': Authentication.
                 - 'authz': Authorization.
-
-        Keyword Args (additional):
-            chat_id (str): The chat ID.
-            message_id (str): The message ID.
-
         Returns:
             function: The decorator.
+
+        Examples:
+            >>> @telegram.message_handler(commands=['start'])
+            >>> @access_control(role_id='admin_role', flow='authz')
+                def my_function(message: telegram.telegram_types.Message, access_result: dict = None):
+                    print(f"User permissions: {access_result}")
         """
         def decorator(func):
             def wrapper(*args, **kwargs):
-                """
-                The wrapper function for the decorator.
-                """
-                user_info = self.user_access_check(
-                    user_id=user_id, role_id=role_id,
-                    chat_id=additional.get('chat_id', 'unknown'),
-                    message_id=additional.get('message_id', 'unknown')
+                # Check if the first argument is an object (message or call)
+                obj = args[0] if args else None
+                # Extract user_id, chat_id, and message_id from the object
+                if hasattr(obj, 'message'):  # from call
+                    obj = obj.message
+                if hasattr(obj, 'user'):  # from message
+                    resolved_user_id = obj.user.id
+                    resolved_chat_id = obj.chat.id
+                    resolved_message_id = obj.message_id
+                else:
+                    raise ValueError("Unsupported object type for access control.")
+
+                access_result = self.user_access_check(
+                    user_id=resolved_user_id, role_id=role_id,
+                    chat_id=resolved_chat_id, message_id=resolved_message_id
                 )
                 access_allowed = (
-                    (flow == 'auth' and user_info.get('access') == self.user_status_allow) or
-                    (flow == 'authz' and user_info.get('permissions') == self.user_status_allow)
+                    (flow == 'auth' and access_result.get('access') == self.user_status_allow) or
+                    (flow == 'authz' and access_result.get('permissions') == self.user_status_allow)
                 )
                 if access_allowed:
-                    return func(*args, **kwargs, user_info=user_info)
+                    kwargs['access_result'] = access_result
+                    return func(*args, **kwargs)
                 return None
             return wrapper
         return decorator
