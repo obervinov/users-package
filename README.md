@@ -388,7 +388,7 @@ def my_function(message: telegram.telegram_types.Message, access_result: dict = 
     pass
 
 # call the function
-my_function()
+my_function(message)
 ```
 
 
