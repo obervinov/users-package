@@ -149,7 +149,7 @@ class Users:
     def access_control(self, role_id: str = None, flow: str = 'auth'):
         """
         Instance method that acts as a decorator factory for access control.
-        Working with the pyTelegramBotAPI objects: telegram.telegram_types.Message and telegram.telegram_types.CallbackQuery.
+        Working with the pyTelegramBotAPI objects: telegram.telegram_types.Message or telegram.telegram_types.CallbackQuery.
 
         Args:
             role_id (str): The role to check against.
