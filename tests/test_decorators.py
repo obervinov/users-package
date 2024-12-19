@@ -12,6 +12,8 @@ def test_access_control_decorator(users_instance):
     Verify the access control decorator for the user.
     """
     message = MagicMock()
+    message.user = MagicMock(id=None)
+    message.chat = MagicMock(id=None)
 
     message.user.id = 'testUser24'
     message.chat.id = 'testUser24'
