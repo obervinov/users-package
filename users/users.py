@@ -177,6 +177,7 @@ class Users:
                     resolved_chat_id = obj.chat.id
                     resolved_message_id = obj.message_id
                 else:
+                    log.error('[Users]: unsupported object type for access control: %s (%s)', obj, type(obj))
                     raise ValueError("Unsupported object type for access control.")
 
                 access_result = self.user_access_check(

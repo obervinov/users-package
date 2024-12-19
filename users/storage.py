@@ -27,7 +27,7 @@ class Storage:
         Initialize the storage class with the database connection and credentials.
 
         Args:
-            db_connection (dict): The database connection object.
+            db_connection (any): The database connection object.
 
         Example:
             >>> import psycopg2
@@ -45,7 +45,7 @@ class Storage:
         # Test query to check the connection to the database
         try:
             self.cursor.execute("SELECT id FROM users LIMIT 1")
-            log.info('[Users]: Successfully connected to the storage')
+            log.info('[Users]: Successfully connected to the storage %s', self.connection)
         except Exception as error:
             log.error('[Users]: Failed to connect to the storage: %s', error)
             raise FailedStorageConnection("Failed to connect to the storage") from error
