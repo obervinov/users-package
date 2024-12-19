@@ -172,8 +172,8 @@ class Users:
                 # Extract user_id, chat_id, and message_id from the object
                 if hasattr(obj, 'message'):  # from call
                     obj = obj.message
-                if hasattr(obj, 'user'):  # from message
-                    resolved_user_id = obj.user.id
+                if hasattr(obj, 'chat'):  # from message
+                    resolved_user_id = obj.chat.id
                     resolved_chat_id = obj.chat.id
                     resolved_message_id = obj.message_id
                 else:
