@@ -105,9 +105,9 @@ Working with the pyTelegramBotAPI objects: `telegram.telegram_types.Message` and
 
 - **Arguments:**
   - `role_id (str)`: Required role ID for the specified user ID.
-  - `flow (str)`: The flow of the function, which can be either
-    - `auth` for authentication
-    - `authz` for authorization
+  - `flow (str)`: The flow of the function, which can be either.
+    - `auth` for authentication. Default value.
+    - `authz` for authorization.
 - **Examples:**
   Role-based access control
   ```python
@@ -121,7 +121,7 @@ Working with the pyTelegramBotAPI objects: `telegram.telegram_types.Message` and
   Just authentication
   ```python
     @telegram.message_handler(commands=['start'])
-    @access_control(flow='auth')
+    @access_control()
     # Decorator returns user information about access, permissions, and rate limits into access_result argument
     def my_function(message: telegram.telegram_types.Message, access_result: dict = None):
         print(f"User permissions: {access_result}")
@@ -380,7 +380,7 @@ users = Users(vault=vault_client, rate_limits=True, storage_connection=psycopg2.
 
 # create a function with the access_control decorator
 @telegram.message_handler(commands=['start'])
-@access_control(flow='auth')
+@access_control()
 # Decorator returns user information about access, permissions, and rate limits into access_result argument
 def my_function(message: telegram.telegram_types.Message, access_result: dict = None):
     print(f"User permissions: {access_result}")

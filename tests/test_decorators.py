@@ -40,7 +40,7 @@ def test_access_control_decorator(users_instance):
     # the user is allowed access to the bot
     message = MockMessage(chat_id='testUser24', message_id=random.randint(1, 9999))
 
-    @users_instance.access_control(flow='auth')
+    @users_instance.access_control()
     def allowed_exist_user_function(message: object, access_result: dict = None):
         print(message)
         return access_result
@@ -49,7 +49,7 @@ def test_access_control_decorator(users_instance):
     # the user is explicitly blocked from accessing the bot
     message = MockMessage(chat_id='testUser25', message_id=random.randint(1, 9999))
 
-    @users_instance.access_control(flow='auth')
+    @users_instance.access_control()
     def blocked_exist_user_function(message: object, access_result: dict = None):
         print(message)
         print(access_result)
@@ -91,7 +91,7 @@ def test_access_control_decorator(users_instance):
     random_user_id = f"testUser{random.randint(100, 10000)}"
     message = MockMessage(chat_id=random_user_id, message_id=random.randint(1, 9999))
 
-    @users_instance.access_control(flow='auth')
+    @users_instance.access_control()
     def does_not_exist_user_function(message: object, access_result: dict = None):
         print(message)
         print(access_result)
