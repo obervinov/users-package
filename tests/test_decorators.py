@@ -4,7 +4,6 @@ A test that verifies the decorators in the users module.
 """
 import random
 import pytest
-from mock import MagicMock
 
 
 # pylint: disable=too-few-public-methods

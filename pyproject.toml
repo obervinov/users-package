@@ -26,7 +26,6 @@ vault  = { git = "https://github.com/obervinov/vault-package.git", tag = "v4.0.0
 pytest = "^8"
 pylint = "^3"
 flake8 = "^7"
-mock = "^5"
 
 [build-system]
 requires = ["poetry-core"]
