@@ -96,3 +96,22 @@ def test_authorization_user_denied(users_instance):
         'access': users_instance.user_status_allow,
         'permissions': users_instance.user_status_deny
     }
+
+
+@pytest.mark.order(11)
+def test_register_user_in_database(users_instance, postgres_instance):
+    """
+    Verify of user records in the database
+    """
+    cursor = postgres_instance[1]
+    test_cases = [
+        {'id': 'testUser22', 'status': 'allowed'},
+        {'id': 'testUser23', 'status': 'denied'},
+        {'id': 'testUser123', 'status': 'denied'}
+    ]
+    for case in test_cases:
+        _ = users_instance.user_access_check(user_id=case['id'])
+        cursor.execute(f"SELECT user_id, status FROM users WHERE user_id = '{case['id']}'")
+        user_record = cursor.fetchone()
+        assert user_record is not None
+        assert user_record[0] == case['id'] and user_record[1] == case['status']

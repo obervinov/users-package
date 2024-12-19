@@ -146,6 +146,55 @@ class Users:
         """
         self._vault_config_path = vault_config_path
 
+    def access_control(self, role_id: str = None, flow: str = 'auth'):
+        """
+        Instance method that acts as a decorator factory for access control.
+        Working with the pyTelegramBotAPI objects: telegram.telegram_types.Message or telegram.telegram_types.CallbackQuery.
+
+        Args:
+            role_id (str): The role to check against.
+            flow (str): The type of access control:
+                - 'auth': Authentication.
+                - 'authz': Authorization.
+        Returns:
+            function: The decorator.
+
+        Examples:
+            >>> @telegram.message_handler(commands=['start'])
+            >>> @access_control(role_id='admin_role', flow='authz')
+                def my_function(message: telegram.telegram_types.Message, access_result: dict = None):
+                    print(f"User permissions: {access_result}")
+        """
+        def decorator(func):
+            def wrapper(*args, **kwargs):
+                # Check if the first argument is an object (message or call)
+                obj = args[0] if args else None
+                # Extract user_id, chat_id, and message_id from the object
+                if hasattr(obj, 'message'):  # from call
+                    obj = obj.message
+                if hasattr(obj, 'chat'):  # from message
+                    resolved_user_id = obj.chat.id
+                    resolved_chat_id = obj.chat.id
+                    resolved_message_id = obj.message_id
+                else:
+                    log.error('[Users]: unsupported object type for access control: %s (%s)', obj, type(obj))
+                    raise ValueError("Unsupported object type for access control.")
+
+                access_result = self.user_access_check(
+                    user_id=resolved_user_id, role_id=role_id,
+                    chat_id=resolved_chat_id, message_id=resolved_message_id
+                )
+                access_allowed = (
+                    (flow == 'auth' and access_result.get('access') == self.user_status_allow) or
+                    (flow == 'authz' and access_result.get('permissions') == self.user_status_allow)
+                )
+                if access_allowed:
+                    kwargs['access_result'] = access_result
+                    return func(*args, **kwargs)
+                return None
+            return wrapper
+        return decorator
+
     def user_access_check(
         self,
         user_id: str = None,
@@ -203,27 +252,14 @@ class Users:
         """
         user_info = {}
         user_info['access'] = self._authentication(user_id=user_id)
+        self.storage.register_user(user_id=user_id, status=user_info['access'], chat_id=kwargs.get('chat_id', 'unknown'))
 
-        if user_info['access'] == self.user_status_allow:
-            self.storage.register_user(
-                user_id=user_id,
-                status=user_info['access'],
-                chat_id=kwargs.get('chat_id', 'undefined')
-            )
+        if user_info['access'] == self.user_status_allow and role_id:
+            user_info['permissions'] = self._authorization(user_id=user_id, role_id=role_id)
 
-            if role_id:
-                user_info['permissions'] = self._authorization(
-                    user_id=user_id,
-                    role_id=role_id
-                )
-
-                if user_info['permissions'] == self.user_status_allow and self.rate_limits:
-                    rl_controller = RateLimiter(
-                        vault=self.vault,
-                        storage=self.storage,
-                        user_id=user_id
-                    )
-                    user_info['rate_limits'] = rl_controller.determine_rate_limit()
+            if user_info['permissions'] == self.user_status_allow and self.rate_limits:
+                rl_controller = RateLimiter(vault=self.vault, storage=self.storage, user_id=user_id)
+                user_info['rate_limits'] = rl_controller.determine_rate_limit()
 
         self.storage.log_user_request(
             user_id=user_id,

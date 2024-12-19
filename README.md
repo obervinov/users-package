@@ -98,6 +98,40 @@ The `Users` class provides authentication, authorization, user attribute managem
     users_with_dict_vault = Users(vault=vault_config, storage_connection=psycopg2.connect(**db_config))
     ```
 
+### decorator: Access Control
+
+The `access_control()` decorator is used to control access to specific functions based on user roles and permissions.</br>
+**Required the `pyTelegramBotAPI` objects:** `telegram.telegram_types.Message` or `telegram.telegram_types.CallbackQuery`
+
+- **Arguments:**
+  - `role_id (str)`: Required role ID for the specified user ID.
+  - `flow (str)`: The flow of the function, which can be either.
+    - `auth` for authentication. Default value.
+    - `authz` for authorization.
+
+- **Examples:**</br>
+  Role-based access control
+  ```python
+    @telegram.message_handler(commands=['start'])
+    @access_control(role_id='admin_role', flow='authz')
+    # Decorator returns user information about access, permissions, and rate limits into access_result argument
+    def my_function(message: telegram.telegram_types.Message, access_result: dict = None):
+        print(f"User permissions: {access_result}")
+        pass
+  ```
+  Just authentication
+  ```python
+    @telegram.message_handler(commands=['start'])
+    @access_control()
+    # Decorator returns user information about access, permissions, and rate limits into access_result argument
+    def my_function(message: telegram.telegram_types.Message, access_result: dict = None):
+        print(f"User permissions: {access_result}")
+        pass
+  ```
+
+- **Returns:**
+  - Breaks the function and returns an error message if the user does not have the required role or permission.
+
 ### method: User Access Check
 
 The `user_access_check()` method is the main entry point for authentication, authorization, and request rate limit verification. It is used to control the request rate (limits) for a specific user.
@@ -325,6 +359,39 @@ else:
     print("Access denied, goodbye!")
 ```
 
+Example 3 - Decorator Usage
+```python
+# import modules
+from vault import VaultClient
+from users import Users
+
+# create the vault client
+vault_client = VaultClient(
+  url='http://vault.example.com',
+  namespace='my_project',
+  auth={
+      'type': 'approle',
+      'role_id': 'my_role',
+      'secret_id':
+  }
+)
+
+# create the Users instance of the class with rate limits
+users = Users(vault=vault_client, rate_limits=True, storage_connection=psycopg2.connect(**db_config))
+
+# create a function with the access_control decorator
+@telegram.message_handler(commands=['start'])
+@access_control()
+# Decorator returns user information about access, permissions, and rate limits into access_result argument
+def my_function(message: telegram.telegram_types.Message, access_result: dict = None):
+    print(f"User permissions: {access_result}")
+    pass
+
+# call the function
+my_function(message)
+```
+
+
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="20" title="install"> Installing
 ```bash
 tee -a pyproject.toml <<EOF
@@ -348,4 +415,4 @@ poetry install
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/github-actions.png" width="25" title="github-actions"> GitHub Actions
 | Name  | Version |
 | ------------------------ | ----------- |
-| GitHub Actions Templates | [v2.0.0](https://github.com/obervinov/_templates/tree/v2.0.0) |
+| GitHub Actions Templates | [v2.0.2](https://github.com/obervinov/_templates/tree/v2.0.2) |

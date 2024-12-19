@@ -159,13 +159,7 @@ def fixture_prepare_vault(vault_url, namespace, policy_path, postgres_url):
 def fixture_postgres_instance(psql_tables_path):
     """Prepare the postgres database, return the connection and cursor"""
     # Prepare database for tests
-    psql_connection = psycopg2.connect(
-        host='0.0.0.0',
-        port=5432,
-        user='postgres',
-        password='postgres',
-        dbname='postgres'
-    )
+    psql_connection = psycopg2.connect(host='0.0.0.0', port=5432, user='postgres', password='postgres', dbname='postgres')
     psql_cursor = psql_connection.cursor()
     with open(psql_tables_path, 'r', encoding='utf-8') as sql_file:
         sql_script = sql_file.read()
@@ -405,7 +399,43 @@ def fixture_users(vault_instance, postgres_instance):
             'status': 'allowed',
             'roles': [],
             'requests': []
-        }
+        },
+        # Test user22
+        # - AUTHN: allowed
+        # - AUTHZ: denied
+        {
+            'name': 'testUser22',
+            'status': 'allowed',
+            'roles': [],
+            'requests': {'requests_per_day': 3, 'requests_per_hour': 3, 'random_shift_minutes': 15},
+        },
+        # Test user23
+        # - AUTHN: denied
+        # - AUTHZ: denied
+        {
+            'name': 'testUser23',
+            'status': 'denied',
+            'roles': [],
+            'requests': {},
+        },
+        # Test user24
+        # - AUTHN: allowed
+        # - AUTHZ: denied
+        {
+            'name': 'testUser24',
+            'status': 'allowed',
+            'roles': ['admin_role'],
+            'requests': {'requests_per_day': 3, 'requests_per_hour': 3, 'random_shift_minutes': 15},
+        },
+        # Test user25
+        # - AUTHN: denied
+        # - AUTHZ: denied
+        {
+            'name': 'testUser25',
+            'status': 'denied',
+            'roles': [],
+            'requests': {}
+        },
     ]
     psql_connection, psql_cursor = postgres_instance
     for user in users:
@@ -441,32 +471,13 @@ def fixture_users(vault_instance, postgres_instance):
 def fixture_users_instance(vault_instance, users):
     """Returns an instance of the Users class with the rate limit controller enabled"""
     _ = users
-    db_conn = psycopg2.connect(
-        host='0.0.0.0',
-        port=5432,
-        user='postgres',
-        password='postgres',
-        dbname='postgres'
-    )
-    return Users(
-        vault=vault_instance,
-        rate_limits=True,
-        storage_connection=db_conn,
-    )
+    db_conn = psycopg2.connect(host='0.0.0.0', port=5432, user='postgres', password='postgres', dbname='postgres')
+    return Users(vault=vault_instance, rate_limits=True, storage_connection=db_conn)
 
 
 @pytest.fixture(name="users_instance_without_rl", scope='function')
 def fixture_users_instance_without_rl(vault_instance, users):
     """Returns an instance of the Users class with the rate limit controller disabled"""
     _ = users
-    db_conn = psycopg2.connect(
-        host='0.0.0.0',
-        port=5432,
-        user='postgres',
-        password='postgres',
-        dbname='postgres'
-    )
-    return Users(
-        vault=vault_instance,
-        storage_connection=db_conn,
-    )
+    db_conn = psycopg2.connect(host='0.0.0.0', port=5432, user='postgres', password='postgres', dbname='postgres')
+    return Users(vault=vault_instance, storage_connection=db_conn)

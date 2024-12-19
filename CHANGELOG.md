@@ -3,15 +3,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## v4.0.2 - 2024-12-19
+### What's Changed
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v4.0.1...v4.0.2 by @obervinov in https://github.com/obervinov/users-package/pull/53
+#### 🚀 Features
+* [Feature request: Add a decorator for easier access verification](https://github.com/obervinov/users-package/issues/52)
+* bump workflows version to `2.0.2`
+#### 🐛 Bug Fixes
+* [Bug: Denied users are not recorded in the database](https://github.com/obervinov/users-package/issues/51)
+
+
 ## v4.0.1 - 2024-10-22
 ### What's Changed
-**Full Changelog**: https://github.com/obervinov/users-package/compare/v4.0.0...v4.0.1 by @obervinov in https://github.com/obervinov/users-package/pull/47
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v4.0.0...v4.0.1 by @obervinov in https://github.com/obervinov/users-package/pull/50
 #### 📚 Documentation
 * actualized documentation in the `README.md` file
 
 ## v4.0.0 - 2024-10-22
 ### What's Changed
-**Full Changelog**: https://github.com/obervinov/users-package/compare/v3.0.2...v4.0.0 by @obervinov in https://github.com/obervinov/users-package/pull/46
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v3.0.2...v4.0.0 by @obervinov in https://github.com/obervinov/users-package/pull/49
 #### 💥 Breaking Changes
 * bump python version to `3.12`
 * some arguments of the `Users` class and the `Storage` class have been replaced. Detailed information can be found in the [DEPRECATED.md](DEPRECATEDv3.md) file

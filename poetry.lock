@@ -2,24 +2,24 @@
 
 [[package]]
 name = "astroid"
-version = "3.3.5"
+version = "3.3.6"
 description = "An abstract syntax tree for Python with inference support."
 optional = false
 python-versions = ">=3.9.0"
 files = [
-    {file = "astroid-3.3.5-py3-none-any.whl", hash = "sha256:a9d1c946ada25098d790e079ba2a1b112157278f3fb7e718ae6a9252f5835dc8"},
-    {file = "astroid-3.3.5.tar.gz", hash = "sha256:5cfc40ae9f68311075d27ef68a4841bdc5cc7f6cf86671b49f00607d30188e2d"},
+    {file = "astroid-3.3.6-py3-none-any.whl", hash = "sha256:db676dc4f3ae6bfe31cda227dc60e03438378d7a896aec57422c95634e8d722f"},
+    {file = "astroid-3.3.6.tar.gz", hash = "sha256:6aaea045f938c735ead292204afdb977a36e989522b7833ef6fea94de743f442"},
 ]
 
 [[package]]
 name = "certifi"
-version = "2024.8.30"
+version = "2024.12.14"
 description = "Python package for providing Mozilla's CA Bundle."
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "certifi-2024.8.30-py3-none-any.whl", hash = "sha256:922820b53db7a7257ffbda3f597266d435245903d80737e34f8a45ff3e3230d8"},
-    {file = "certifi-2024.8.30.tar.gz", hash = "sha256:bec941d2aa8195e248a60b31ff9f0558284cf01a52591ceda73ea9afffd69fd9"},
+    {file = "certifi-2024.12.14-py3-none-any.whl", hash = "sha256:1275f7a45be9464efc1173084eaa30f866fe2e47d389406136d332ed4967ec56"},
+    {file = "certifi-2024.12.14.tar.gz", hash = "sha256:b650d30f370c2b724812bee08008be0c4163b163ddaec3f2546c1caf65f191db"},
 ]
 
 [[package]]
@@ -262,13 +262,13 @@ files = [
 
 [[package]]
 name = "packaging"
-version = "24.1"
+version = "24.2"
 description = "Core utilities for Python packages"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "packaging-24.1-py3-none-any.whl", hash = "sha256:5b8f2217dbdbd2f7f384c41c628544e6d52f2d0f53c6d0c3ea61aa5d1d7ff124"},
-    {file = "packaging-24.1.tar.gz", hash = "sha256:026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002"},
+    {file = "packaging-24.2-py3-none-any.whl", hash = "sha256:09abb1bccd265c01f4a3aa3f7a7db064b36514d2cba19a2f694fe6150451a759"},
+    {file = "packaging-24.2.tar.gz", hash = "sha256:c228a6dc5e932d346bc5739379109d49e8853dd8223571c7c5b55260edc0b97f"},
 ]
 
 [[package]]
@@ -402,17 +402,17 @@ files = [
 
 [[package]]
 name = "pylint"
-version = "3.3.1"
+version = "3.3.2"
 description = "python code static checker"
 optional = false
 python-versions = ">=3.9.0"
 files = [
-    {file = "pylint-3.3.1-py3-none-any.whl", hash = "sha256:2f846a466dd023513240bc140ad2dd73bfc080a5d85a710afdb728c420a5a2b9"},
-    {file = "pylint-3.3.1.tar.gz", hash = "sha256:9f3dcc87b1203e612b78d91a896407787e708b3f189b5fa0b307712d49ff0c6e"},
+    {file = "pylint-3.3.2-py3-none-any.whl", hash = "sha256:77f068c287d49b8683cd7c6e624243c74f92890f767f106ffa1ddf3c0a54cb7a"},
+    {file = "pylint-3.3.2.tar.gz", hash = "sha256:9ec054ec992cd05ad30a6df1676229739a73f8feeabf3912c995d17601052b01"},
 ]
 
 [package.dependencies]
-astroid = ">=3.3.4,<=3.4.0-dev0"
+astroid = ">=3.3.5,<=3.4.0-dev0"
 colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
 dill = {version = ">=0.3.7", markers = "python_version >= \"3.12\""}
 isort = ">=4.2.5,<5.13.0 || >5.13.0,<6"
@@ -426,13 +426,13 @@ testutils = ["gitpython (>3)"]
 
 [[package]]
 name = "pytest"
-version = "8.3.3"
+version = "8.3.4"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pytest-8.3.3-py3-none-any.whl", hash = "sha256:a6853c7375b2663155079443d2e45de913a911a11d669df02a50814944db57b2"},
-    {file = "pytest-8.3.3.tar.gz", hash = "sha256:70b98107bd648308a7952b06e6ca9a50bc660be218d53c257cc1fc94fda10181"},
+    {file = "pytest-8.3.4-py3-none-any.whl", hash = "sha256:50e16d954148559c9a74109af1eaf0c945ba2d8f30f0a3d3335edde19788b6f6"},
+    {file = "pytest-8.3.4.tar.gz", hash = "sha256:965370d062bce11e73868e0335abac31b4d3de0e82f4007408d242b4f8610761"},
 ]
 
 [package.dependencies]
