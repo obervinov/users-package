@@ -101,7 +101,7 @@ The `Users` class provides authentication, authorization, user attribute managem
 ### decorator: Access Control
 
 The `access_control()` decorator is used to control access to specific functions based on user roles and permissions.
-Required the pyTelegramBotAPI objects
+- **Required the pyTelegramBotAPI objects:**
 - `telegram.telegram_types.Message`
 - `telegram.telegram_types.CallbackQuery`
 
