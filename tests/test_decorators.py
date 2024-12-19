@@ -38,7 +38,7 @@ def test_access_control_decorator(users_instance):
     """
 
     # the user is allowed access to the bot
-    message = MockMessage(chat_id='testChat24', message_id=random.randint(1, 9999))
+    message = MockMessage(chat_id='testUser24', message_id=random.randint(1, 9999))
 
     @users_instance.access_control(flow='auth')
     def allowed_exist_user_function(message: object, access_result: dict = None):
@@ -47,7 +47,7 @@ def test_access_control_decorator(users_instance):
     assert allowed_exist_user_function(message) == {'access': users_instance.user_status_allow}
 
     # the user is explicitly blocked from accessing the bot
-    message = MockMessage(chat_id='testChat25', message_id=random.randint(1, 9999))
+    message = MockMessage(chat_id='testUser25', message_id=random.randint(1, 9999))
 
     @users_instance.access_control(flow='auth')
     def blocked_exist_user_function(message: object, access_result: dict = None):
@@ -57,7 +57,7 @@ def test_access_control_decorator(users_instance):
     assert blocked_exist_user_function(message) is None
 
     # user has a specified access role
-    message = MockMessage(chat_id='testChat24', message_id=random.randint(1, 9999))
+    message = MockMessage(chat_id='testUser24', message_id=random.randint(1, 9999))
 
     @users_instance.access_control(role_id='admin_role', flow='authz')
     def allowed_exist_user_with_role_function(message: object, access_result: dict = None):
@@ -68,7 +68,7 @@ def test_access_control_decorator(users_instance):
     }
 
     # the user has a role but not the one requested
-    message = MockMessage(chat_id='testChat24', message_id=random.randint(1, 9999))
+    message = MockMessage(chat_id='testUser24', message_id=random.randint(1, 9999))
 
     @users_instance.access_control(role_id='other_role', flow='authz')
     def allowed_exist_user_without_role_function(message: object, access_result: dict = None):
@@ -78,7 +78,7 @@ def test_access_control_decorator(users_instance):
     assert allowed_exist_user_without_role_function(message) is None
 
     # the user is explicitly blocked from access and the user has no roles
-    message = MockMessage(chat_id='testChat25', message_id=random.randint(1, 9999))
+    message = MockMessage(chat_id='testUser25', message_id=random.randint(1, 9999))
 
     @users_instance.access_control(role_id='admin_role', flow='authz')
     def blocked_exist_user_without_role_function(message: object, access_result: dict = None):
