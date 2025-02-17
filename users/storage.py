@@ -71,8 +71,8 @@ class Storage:
         self.connection = self.create_connection()
         self.cursor = self.connection.cursor()
 
-        if not self.db_connection or not self.vault:
-            log.error('[Users]: Failed connection settings. db_connection: %s, vault: %s', self.db_connection, self.vault)
+        if not self.db_connection and not self.vault:
+            log.error('[Users]: Failed connection settings. Provide the database connection or vault settings.\ndb_connection: %s\nvault: %s', db_connection, vault)
             raise FailedStorageConnection("Failed to connect to the storage")
 
         # Test query to check the connection to the database
