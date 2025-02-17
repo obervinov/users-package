@@ -33,8 +33,8 @@ class Storage:
     Attributes:
         db_connection (object): The database connection object from the psycopg2 library.
         vault (dict): Alternative way to provide the database connection settings.
-            object (object): The Vault object.
-            role (str): The database role.
+            :param instance (object): The Vault object.
+            :param role (str): The database role.
         connection (psycopg2.connect): The database connection object.
         cursor (psycopg2.cursor): The database cursor object.
 
@@ -54,8 +54,8 @@ class Storage:
         Args:
             db_connection (object): The database connection object from the psycopg2 library.
             vault (dict): Alternative way to provide the database connection settings. Can't be used with db_connection.
-                instance (object): The Vault object.
-                role (str): The database role.
+                :param instance (object): The Vault object.
+                :param role (str): The database role.
 
         Example:
             >>> import psycopg2
