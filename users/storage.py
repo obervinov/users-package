@@ -31,8 +31,12 @@ class Storage:
     The storage class for the storage of user data: requests, access logs, etc.
 
     Attributes:
-        connection (object): The database connection object.
-        cursor (object): The database cursor object.
+        db_connection (object): The database connection object from the psycopg2 library.
+        vault (dict): Alternative way to provide the database connection settings.
+            object (object): The Vault object.
+            role (str): The database role.
+        connection (psycopg2.connect): The database connection object.
+        cursor (psycopg2.cursor): The database cursor object.
 
     Methods:
         register_user: Register the user in the
@@ -43,14 +47,14 @@ class Storage:
     Raises:
         FailedStorageConnection: An error occurred when the storage connection fails.
     """
-    def __init__(self, db_connection: object = None, vault_dbengine: dict = None):
+    def __init__(self, db_connection: object = None, vault: dict = None):
         """
         Initialize the storage class with the database connection.
 
         Args:
             db_connection (object): The database connection object from the psycopg2 library.
-            vault_dbengine (dict): Alternative way to provide the database connection settings. Can't be used with db_connection.
-                object (object): The Vault object.
+            vault (dict): Alternative way to provide the database connection settings. Can't be used with db_connection.
+                instance (object): The Vault object.
                 role (str): The database role.
 
         Example:
@@ -58,17 +62,17 @@ class Storage:
             >>> conn_pool = psycopg2.pool.SimpleConnectionPool(1, 20, ...)
             >>> db_conn = conn_pool.getconn()
             >>> storage = Storage(db_conn)
-            >>> # OR
+            >>> ...
             >>> vault = Vault()
-            >>> storage = Storage(vault_dbengine={'vault': <vault object>, 'role': 'myproject_users'})
+            >>> storage = Storage(vault={'vault': <vault object>, 'role': 'myproject_users'})
         """
         self.db_connection = db_connection
-        self.vault = vault_dbengine
+        self.vault = vault
         self.connection = self.create_connection()
         self.cursor = self.connection.cursor()
 
         if not self.db_connection or not self.vault:
-            log.error('[Users]: Failed connection settings. Please check the parameter db_connection or vault_dbengine')
+            log.error('[Users]: Failed connection settings. Please check the parameter db_connection or vault')
             raise FailedStorageConnection("Failed to connect to the storage")
 
         # Test query to check the connection to the database
@@ -88,18 +92,18 @@ class Storage:
         """
         if self.vault and not self.db_connection:
             required_keys = {"configuration": ["host", "port", "dbname"], "credentials": ["username", "password"]}
-            db_configuration = self.vault['object'].kv2engine.read_secret(path='configuration/database')
-            db_credentials = self.vault['object'].dbengine.generate_credentials(role=self.vault.get('role', 'undefined'))
+            db_configuration = self.vault['instance'].kv2engine.read_secret(path='configuration/database')
+            db_credentials = self.vault['instance'].dbengine.generate_credentials(role=self.vault.get('role', 'undefined'))
 
             if not db_configuration or not db_credentials:
-                raise ValueError('Vault_dbengine: database configuration or credentials are missing')
+                raise ValueError('vault: database configuration or credentials are missing')
 
             missing_keys = (required_keys['configuration'] - set(db_configuration.keys())) | (required_keys['credentials'] - set(db_credentials.keys()))
             if missing_keys:
-                raise KeyError("Vault_dbengine: missing keys in the database configuration or credentials: {missing_keys}")
+                raise KeyError("vault: missing keys in the database configuration or credentials: {missing_keys}")
 
             log.info(
-                '[Users]: vault_dbengine: creating a connection for the %s:%s/%s', db_configuration['host'], db_configuration['port'], db_configuration['dbname']
+                '[Users]: vault: creating a connection for the %s:%s/%s', db_configuration['host'], db_configuration['port'], db_configuration['dbname']
             )
             settings = {
                 'host': db_configuration['host'], 'port': db_configuration['port'], 'database': db_configuration['dbname'],
