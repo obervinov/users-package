@@ -67,7 +67,7 @@ class Storage:
         self.connection = self.create_connection()
         self.cursor = self.connection.cursor()
 
-        if not self.connection or not self.vault:
+        if not self.db_connection or not self.vault:
             log.error('[Users]: Failed connection settings. Please check the parameter db_connection or vault_dbengine')
             raise FailedStorageConnection("Failed to connect to the storage")
 
