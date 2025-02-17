@@ -50,7 +50,7 @@ class Storage:
         Args:
             db_connection (object): The database connection object from the psycopg2 library.
             vault_dbengine (dict): Alternative way to provide the database connection settings. Can't be used with db_connection.
-                vault (object): The Vault object.
+                object (object): The Vault object.
                 role (str): The database role.
 
         Example:
@@ -88,8 +88,8 @@ class Storage:
         """
         if self.vault and not self.db_connection:
             required_keys = {"configuration": ["host", "port", "dbname"], "credentials": ["username", "password"]}
-            db_configuration = self.vault.kv2engine.read_secret(path='configuration/database')
-            db_credentials = self.vault.dbengine.generate_credentials(role=self.vault.get('role', 'undefined'))
+            db_configuration = self.vault['object'].kv2engine.read_secret(path='configuration/database')
+            db_credentials = self.vault['object'].dbengine.generate_credentials(role=self.vault.get('role', 'undefined'))
 
             if not db_configuration or not db_credentials:
                 raise ValueError('Vault_dbengine: database configuration or credentials are missing')
