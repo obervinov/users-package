@@ -1,7 +1,7 @@
 """This module contains the storage class for the storage of user data: requests, access logs, etc."""
 import json
 import time
-import psycopg2 
+import psycopg2
 from logger import log
 from .exceptions import FailedStorageConnection
 
