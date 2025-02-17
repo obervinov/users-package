@@ -107,7 +107,7 @@ class Storage:
             }
             connection = psycopg2.connect(**settings)
         if self.db_connection and not self.vault:
-            connection = self.connection
+            connection = self.db_connection
         else:
             raise ValueError('Database connection settings are missing')
         return connection
