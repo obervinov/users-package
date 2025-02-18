@@ -104,14 +104,14 @@ class Storage:
                 raise KeyError("vault: missing keys in the database configuration or credentials: {missing_keys}")
 
             log.info(
-                '[Users]: vault: creating a connection for the %s:%s/%s', db_configuration['host'], db_configuration['port'], db_configuration['dbname']
+                '[Users]: creating a connection for the %s:%s/%s', db_configuration['host'], db_configuration['port'], db_configuration['dbname']
             )
             settings = {
                 'host': db_configuration['host'], 'port': db_configuration['port'], 'database': db_configuration['dbname'],
                 'user': db_credentials['username'], 'password': db_credentials['password']
             }
             connection = psycopg2.connect(**settings)
-        if self.db_connection and not self.vault:
+        elif self.db_connection and not self.vault:
             connection = self.db_connection
         else:
             raise ValueError('Database connection settings are missing')
