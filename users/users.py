@@ -17,13 +17,15 @@ class Users:
     for Telegram bots.
 
     Attributes:
-        vault (any): The initialized VaultClient instance or None if initialization failed.
+        vault (any): The Vault client instance for interacting with the Vault API. It can be an object or a dictionary.
+        storage (Storage): The storage object for interacting with the database.
         rate_limits (bool): Enable or disable rate limit functionality.
         user_status_allow (str): A constant representing allowed user status.
         user_status_deny (str): A constant representing denied user status.
         vault_config_path (str): Path to the configuration data in Vault.
 
     Methods:
+        access_control: Acts as a decorator factory for access control.
         user_access_check: The main entry point for authentication, authorization, and request rate limit verification.
         _authentication: Checks if the specified user ID has access to the bot.
         _authorization: Checks if the specified user ID has the specified role.
@@ -41,13 +43,13 @@ class Users:
         Create a new Users instance.
 
         Args:
-            :param vault (any): configuration for initializing the Vault client.
-                - (object) vault client instance for interacting with the Vault API.
-                - (dict) configuration for initializing a vault client instance in this class.
-                    :param instance (object): instance of VaultClient.
-                    :param role (str): The role for the database engine.
+            :param vault (any): configuration or instance of VaultClient for interacting with the Vault API.
+                - (object) already initialized VaultClient instance.
+                - (dict) extended configuration for VaultClient (for database engine).
+                    :param instance (object): The already initialized VaultClient instance.
+                    :param role (str): The role name for the database engine in Vault.
             :param rate_limits (bool): Enable rate limit functionality. Default is False.
-            :param storage_connection (any): Connection object to connect to the storage.
+            :param storage_connection (any): Connection object to connect to the storage. Do not use if you are using Vault database engine.
 
         Examples:
             >>> import psycopg2

@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 * bump dependencies version
 * bump workflows version to `2.1.1`
 * the functionality has been returned to establish its own connection to the database (in addition to the possibility of transferring an existing connection object) for more stable operation of the module with correct credentials via Vault DBEngine (for example, the bug https://github.com/obervinov/pyinstabot-downloader/issues/118)
+#### 💥 Breaking Changes
+* The `vault` input argument of the `Users()` class now expects an object or a new dict format `{'instance': <vault_object>, 'role': 'my-dbengine-role'}`. The previous vault dictionary format is no longer supported. 
 
 
 ## v4.0.2 - 2024-12-19
