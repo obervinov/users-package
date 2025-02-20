@@ -64,14 +64,14 @@ This module contains constant values
 The `Users` class provides authentication, authorization, user attribute management and user request logging for Telegram bots. You can initialize it with different options
 
 - `vault (any)`: Configuration for initializing the Vault client.
-  - `(VaultClient)`: an already initialized instance for interacting with the Vault API.
-  - `(dict)`: configuration for initializing a VaultClient instance in this class.
+  - `(object)`: an already initialized instance of VaultClient for interacting with the Vault API.
+  - `(dict)`: extended configuration for VaultClient (for database engine).
+    - `instance (VaultClient)`: An already initialized instance for interacting with the Vault API.
+    - `role (str)`: The role name for the Vault database engine.
 
 - `rate_limits (bool)`: Enable rate limit functionality.
 
-- `storage (dict)`: Configuration for initializing the storage client.
-  - `db_role (str)`: The role name for the Vault database engine.
-
+- `storage_connection (any)`: Connection object to connect to the storage. Do not use if you are using Vault database engine.
 - **Examples:**
 
   - Initialize with `VaultClient` and without `rate_limits`:
@@ -86,16 +86,8 @@ The `Users` class provides authentication, authorization, user attribute managem
 
   - Initialize with Vault `configuration dictionary`:
     ```python
-    vault_config = {
-      'namespace': 'my_project',
-      'url': 'https://vault.example.com',
-      'auth': {
-          'type': 'approle',
-          'role_id': 'my_role_id',
-          'secret_id': 'my_secret_id'
-      }
-    }
-    users_with_dict_vault = Users(vault=vault_config, storage_connection=psycopg2.connect(**db_config))
+    vault_config = {'instance': <VaultClient>, 'role': 'my_db_role'}
+    users_with_dict_vault = Users(vault=vault_config)
     ```
 
 ### decorator: Access Control
