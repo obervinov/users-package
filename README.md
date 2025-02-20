@@ -222,6 +222,91 @@ The `get_user_request_counters()` method calculates the number of requests made 
 | `dict`         | `requests_counters`      | Counters for the number of requests per day and per hour.                | `None`                          |
 
 
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/build.png" width="25" title="class"> Storage class
+### Class Initialization
+The storage class for the storage of user data: requests, access logs, etc in the PostgreSQL database.
+Only one of the parameters is required for initialization: `db_connection` or `vault`.
+
+- `db_connection (object)`: The database connection object for interacting with the PostgreSQL database (psycopg2). Only one of the parameters is required.
+
+- `vault (dict)`: Configuration for initializing the Vault client.
+  - `instance (VaultClient)`: An already initialized instance for interacting with the Vault API.
+  - `role (str)`: The role name for the Vault database engine.
+
+- **Examples:**
+  ```python
+  storage = Storage(db_connection=psycopg2.connect(**db_config))
+  ```
+  ```python
+  storage = Storage(vault={'instance': <VaultClient>, 'role': 'my_db_role'})
+  ```
+
+### method: Create connection to the PostgreSQL database
+The `create_connection()` method creates a connection to the PostgreSQL database.
+
+- **Examples:**
+```python
+create_connection()
+```
+
+- **Returns:**
+  - Connection object to the PostgreSQL database.
+
+### method: Register of User
+The `register_user()` method registers a new user in the database.
+
+- **Arguments:**
+  - `user_id (str)`: User ID for registration.
+  - `chat_id (str)`: Chat ID for registration.
+  - `status (str)`: The user state in the system. Values: `self.user_status_allow` or `self.user_status_deny`.
+
+- **Examples:**
+  ```python
+  register_user(user_id='user1', chat_id='chat1', status='allowed')
+  ```
+
+### method: Log user request
+The `log_user_request()` method logs the user request in the database.
+
+- **Arguments:**
+  - `user_id (str)`: User ID for logging.
+  - `request (dict)`: The user request details.
+
+- **Examples:**
+  ```python
+  log_user_request(user_id='user1', request={'chat_id': 'chat1', 'message_id': 'msg1'})
+  ```
+
+### method: Get user requests
+The `get_user_requests()` method retrieves the user's requests from the database.
+
+- **Arguments:**
+  - `user_id (str)`: User ID for retrieving requests.
+  - `limit (int)`: The number of requests to retrieve.
+  - `order (str)`: The order of the requests. Values: `asc` or `desc`.
+
+- **Examples:**
+  ```python
+  get_user_requests(user_id='user1', limit=10, order='asc')
+  ```
+
+- **Returns:**
+  - A list of user requests `[(id, timestamp, rate_limits), ...]`.
+
+### method: Get users
+The `get_users()` method retrieves all users from the database.
+
+- **Arguments:**
+  - `only_allowed (bool)`: Retrieve only allowed users.
+
+- **Examples:**
+  ```python
+  get_users()
+  ```
+
+- **Returns:**
+  - A list of users `[{'user_id': '12345', 'chat_id': '67890', 'status': 'denied'}, ...]`.
+
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/requirements.png" width="25" title="configuration-structure"> Structure of configuration in Vault
 This project uses a Vault server with the KV2 engine and Database Engine for storing user configurations and database connection data.

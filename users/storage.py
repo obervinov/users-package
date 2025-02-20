@@ -39,6 +39,7 @@ class Storage:
         cursor (psycopg2.cursor): The database cursor object.
 
     Methods:
+        create_connection: Create a connection for the PostgreSQL
         register_user: Register the user in the
         log_user_request: Write the user requests to the database.
         get_user_requests: Get the user requests from the database.
