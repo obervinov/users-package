@@ -55,8 +55,8 @@ class Users:
             >>> import psycopg2
             >>> conn_pool = psycopg2.pool.SimpleConnectionPool(1, 20, ...)
             >>> db_conn = conn_pool.getconn()
-            >>> users_with_ratelimits = Users(vault=vault_client, rate_limits=True, storage_connection=db_conn)
-            >>> users = Users(vault=vault_client, storage_connection=db_conn)
+            >>> users_with_ratelimits = Users(vault=<VaultClient>, rate_limits=True, storage_connection=db_conn)
+            >>> users = Users(vault=<VaultClient>, storage_connection=db_conn)
             >>> ...
             >>> vault_dict = {
             >>>     'instance': <vault_object>,

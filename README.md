@@ -76,15 +76,15 @@ The `Users` class provides authentication, authorization, user attribute managem
 
   - Initialize with `VaultClient` and without `rate_limits`:
     ```python
-    users_without_ratelimits = Users(vault=vault_client, rate_limits=False, storage_connection=psycopg2.connect(**db_config))
+    users_without_ratelimits = Users(vault=<VaultClient>, rate_limits=False, storage_connection=psycopg2.connect(**db_config))
     ```
 
   - Initialize with `VaultClient` and with `rate_limits`:
     ```python
-    users_with_ratelimits = Users(vault=vault_client, storage_connection=psycopg2.connect(**db_config))
+    users_with_ratelimits = Users(vault=<VaultClient>, storage_connection=psycopg2.connect(**db_config))
     ```
 
-  - Initialize with Vault `configuration dictionary`:
+  - Initialize with Vault `configuration dictionary` (for using the vault database engine):
     ```python
     vault_config = {'instance': <VaultClient>, 'role': 'my_db_role'}
     users_with_dict_vault = Users(vault=vault_config)
@@ -175,7 +175,7 @@ The `RateLimiter` class provides restriction functionality for user requests to 
 
 - **Examples:**
   ```python
-  limiter = RateLimiter(vault=vault_client, storage=storage_client, user_id='User1')
+  limiter = RateLimiter(vault=<VaultClient>, storage=storage_client, user_id='User1')
   ```
 
 ### method: Rate Limit Determination
@@ -224,10 +224,10 @@ The `get_user_request_counters()` method calculates the number of requests made 
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/build.png" width="25" title="class"> Storage class
 ### Class Initialization
-The storage class for the storage of user data: requests, access logs, etc in the PostgreSQL database.
-Only one of the parameters is required for initialization: `db_connection` or `vault`.
+The storage class for the storage of user data: requests, access logs, etc in the PostgreSQL database.</br>
+**Only one of the parameters is required for initialization: `db_connection` or `vault`**.
 
-- `db_connection (object)`: The database connection object for interacting with the PostgreSQL database (psycopg2). Only one of the parameters is required.
+- `db_connection (object)`: The database connection object for interacting with the PostgreSQL database (psycopg2).
 
 - `vault (dict)`: Configuration for initializing the Vault client.
   - `instance (VaultClient)`: An already initialized instance for interacting with the Vault API.
@@ -340,7 +340,7 @@ It supports user configurations to define system access rights, roles, and reque
 ### Database Configuration
 - **path to the secret**: `configuration/database`
 
-- **keys and values**:
+- **keys and values with simple database connection**:
   - `host`: The host of the PostgreSQL server.
   - `port`: The port of the PostgreSQL server.
   - `database`: The name of the PostgreSQL database.
@@ -351,12 +351,23 @@ It supports user configurations to define system access rights, roles, and reque
   {
     "host": "localhost",
     "port": 5432,
-    "database": "mydatabase",
+    "dbname": "mydatabase",
     "user": "myuser",
     "password": "mypassword",
   }
   ```
 
+- **keys and values with Vault Database Engine**:
+  - `role`: The role name for the Vault database engine.
+  - `instance`: The instance of the VaultClient for interacting with the Vault API.
+
+  ```json
+  {
+    "host": "localhost",
+    "port": 5432,
+    "dbname": "mydatabase",
+  }
+  ```
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/requirements.png" width="25" title="data-structure"> Structure of historical data in PostgreSQL
 This project uses a PostgreSQL database to store historical data about user requests and access events. It supports user request logging to track user activity and access rights.
@@ -387,7 +398,7 @@ vault_client = VaultClient(
 )
 
 # create the Users instance of the class with rate limits and get user information
-users = Users(vault=vault_client, rate_limits=True, storage_connection=psycopg2.connect(**db_config))
+users = Users(vault=<VaultClient>, rate_limits=True, storage_connection=psycopg2.connect(**db_config))
 user_info = users.user_access_check(user_id=message.chat.id, role_id="admin_role", chat_id=message.chat.id, message_id=message.message_id)
 
 # check permissions, roles, and rate limits
@@ -422,7 +433,7 @@ vault_client = VaultClient(
 )
 
 # create the Users instance of the class without rate limits and get user information
-users = Users(vault=vault_client, storage_connection=psycopg2.connect(**db_config))
+users = Users(vault=<VaultClient>, storage_connection=psycopg2.connect(**db_config))
 user_info = users.user_access_check(user_id=message.chat.id, role_id="admin_role", chat_id=message.chat.id, message_id=message.message_id)
 
 # check permissions and roles
@@ -454,7 +465,7 @@ vault_client = VaultClient(
 )
 
 # create the Users instance of the class with rate limits
-users = Users(vault=vault_client, rate_limits=True, storage_connection=psycopg2.connect(**db_config))
+users = Users(vault=<VaultClient>, rate_limits=True, storage_connection=psycopg2.connect(**db_config))
 
 # create a function with the access_control decorator
 @telegram.message_handler(commands=['start'])
@@ -479,7 +490,7 @@ description = ""
 
 [tool.poetry.dependencies]
 python = "^3.12"
-users = { git = "https://github.com/obervinov/users-package.git", tag = "v4.0.0" }
+users = { git = "https://github.com/obervinov/users-package.git", tag = "v4.1.0" }
 
 [build-system]
 requires = ["poetry-core"]
