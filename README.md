@@ -37,6 +37,18 @@ sequenceDiagram
       - [PostgreSQL Server](docker-compose.yml) for storing user data and historical records
       - [PostgreSQL Schema](tests/postgres/tables.sql) for creating tables in the database
 
+**Table of Contents**
+- [Description of module Constants](#-description-of-module-constants)
+- [Description of module Exceptions](#-description-of-module-exceptions)
+- [Users class](#-users-class)
+- [RateLimiter class](#-ratelimiter-class)
+- [Storage class](#-storage-class)
+- [Structure of configuration in Vault](#-structure-of-configuration-in-vault)
+- [Structure of historical data in PostgreSQL](#-structure-of-historical-data-in-postgresql)
+- [Additional usage example](#-additional-usage-example)
+- [Installing](#-installing)
+
+
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="21" title="constants"> Description of module Constants
 
 This module contains constant values
