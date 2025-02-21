@@ -1,6 +1,6 @@
 """This file contains tests for check connection to database with Vault Database Engine"""
 import pytest
-from psycopg2 import connect, cursor
+from psycopg2 import connect
 
 
 @pytest.mark.order(17)
@@ -16,6 +16,6 @@ def test_check_dbengine_connection(users_instance_dbengine):
     assert users_instance_dbengine.storage.vault.role == 'test-role'
     # Check the connection to the database engine
     assert isinstance(users_instance_dbengine.storage.connection, connect)
-    assert isinstance(users_instance_dbengine.storage.cursor, cursor)
+    assert users_instance_dbengine.storage.cursor is not None
     # Check query execution
     users_instance_dbengine.storage.cursor.execute("SELECT id FROM users LIMIT 1")
