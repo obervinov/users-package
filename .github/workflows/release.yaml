@@ -10,4 +10,4 @@ on:   # yamllint disable-line rule:truthy
 
 jobs:
   release:
-    uses: obervinov/_templates/.github/workflows/release.yaml@v2.0.2
+    uses: obervinov/_templates/.github/workflows/release.yaml@v2.1.1

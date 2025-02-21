@@ -3,6 +3,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## v4.1.0 - 2025-02-21
+### What's Changed
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v4.0.2...v4.1.0 by @obervinov in https://github.com/obervinov/users-package/pull/54
+#### 🚀 Features
+* bump dependencies version
+* bump workflows version to `2.1.1`
+* the functionality has been returned to establish its own connection to the database (in addition to the possibility of transferring an existing connection object) for more stable operation of the module with correct credentials via Vault DBEngine (for example, the bug https://github.com/obervinov/pyinstabot-downloader/issues/118)
+#### 💥 Breaking Changes
+* The `vault` input argument of the `Users()` class now expects an object or a new dict format `{'instance': <vault_object>, 'role': 'my-dbengine-role'}`. The previous vault dictionary format is no longer supported. 
+
+
 ## v4.0.2 - 2024-12-19
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v4.0.1...v4.0.2 by @obervinov in https://github.com/obervinov/users-package/pull/53

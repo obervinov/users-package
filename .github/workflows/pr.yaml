@@ -11,6 +11,6 @@ on:   # yamllint disable-line rule:truthy
 
 jobs:
   pr:
-    uses: obervinov/_templates/.github/workflows/pr.yaml@v2.0.2
+    uses: obervinov/_templates/.github/workflows/pr.yaml@v2.1.1
   pyproject:
-    uses: obervinov/_templates/.github/workflows/pyproject.yaml@v2.0.2
+    uses: obervinov/_templates/.github/workflows/pyproject.yaml@v2.1.1

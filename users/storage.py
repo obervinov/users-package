@@ -1,8 +1,29 @@
 """This module contains the storage class for the storage of user data: requests, access logs, etc."""
 import json
+import time
 import psycopg2
 from logger import log
 from .exceptions import FailedStorageConnection
+
+
+def reconnect_on_exception(method):
+    """
+    A decorator that catches the closed cursor exception and reconnects to the database.
+    """
+    def wrapper(self, *args, **kwargs):
+        try:
+            return method(self, *args, **kwargs)
+        except psycopg2.Error as exception:
+            log.warning('[Users]: Connection to the database was lost: %s. Attempting to reconnect...', str(exception))
+            time.sleep(5)
+            try:
+                self.database_connection = self.create_connection()
+                log.info('[Users]: Reconnection successful.')
+                return method(self, *args, **kwargs)
+            except psycopg2.Error as inner_exception:
+                log.error('[Users]: Failed to reconnect to the database: %s', str(inner_exception))
+                raise inner_exception
+    return wrapper
 
 
 class Storage:
@@ -10,10 +31,15 @@ class Storage:
     The storage class for the storage of user data: requests, access logs, etc.
 
     Attributes:
-        connection (object): The database connection object.
-        cursor (object): The database cursor object.
+        db_connection (object): The database connection object from the psycopg2 library.
+        vault (dict): Alternative way to provide the database connection settings.
+            :param instance (object): The Vault object.
+            :param role (str): The database role.
+        connection (psycopg2.connect): The database connection object.
+        cursor (psycopg2.cursor): The database cursor object.
 
     Methods:
+        create_connection: Create a connection for the PostgreSQL
         register_user: Register the user in the
         log_user_request: Write the user requests to the database.
         get_user_requests: Get the user requests from the database.
@@ -22,24 +48,32 @@ class Storage:
     Raises:
         FailedStorageConnection: An error occurred when the storage connection fails.
     """
-    def __init__(self, db_connection: any = None) -> None:
+    def __init__(self, db_connection: object = None, vault: dict = None):
         """
-        Initialize the storage class with the database connection and credentials.
+        Initialize the storage class with the database connection.
 
         Args:
-            db_connection (any): The database connection object.
+            db_connection (object): The database connection object from the psycopg2 library.
+            vault (dict): Alternative way to provide the database connection settings. Can't be used with db_connection.
+                :param instance (object): The Vault object.
+                :param role (str): The database role.
 
         Example:
             >>> import psycopg2
             >>> conn_pool = psycopg2.pool.SimpleConnectionPool(1, 20, ...)
             >>> db_conn = conn_pool.getconn()
             >>> storage = Storage(db_conn)
+            >>> ...
+            >>> vault = Vault()
+            >>> storage = Storage(vault={'vault': <vault object>, 'role': 'myproject_users'})
         """
-        self.connection = db_connection
+        self.db_connection = db_connection
+        self.vault = vault
+        self.connection = self.create_connection()
         self.cursor = self.connection.cursor()
 
-        if not self.connection:
-            log.error('[Users]: Failed to connect to the storage')
+        if not self.db_connection and not self.vault:
+            log.error('[Users]: Failed connection settings. Provide the database connection or vault settings.\ndb_connection: %s\nvault: %s', db_connection, vault)
             raise FailedStorageConnection("Failed to connect to the storage")
 
         # Test query to check the connection to the database
@@ -50,6 +84,41 @@ class Storage:
             log.error('[Users]: Failed to connect to the storage: %s', error)
             raise FailedStorageConnection("Failed to connect to the storage") from error
 
+    def create_connection(self) -> psycopg2.connect:
+        """
+        Create a connection for the PostgreSQL database.
+
+        Returns:
+            psycopg2.connect: The database connection object.
+        """
+        if self.vault and not self.db_connection:
+            required_keys_configuration = {"host", "port", "dbname"}
+            required_keys_credentials = {"username", "password"}
+            db_configuration = self.vault['instance'].kv2engine.read_secret(path='configuration/database')
+            db_credentials = self.vault['instance'].dbengine.generate_credentials(role=self.vault.get('role', 'undefined'))
+
+            if not db_configuration or not db_credentials:
+                raise ValueError('vault: database configuration or credentials are missing')
+
+            missing_keys = (required_keys_configuration - set(db_configuration.keys())) | (required_keys_credentials - set(db_credentials.keys()))
+            if missing_keys:
+                raise KeyError("vault: missing keys in the database configuration or credentials: {missing_keys}")
+
+            log.info(
+                '[Users]: creating a connection for the %s:%s/%s', db_configuration['host'], db_configuration['port'], db_configuration['dbname']
+            )
+            settings = {
+                'host': db_configuration['host'], 'port': db_configuration['port'], 'database': db_configuration['dbname'],
+                'user': db_credentials['username'], 'password': db_credentials['password']
+            }
+            connection = psycopg2.connect(**settings)
+        elif self.db_connection and not self.vault:
+            connection = self.db_connection
+        else:
+            raise ValueError('Database connection settings are missing')
+        return connection
+
+    @reconnect_on_exception
     def register_user(
         self,
         user_id: str = None,
@@ -78,6 +147,7 @@ class Storage:
             self.cursor.execute(f"UPDATE users SET chat_id='{chat_id}', status='{status}' WHERE user_id='{user_id}'")
             self.connection.commit()
 
+    @reconnect_on_exception
     def log_user_request(
         self,
         user_id: str = None,
@@ -112,6 +182,7 @@ class Storage:
         self.cursor.execute(sql_query)
         self.connection.commit()
 
+    @reconnect_on_exception
     def get_user_requests(
         self,
         user_id: str = None,
@@ -137,6 +208,7 @@ class Storage:
         self.cursor.execute(f"SELECT id, timestamp, rate_limits FROM users_requests WHERE user_id='{user_id}' ORDER BY {order} LIMIT {limit}")
         return self.cursor.fetchall()
 
+    @reconnect_on_exception
     def get_users(
         self,
         only_allowed: bool = True

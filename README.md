@@ -37,6 +37,18 @@ sequenceDiagram
       - [PostgreSQL Server](docker-compose.yml) for storing user data and historical records
       - [PostgreSQL Schema](tests/postgres/tables.sql) for creating tables in the database
 
+**Table of Contents**
+- [Description of module Constants](#-description-of-module-constants)
+- [Description of module Exceptions](#-description-of-module-exceptions)
+- [Users class](#-users-class)
+- [RateLimiter class](#-ratelimiter-class)
+- [Storage class](#-storage-class)
+- [Structure of configuration in Vault](#-structure-of-configuration-in-vault)
+- [Structure of historical data in PostgreSQL](#-structure-of-historical-data-in-postgresql)
+- [Additional usage example](#-additional-usage-example)
+- [Installing](#-installing)
+
+
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="21" title="constants"> Description of module Constants
 
 This module contains constant values
@@ -64,38 +76,30 @@ This module contains constant values
 The `Users` class provides authentication, authorization, user attribute management and user request logging for Telegram bots. You can initialize it with different options
 
 - `vault (any)`: Configuration for initializing the Vault client.
-  - `(VaultClient)`: an already initialized instance for interacting with the Vault API.
-  - `(dict)`: configuration for initializing a VaultClient instance in this class.
+  - `(object)`: an already initialized instance of VaultClient for interacting with the Vault API.
+  - `(dict)`: extended configuration for VaultClient (for database engine).
+    - `instance (VaultClient)`: An already initialized instance for interacting with the Vault API.
+    - `role (str)`: The role name for the Vault database engine.
 
 - `rate_limits (bool)`: Enable rate limit functionality.
 
-- `storage (dict)`: Configuration for initializing the storage client.
-  - `db_role (str)`: The role name for the Vault database engine.
-
+- `storage_connection (any)`: Connection object to connect to the storage. Do not use if you are using Vault database engine.
 - **Examples:**
 
   - Initialize with `VaultClient` and without `rate_limits`:
     ```python
-    users_without_ratelimits = Users(vault=vault_client, rate_limits=False, storage_connection=psycopg2.connect(**db_config))
+    users_without_ratelimits = Users(vault=<VaultClient>, rate_limits=False, storage_connection=psycopg2.connect(**db_config))
     ```
 
   - Initialize with `VaultClient` and with `rate_limits`:
     ```python
-    users_with_ratelimits = Users(vault=vault_client, storage_connection=psycopg2.connect(**db_config))
+    users_with_ratelimits = Users(vault=<VaultClient>, storage_connection=psycopg2.connect(**db_config))
     ```
 
-  - Initialize with Vault `configuration dictionary`:
+  - Initialize with Vault `configuration dictionary` (for using the vault database engine):
     ```python
-    vault_config = {
-      'namespace': 'my_project',
-      'url': 'https://vault.example.com',
-      'auth': {
-          'type': 'approle',
-          'role_id': 'my_role_id',
-          'secret_id': 'my_secret_id'
-      }
-    }
-    users_with_dict_vault = Users(vault=vault_config, storage_connection=psycopg2.connect(**db_config))
+    vault_config = {'instance': <VaultClient>, 'role': 'my_db_role'}
+    users_with_dict_vault = Users(vault=vault_config)
     ```
 
 ### decorator: Access Control
@@ -183,7 +187,7 @@ The `RateLimiter` class provides restriction functionality for user requests to 
 
 - **Examples:**
   ```python
-  limiter = RateLimiter(vault=vault_client, storage=storage_client, user_id='User1')
+  limiter = RateLimiter(vault=<VaultClient>, storage=storage_client, user_id='User1')
   ```
 
 ### method: Rate Limit Determination
@@ -230,6 +234,91 @@ The `get_user_request_counters()` method calculates the number of requests made 
 | `dict`         | `requests_counters`      | Counters for the number of requests per day and per hour.                | `None`                          |
 
 
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/build.png" width="25" title="class"> Storage class
+### Class Initialization
+The storage class for the storage of user data: requests, access logs, etc in the PostgreSQL database.</br>
+**Only one of the parameters is required for initialization: `db_connection` or `vault`**.
+
+- `db_connection (object)`: The database connection object for interacting with the PostgreSQL database (psycopg2).
+
+- `vault (dict)`: Configuration for initializing the Vault client.
+  - `instance (VaultClient)`: An already initialized instance for interacting with the Vault API.
+  - `role (str)`: The role name for the Vault database engine.
+
+- **Examples:**
+  ```python
+  storage = Storage(db_connection=psycopg2.connect(**db_config))
+  ```
+  ```python
+  storage = Storage(vault={'instance': <VaultClient>, 'role': 'my_db_role'})
+  ```
+
+### method: Create connection to the PostgreSQL database
+The `create_connection()` method creates a connection to the PostgreSQL database.
+
+- **Examples:**
+```python
+create_connection()
+```
+
+- **Returns:**
+  - Connection object to the PostgreSQL database.
+
+### method: Register of User
+The `register_user()` method registers a new user in the database.
+
+- **Arguments:**
+  - `user_id (str)`: User ID for registration.
+  - `chat_id (str)`: Chat ID for registration.
+  - `status (str)`: The user state in the system. Values: `self.user_status_allow` or `self.user_status_deny`.
+
+- **Examples:**
+  ```python
+  register_user(user_id='user1', chat_id='chat1', status='allowed')
+  ```
+
+### method: Log user request
+The `log_user_request()` method logs the user request in the database.
+
+- **Arguments:**
+  - `user_id (str)`: User ID for logging.
+  - `request (dict)`: The user request details.
+
+- **Examples:**
+  ```python
+  log_user_request(user_id='user1', request={'chat_id': 'chat1', 'message_id': 'msg1'})
+  ```
+
+### method: Get user requests
+The `get_user_requests()` method retrieves the user's requests from the database.
+
+- **Arguments:**
+  - `user_id (str)`: User ID for retrieving requests.
+  - `limit (int)`: The number of requests to retrieve.
+  - `order (str)`: The order of the requests. Values: `asc` or `desc`.
+
+- **Examples:**
+  ```python
+  get_user_requests(user_id='user1', limit=10, order='asc')
+  ```
+
+- **Returns:**
+  - A list of user requests `[(id, timestamp, rate_limits), ...]`.
+
+### method: Get users
+The `get_users()` method retrieves all users from the database.
+
+- **Arguments:**
+  - `only_allowed (bool)`: Retrieve only allowed users.
+
+- **Examples:**
+  ```python
+  get_users()
+  ```
+
+- **Returns:**
+  - A list of users `[{'user_id': '12345', 'chat_id': '67890', 'status': 'denied'}, ...]`.
+
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/requirements.png" width="25" title="configuration-structure"> Structure of configuration in Vault
 This project uses a Vault server with the KV2 engine and Database Engine for storing user configurations and database connection data.
@@ -263,7 +352,7 @@ It supports user configurations to define system access rights, roles, and reque
 ### Database Configuration
 - **path to the secret**: `configuration/database`
 
-- **keys and values**:
+- **keys and values with simple database connection**:
   - `host`: The host of the PostgreSQL server.
   - `port`: The port of the PostgreSQL server.
   - `database`: The name of the PostgreSQL database.
@@ -274,12 +363,23 @@ It supports user configurations to define system access rights, roles, and reque
   {
     "host": "localhost",
     "port": 5432,
-    "database": "mydatabase",
+    "dbname": "mydatabase",
     "user": "myuser",
     "password": "mypassword",
   }
   ```
 
+- **keys and values with Vault Database Engine**:
+  - `role`: The role name for the Vault database engine.
+  - `instance`: The instance of the VaultClient for interacting with the Vault API.
+
+  ```json
+  {
+    "host": "localhost",
+    "port": 5432,
+    "dbname": "mydatabase",
+  }
+  ```
 
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/requirements.png" width="25" title="data-structure"> Structure of historical data in PostgreSQL
 This project uses a PostgreSQL database to store historical data about user requests and access events. It supports user request logging to track user activity and access rights.
@@ -310,7 +410,7 @@ vault_client = VaultClient(
 )
 
 # create the Users instance of the class with rate limits and get user information
-users = Users(vault=vault_client, rate_limits=True, storage_connection=psycopg2.connect(**db_config))
+users = Users(vault=<VaultClient>, rate_limits=True, storage_connection=psycopg2.connect(**db_config))
 user_info = users.user_access_check(user_id=message.chat.id, role_id="admin_role", chat_id=message.chat.id, message_id=message.message_id)
 
 # check permissions, roles, and rate limits
@@ -345,7 +445,7 @@ vault_client = VaultClient(
 )
 
 # create the Users instance of the class without rate limits and get user information
-users = Users(vault=vault_client, storage_connection=psycopg2.connect(**db_config))
+users = Users(vault=<VaultClient>, storage_connection=psycopg2.connect(**db_config))
 user_info = users.user_access_check(user_id=message.chat.id, role_id="admin_role", chat_id=message.chat.id, message_id=message.message_id)
 
 # check permissions and roles
@@ -377,7 +477,7 @@ vault_client = VaultClient(
 )
 
 # create the Users instance of the class with rate limits
-users = Users(vault=vault_client, rate_limits=True, storage_connection=psycopg2.connect(**db_config))
+users = Users(vault=<VaultClient>, rate_limits=True, storage_connection=psycopg2.connect(**db_config))
 
 # create a function with the access_control decorator
 @telegram.message_handler(commands=['start'])
@@ -402,7 +502,7 @@ description = ""
 
 [tool.poetry.dependencies]
 python = "^3.12"
-users = { git = "https://github.com/obervinov/users-package.git", tag = "v4.0.0" }
+users = { git = "https://github.com/obervinov/users-package.git", tag = "v4.1.0" }
 
 [build-system]
 requires = ["poetry-core"]
@@ -415,4 +515,4 @@ poetry install
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/github-actions.png" width="25" title="github-actions"> GitHub Actions
 | Name  | Version |
 | ------------------------ | ----------- |
-| GitHub Actions Templates | [v2.0.2](https://github.com/obervinov/_templates/tree/v2.0.2) |
+| GitHub Actions Templates | [v2.1.1](https://github.com/obervinov/_templates/tree/v2.1.1) |

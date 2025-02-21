@@ -148,6 +148,14 @@ def fixture_prepare_vault(vault_url, namespace, policy_path, postgres_url):
     )
     print(f"Created role: {role}")
 
+    # Prepare secret for databaseEngine
+    secret = {'host': '0.0.0.0', 'port': 5432, 'dbname': 'postgres'}
+    _ = client.secrets.kv.v2.create_or_update_secret(
+        path='configuration/database',
+        secret=secret,
+        mount_point=namespace
+    )
+
     # Return the role_id and secret_id
     return {
         'id': approle_adapter.read_role_id(role_name=namespace, mount_point=namespace)["data"]["role_id"],
@@ -481,3 +489,11 @@ def fixture_users_instance_without_rl(vault_instance, users):
     _ = users
     db_conn = psycopg2.connect(host='0.0.0.0', port=5432, user='postgres', password='postgres', dbname='postgres')
     return Users(vault=vault_instance, storage_connection=db_conn)
+
+
+@pytest.fixture(name="users_instance_dbengine", scope='function')
+def fixture_users_instance_dbengine(vault_instance, users):
+    """Returns an instance of the Users class with the database connection from the Vault Database Engine"""
+    _ = users
+    vault_dict = {'instance': vault_instance, 'role': 'test-role'}
+    return Users(vault=vault_dict)

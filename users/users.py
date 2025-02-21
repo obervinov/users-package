@@ -17,13 +17,15 @@ class Users:
     for Telegram bots.
 
     Attributes:
-        vault (any): The initialized VaultClient instance or None if initialization failed.
+        vault (any): The Vault client instance for interacting with the Vault API. It can be an object or a dictionary.
+        storage (Storage): The storage object for interacting with the database.
         rate_limits (bool): Enable or disable rate limit functionality.
         user_status_allow (str): A constant representing allowed user status.
         user_status_deny (str): A constant representing denied user status.
         vault_config_path (str): Path to the configuration data in Vault.
 
     Methods:
+        access_control: Acts as a decorator factory for access control.
         user_access_check: The main entry point for authentication, authorization, and request rate limit verification.
         _authentication: Checks if the specified user ID has access to the bot.
         _authorization: Checks if the specified user ID has the specified role.
@@ -41,47 +43,38 @@ class Users:
         Create a new Users instance.
 
         Args:
-            :param vault (any): Configuration for initializing the Vault client.
-                - (object) VaultClient instance for interacting with the Vault API.
-                - (dict) Configuration for initializing a VaultClient instance in this class.
+            :param vault (any): configuration or instance of VaultClient for interacting with the Vault API.
+                - (object) already initialized VaultClient instance.
+                - (dict) extended configuration for VaultClient (for database engine).
+                    :param instance (object): The already initialized VaultClient instance.
+                    :param role (str): The role name for the database engine in Vault.
             :param rate_limits (bool): Enable rate limit functionality. Default is False.
-            :param storage_connection (any): Connection object to connect to the storage.
+            :param storage_connection (any): Connection object to connect to the storage. Do not use if you are using Vault database engine.
 
         Examples:
             >>> import psycopg2
             >>> conn_pool = psycopg2.pool.SimpleConnectionPool(1, 20, ...)
             >>> db_conn = conn_pool.getconn()
-            >>> users_with_ratelimits = Users(vault=vault_client, rate_limits=True, storage_connection=db_conn)
-            >>> users = Users(vault=vault_client, storage_connection=db_conn)
-            >>> vault_config = {
-                    "namespace": "my_project",
-                    "url": "https://vault.example.com",
-                    "auth": {
-                        "type": "approle",
-                        "role_id": "role_id",
-                        "secret_id": "secret_id"
-                    },
-                    "dbengine": {
-                        "mount_point": "database",
-                    }
-            }
-            >>> users_with_dict_vault = Users(vault=vault_config, storage_connection=db_conn)
+            >>> users_with_ratelimits = Users(vault=<VaultClient>, rate_limits=True, storage_connection=db_conn)
+            >>> users = Users(vault=<VaultClient>, storage_connection=db_conn)
+            >>> ...
+            >>> vault_dict = {
+            >>>     'instance': <vault_object>,
+            >>>     'role': 'myproject-dbengine-role'
+            >>> }
+            >>> users_with_dbengine = Users(vault=vault_dict)
         """
         if isinstance(vault, VaultClient):
             self.vault = vault
+            self.storage = Storage(db_connection=storage_connection)
         elif isinstance(vault, dict):
-            self.vault = VaultClient(
-                url=vault.get('url', None),
-                namespace=vault.get('namespace', None),
-                auth=vault.get('auth', None),
-                dbengine=vault.get('dbengine', None)
-            )
+            self.vault = vault.get('instance', None)
+            self.storage = Storage(vault=vault)
         else:
             log.error('[Users]: wrong vault parameters in Users(vault=%s), see doc-string', vault)
             raise VaultInstanceNotSet("Vault instance is not set. Please provide a valid Vault instance as instance or dictionary.")
 
         self.rate_limits = rate_limits
-        self.storage = Storage(db_connection=storage_connection)
         self._user_status_allow = USER_STATUS_ALLOW
         self._user_status_deny = USER_STATUS_DENY
         self._vault_config_path = USERS_VAULT_CONFIG_PATH
