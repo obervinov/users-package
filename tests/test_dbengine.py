@@ -5,7 +5,7 @@ import pytest
 @pytest.mark.order(17)
 def test_check_dbengine_connection(users_instance_dbengine):
     """
-    Verify the connection to the database engine.
+    Verify the connection to the database with Vault Database Engine.
     """
     # Check the storage class input parameters
     assert users_instance_dbengine.storage.db_connection is None
