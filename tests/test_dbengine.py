@@ -1,6 +1,7 @@
 """This file contains tests for check connection to database with Vault Database Engine"""
 import pytest
 
+
 @pytest.mark.order(17)
 def test_check_dbengine_connection(users_instance_dbengine):
     """
