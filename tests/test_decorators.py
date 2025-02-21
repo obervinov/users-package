@@ -31,7 +31,7 @@ class MockCall:
         self.message = MockMessage(chat_id, message_id)
 
 
-@pytest.mark.order(12)
+@pytest.mark.order(16)
 def test_access_control_decorator(users_instance):
     """
     Verify the access control decorator for the user.

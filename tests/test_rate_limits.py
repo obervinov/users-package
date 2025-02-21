@@ -6,7 +6,7 @@ import datetime
 import pytest
 
 
-@pytest.mark.order(11)
+@pytest.mark.order(12)
 def test_check_rl_counters_exceed_per_hour(timestamp_pattern, users_instance):
     """
     Checking behaviour when the user request counter is exceeded per hour.
@@ -20,7 +20,7 @@ def test_check_rl_counters_exceed_per_hour(timestamp_pattern, users_instance):
     assert user['rate_limits'] < now + datetime.timedelta(hours=24)
 
 
-@pytest.mark.order(12)
+@pytest.mark.order(13)
 def test_check_rl_counters_exceed_per_day(timestamp_pattern, users_instance):
     """
     Checking behaviour when the user request counter is exceeded per day.
@@ -34,7 +34,7 @@ def test_check_rl_counters_exceed_per_day(timestamp_pattern, users_instance):
     assert user['rate_limits'] <= now + datetime.timedelta(hours=48)
 
 
-@pytest.mark.order(13)
+@pytest.mark.order(14)
 def test_check_rl_counters_exceed_both(timestamp_pattern, users_instance):
     """
     Checking behaviour when the user request counter is exceeded for both counters (per hour and per day).
@@ -48,7 +48,7 @@ def test_check_rl_counters_exceed_both(timestamp_pattern, users_instance):
     assert user['rate_limits'] <= now + datetime.timedelta(hours=48)
 
 
-@pytest.mark.order(14)
+@pytest.mark.order(15)
 def test_check_rl_counters_do_not_exceed(users_instance):
     """
     Checking behaviour when the user request counter does not exceed any of the counters.

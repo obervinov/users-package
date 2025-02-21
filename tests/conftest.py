@@ -481,3 +481,11 @@ def fixture_users_instance_without_rl(vault_instance, users):
     _ = users
     db_conn = psycopg2.connect(host='0.0.0.0', port=5432, user='postgres', password='postgres', dbname='postgres')
     return Users(vault=vault_instance, storage_connection=db_conn)
+
+
+@pytest.fixture(name="users_instance_dbengine", scope='function')
+def fixture_users_instance_dbengine(vault_instance, users):
+    """Returns an instance of the Users class with the database connection from the Vault Database Engine"""
+    _ = users
+    vault_dict = {'instance': vault_instance, 'role': 'test-role'}
+    return Users(vault=vault_dict)
