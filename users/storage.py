@@ -18,7 +18,8 @@ def reconnect_on_exception(method):
             time.sleep(5)
             try:
                 self.database_connection = self.create_connection()
-                log.info('[Users]: Reconnection successful.')
+                log.info('[Users]: Reconnection successful. Rolling back the transaction...')
+                self.connection.rollback()
                 return method(self, *args, **kwargs)
             except psycopg2.Error as inner_exception:
                 log.error('[Users]: Failed to reconnect to the database: %s', str(inner_exception))
