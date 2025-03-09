@@ -17,7 +17,7 @@ def reconnect_on_exception(method):
             log.warning('[Users]: Connection to the database was lost: %s. Attempting to reconnect...', str(exception))
             time.sleep(5)
             try:
-                self.database_connection = self.create_connection()
+                self.connection = self.create_connection()
                 log.info('[Users]: Reconnection successful. Rolling back the transaction...')
                 self.connection.rollback()
                 return method(self, *args, **kwargs)

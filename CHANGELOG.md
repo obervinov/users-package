@@ -3,11 +3,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## v4.1.1 - 2025-03-02
+## v4.1.1 - 2025-03-09
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v4.1.0...v4.1.1 by @obervinov in https://github.com/obervinov/users-package/pull/55
 #### 🐛 Bug Fixes
-* add `rollback transaction` action in the `Storage` exception handling block to prevent critical exceptions from breaking the database connection
+* add `rollback transaction` action in the `Storage` class exception handling block to prevent critical exceptions from breaking the database connection
 
 
 ## v4.1.0 - 2025-02-21
