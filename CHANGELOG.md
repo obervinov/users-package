@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## v4.1.2 - 2025-07-15
+### What's Changed
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v4.1.1...v4.1.2 by @obervinov in https://github.com/obervinov/users-package/pull/63
+#### 🚀 Features
+* bump dependencies version
+
+
 ## v4.1.1 - 2025-03-26
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v4.1.0...v4.1.1 by @obervinov in https://github.com/obervinov/users-package/pull/55

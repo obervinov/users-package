@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "users"
-version = "4.1.1"
+version = "4.1.2"
 description = "This python module is a simple implementation of user management functionality for telegram bots, such as: authentication, authorization and requests limiting."
 authors = ["Bervinov Oleg <bervinov.ob@gmail.com>"]
 maintainers = ["Bervinov Oleg <bervinov.ob@gmail.com>"]
@@ -19,8 +19,8 @@ include = ["CHANGELOG.md"]
 [tool.poetry.dependencies]
 python = "^3.12"
 psycopg2-binary = "^2"
-logger = { git = "https://github.com/obervinov/logger-package.git", tag = "v2.0.0" }
-vault  = { git = "https://github.com/obervinov/vault-package.git", tag = "v4.0.1" }
+logger = { git = "https://github.com/obervinov/logger-package.git", tag = "v2.0.2" }
+vault  = { git = "https://github.com/obervinov/vault-package.git", tag = "v4.0.2" }
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8"
