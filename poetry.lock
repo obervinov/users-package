@@ -235,7 +235,7 @@ plugins = ["setuptools"]
 
 [[package]]
 name = "logger"
-version = "2.0.0"
+version = "2.0.2"
 description = "This is an additional implementation over the logging module. This module is designed for fast initialization and configuration of readable and structured logging."
 optional = false
 python-versions = "^3.12"
@@ -246,8 +246,8 @@ develop = false
 [package.source]
 type = "git"
 url = "https://github.com/obervinov/logger-package.git"
-reference = "v2.0.0"
-resolved_reference = "fad1931aa44e765ffcfa242ce7b7c2fd8c092cc4"
+reference = "v2.0.2"
+resolved_reference = "87e788a7675f08cab68528a20fd6cef9880d0675"
 
 [[package]]
 name = "mccabe"
@@ -524,7 +524,7 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "vault"
-version = "4.0.1"
+version = "4.0.2"
 description = "This is an additional implementation compared to the hvac module. The main purpose of which is to simplify the use and interaction with vault for my standard projects. This module contains a set of methods for working with secrets and database engines in vault."
 optional = false
 python-versions = "^3.12"
@@ -534,16 +534,16 @@ develop = false
 
 [package.dependencies]
 hvac = "^2"
-logger = {git = "https://github.com/obervinov/logger-package.git", tag = "v2.0.0"}
+logger = {git = "https://github.com/obervinov/logger-package.git", tag = "v2.0.2"}
 requests = "^2"
 
 [package.source]
 type = "git"
 url = "https://github.com/obervinov/vault-package.git"
-reference = "v4.0.1"
-resolved_reference = "fcd351ed68fbf03fc92cbb1f6b25f5bc40bf2d5e"
+reference = "v4.0.2"
+resolved_reference = "243bfb5309213f70bd17cde1d2eeadbc464c783e"
 
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "c9ec0760715a3116f617c470e1f40a4f6db8c9dd61ec89db102736ab6982ddd3"
+content-hash = "8af3efba80c450382dd404b63379b14b75d5dc6aa74249cfe6c0d29b6815e97f"
