@@ -23,7 +23,7 @@ logger = { git = "https://github.com/obervinov/logger-package.git", tag = "v2.0.
 vault  = { git = "https://github.com/obervinov/vault-package.git", tag = "v4.0.2" }
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8"
+pytest = "^9"
 pylint = "^3"
 flake8 = "^7"
 
