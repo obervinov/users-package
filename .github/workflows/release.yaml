@@ -1,7 +1,11 @@
 ---
 name: Release
 
-on:   # yamllint disable-line rule:truthy
+permissions:
+  contents: write
+  pull-requests: read
+
+on:
   pull_request:
     branches:
       - main
