@@ -1,6 +1,7 @@
 """This module contains the storage class for the storage of user data: requests, access logs, etc."""
 import json
 import psycopg2
+from datetime import datetime
 from logger import log
 from .exceptions import FailedStorageConnection
 
@@ -250,7 +251,7 @@ class Storage:
         user_id: str = None,
         token_hash: str = None,
         token_salt: str = None,
-        expires_at: any = None
+        expires_at: datetime = None
     ) -> None:
         """
         Store a hashed token in the database.

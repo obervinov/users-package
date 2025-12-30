@@ -372,6 +372,10 @@ class Users:
             log.error('[Users]: user_id is required for token issuance')
             raise ValueError("user_id is required for token issuance")
 
+        if '.' in str(user_id):
+            log.error('[Users]: user_id cannot contain period characters (breaks token format)')
+            raise ValueError("user_id cannot contain period characters")
+
         # Generate token components
         token_id = secrets.token_urlsafe(32)
         token_salt = secrets.token_hex(32)
@@ -421,11 +425,7 @@ class Users:
             raise ValueError("Invalid token format. Expected format: 'user_id.token_id'")
 
         # Parse token
-        try:
-            user_id, token_id = token.split('.', 1)
-        except ValueError as error:
-            log.error('[Users]: Failed to parse token: %s', error)
-            raise ValueError("Invalid token format. Expected format: 'user_id.token_id'") from error
+        user_id, token_id = token.split('.', 1)
 
         # Retrieve stored token data
         token_data = self.storage.get_token(user_id=user_id)
@@ -488,6 +488,10 @@ class Users:
         if not user_id:
             log.error('[Users]: user_id is required for token revocation')
             raise ValueError("user_id is required for token revocation")
+
+        if '.' in str(user_id):
+            log.error('[Users]: user_id cannot contain period characters (breaks token format)')
+            raise ValueError("user_id cannot contain period characters")
 
         # Mark all active tokens as used
         self.storage.mark_token_used(user_id=user_id)
