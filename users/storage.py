@@ -243,3 +243,134 @@ class Storage:
             for user in users:
                 users_list.append({'user_id': user[0], 'chat_id': user[1], 'status': user[2]})
         return users_list
+
+    @reconnect_on_exception
+    def store_token(
+        self,
+        user_id: str = None,
+        token_hash: str = None,
+        token_salt: str = None,
+        expires_at: any = None
+    ) -> None:
+        """
+        Store a hashed token in the database.
+        Marks any previous active tokens as used before inserting new one.
+
+        Args:
+            user_id (str): The user ID.
+            token_hash (str): The hashed token.
+            token_salt (str): The salt used for hashing.
+            expires_at (datetime): The token expiration timestamp.
+
+        Example:
+            >>> storage = Storage(database_connection)
+            >>> storage.store_token("user1", "hash123", "salt456", datetime.now() + timedelta(minutes=10))
+        """
+        try:
+            # Check if table exists (backward compatibility)
+            self.cursor.execute("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users_tokens')")
+            table_exists = self.cursor.fetchone()[0]
+
+            if not table_exists:
+                log.warning('[Users.Storage]: users_tokens table does not exist. Token storage skipped for backward compatibility.')
+                return
+
+            # Mark previous active tokens as used
+            self.cursor.execute(f"UPDATE users_tokens SET token_used = TRUE WHERE user_id = '{user_id}' AND token_used = FALSE")
+
+            # Insert new token
+            self.cursor.execute(
+                "INSERT INTO users_tokens (user_id, token_hash, token_salt, token_expires_at) VALUES (%s, %s, %s, %s)",
+                (user_id, token_hash, token_salt, expires_at)
+            )
+            self.connection.commit()
+            log.info('[Users.Storage]: Token stored successfully for user %s', user_id)
+        # pylint: disable=broad-except
+        except Exception as error:
+            self.connection.rollback()
+            log.error('[Users.Storage]: Failed to store token: %s', error)
+            raise
+
+    @reconnect_on_exception
+    def get_token(
+        self,
+        user_id: str = None
+    ) -> dict:
+        """
+        Retrieve the most recent unused, non-expired token for user.
+
+        Args:
+            user_id (str): The user ID.
+
+        Returns:
+            dict: Token data with keys: token_hash, token_salt, token_expires_at, token_used
+            None: If no valid token found or table doesn't exist
+
+        Example:
+            >>> storage = Storage(database_connection)
+            >>> token_data = storage.get_token("user1")
+        """
+        try:
+            # Check if table exists (backward compatibility)
+            self.cursor.execute("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users_tokens')")
+            table_exists = self.cursor.fetchone()[0]
+
+            if not table_exists:
+                log.warning('[Users.Storage]: users_tokens table does not exist. Token retrieval skipped for backward compatibility.')
+                return None
+
+            self.cursor.execute(
+                "SELECT token_hash, token_salt, token_expires_at, token_used FROM users_tokens "
+                "WHERE user_id = %s AND token_used = FALSE AND token_expires_at > NOW() "
+                "ORDER BY created_at DESC LIMIT 1",
+                (user_id,)
+            )
+            result = self.cursor.fetchone()
+
+            if result:
+                return {
+                    'token_hash': result[0],
+                    'token_salt': result[1],
+                    'token_expires_at': result[2],
+                    'token_used': result[3]
+                }
+            return None
+        # pylint: disable=broad-except
+        except Exception as error:
+            log.error('[Users.Storage]: Failed to retrieve token: %s', error)
+            return None
+
+    @reconnect_on_exception
+    def mark_token_used(
+        self,
+        user_id: str = None
+    ) -> None:
+        """
+        Mark user's active token as used (single-use enforcement).
+
+        Args:
+            user_id (str): The user ID.
+
+        Example:
+            >>> storage = Storage(database_connection)
+            >>> storage.mark_token_used("user1")
+        """
+        try:
+            # Check if table exists (backward compatibility)
+            self.cursor.execute("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users_tokens')")
+            table_exists = self.cursor.fetchone()[0]
+
+            if not table_exists:
+                log.warning('[Users.Storage]: users_tokens table does not exist. Token marking skipped for backward compatibility.')
+                return
+
+            self.cursor.execute(
+                "UPDATE users_tokens SET token_used = TRUE WHERE user_id = %s AND token_used = FALSE",
+                (user_id,)
+            )
+            self.connection.commit()
+            log.info('[Users.Storage]: Token marked as used for user %s', user_id)
+        except Exception as error:
+            self.connection.rollback()
+            log.error('[Users.Storage]: Failed to mark token as used: %s', error)
+            raise
