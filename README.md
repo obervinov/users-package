@@ -43,6 +43,7 @@ sequenceDiagram
 - [Users class](#-users-class)
 - [RateLimiter class](#-ratelimiter-class)
 - [Storage class](#-storage-class)
+- [Token Authentication](#-token-authentication)
 - [Structure of configuration in Vault](#-structure-of-configuration-in-vault)
 - [Structure of historical data in PostgreSQL](#-structure-of-historical-data-in-postgresql)
 - [Additional usage example](#-additional-usage-example)
@@ -320,6 +321,87 @@ The `get_users()` method retrieves all users from the database.
   - A list of users `[{'user_id': '12345', 'chat_id': '67890', 'status': 'denied'}, ...]`.
 
 
+## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/config.png" width="25" title="token-authentication"> Token Authentication
+
+### Overview
+Starting from **v4.2.0**, the Users package supports generic token-based authentication for frontend integration (web UIs, mobile apps, CLI tools). This feature enables temporary access without storing user credentials.
+
+### Use Cases
+- **Database Bridge Pattern**: Telegram bot issues tokens, frontend validates them through Users module using shared PostgreSQL database
+- **Restricted Bot Access**: Alternative authentication when Telegram auth widget is unavailable (e.g., bot with closed external access)
+- **Web Authentication**: Secure temporary access for web interfaces
+- **API Access**: Short-lived tokens for API clients
+- **Mobile Apps**: Authenticate mobile app users without password storage
+
+### Token Format
+Tokens follow the format `user_id.token_id`:
+- Example: `"123456.a8f3kjs9dfjkl23jrlksjdf..."`
+- Total length: ~45-50 characters
+- Cryptographically secure using PBKDF2 with salt
+
+### Available Methods
+
+#### issue_token(user_id, ttl_minutes=10)
+Generate a temporary access token for a user.
+
+**Arguments:**
+- `user_id (str)`: User ID to issue token for
+- `ttl_minutes (int)`: Token validity period in minutes (default: 10)
+
+**Returns:** Token string in format `"user_id.token_id"`
+
+**Example:**
+```python
+token = users.issue_token(user_id='user1', ttl_minutes=15)
+print(token)  # "user1.a8f3kjs9dfjkl23jrlksjdf..."
+```
+
+#### validate_token(token)
+Validate a token and return user information.
+
+**Arguments:**
+- `token (str)`: Token string in format `"user_id.token_id"`
+
+**Returns:** 
+- `dict`: User info `{'user_id': str, 'status': str, 'roles': list}` if valid
+- `None`: If token is invalid, expired, or already used
+
+**Example:**
+```python
+user_info = users.validate_token(token=token)
+if user_info:
+    print(f"User: {user_info['user_id']}")
+    print(f"Status: {user_info['status']}")
+    print(f"Roles: {user_info['roles']}")
+```
+
+**Note:** Tokens are single-use and automatically marked as used after validation.
+
+#### revoke_token(user_id)
+Revoke all existing tokens for a user.
+
+**Arguments:**
+- `user_id (str)`: User ID to revoke tokens for
+
+**Example:**
+```python
+users.revoke_token(user_id='user1')
+```
+
+### Security Features
+- **PBKDF2 Hashing**: Tokens hashed with 100,000 iterations
+- **Salt**: Unique 32-byte salt per token
+- **Single-Use**: Tokens automatically invalidated after first use
+- **Auto-Revocation**: New token issuance revokes previous tokens
+- **Expiration**: Configurable TTL with automatic cleanup
+
+### Database Schema
+Tokens stored in `users_tokens` table. See full schema in [tables.sql](tests/postgres/tables.sql).
+
+### Backward Compatibility
+All token methods gracefully handle missing `users_tokens` table, logging warnings without raising exceptions. Existing deployments continue working without schema updates.
+
+
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/requirements.png" width="25" title="configuration-structure"> Structure of configuration in Vault
 This project uses a Vault server with the KV2 engine and Database Engine for storing user configurations and database connection data.
 It supports user configurations to define system access rights, roles, and request restrictions.
@@ -489,6 +571,43 @@ def my_function(message: telegram.telegram_types.Message, access_result: dict = 
 
 # call the function
 my_function(message)
+```
+
+Example 4 - Token Authentication (v4.2.0+)
+```python
+# import modules
+from vault import VaultClient
+from users import Users
+import psycopg2
+
+# create the vault client and users instance
+vault_client = VaultClient(
+  url='http://vault.example.com',
+  namespace='my_project',
+  auth={
+      'type': 'approle',
+      'role_id': 'my_role',
+      'secret_id': 'my_secret_id'
+  }
+)
+
+users = Users(vault=vault_client, storage_connection=psycopg2.connect(**db_config))
+
+# Issue a temporary access token for a user (e.g., from Telegram bot)
+token = users.issue_token(user_id='user1', ttl_minutes=15)
+print(f"Token: {token}")  # Returns: "user1.a8f3kjs9dfjkl23jrlksjdf..."
+
+# Validate the token (e.g., in web frontend or API)
+user_info = users.validate_token(token=token)
+if user_info:
+    print(f"User authenticated: {user_info['user_id']}")
+    print(f"Status: {user_info['status']}")
+    print(f"Roles: {user_info['roles']}")
+else:
+    print("Invalid or expired token")
+
+# Revoke all tokens for a user
+users.revoke_token(user_id='user1')
 ```
 
 

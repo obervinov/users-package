@@ -3,6 +3,9 @@ This python module is a implementation of user management functionality for tele
 authentication, authorization and request limiting.
 """
 import json
+import secrets
+import hashlib
+from datetime import datetime, timedelta
 from logger import log
 from vault import VaultClient
 from .constants import USERS_VAULT_CONFIG_PATH, USER_STATUS_ALLOW, USER_STATUS_DENY
@@ -340,3 +343,154 @@ class Users:
             status = self.user_status_deny
         log.info('[Users]: check role `%s` for user `%s`: %s', role_id, user_id, status)
         return status
+
+    def issue_token(
+        self,
+        user_id: str = None,
+        ttl_minutes: int = 10
+    ) -> str:
+        """
+        Generate a temporary access token for the specified user.
+
+        Args:
+            :param user_id (str): User ID to issue token for.
+            :param ttl_minutes (int): Token validity period in minutes (default 10).
+
+        Returns:
+            (str | None): Token in format "user_id.token_id" or None if token could not be stored (e.g., tokens table missing)
+
+        Raises:
+            ValueError: If user_id is not provided.
+
+        Examples:
+            >>> users = Users(vault=<VaultClient>, storage_connection=db_conn)
+            >>> token = users.issue_token(user_id='user1', ttl_minutes=15)
+            >>> print(token)
+            'user1.a8f3kjs9dfjkl23jrlksjdf...'
+        """
+        if not user_id:
+            log.error('[Users]: user_id is required for token issuance')
+            raise ValueError("user_id is required for token issuance")
+
+        if '.' in str(user_id):
+            log.error('[Users]: user_id cannot contain period characters (breaks token format)')
+            raise ValueError("user_id cannot contain period characters")
+
+        # Generate token components
+        token_id = secrets.token_urlsafe(32)
+        token_salt = secrets.token_hex(32)
+        token_hash = hashlib.pbkdf2_hmac('sha256', token_id.encode(), token_salt.encode(), 100_000).hex()
+
+        # Calculate expiration
+        expires_at = datetime.now() + timedelta(minutes=ttl_minutes)
+
+        # Store token in database
+        store_result = self.storage.store_token(
+            user_id=user_id,
+            token_hash=token_hash,
+            token_salt=token_salt,
+            expires_at=expires_at
+        )
+
+        if store_result is False:
+            log.warning('[Users]: Token storage skipped; tokens table missing. Returning None for backward compatibility.')
+            return None
+
+        # Return plaintext token
+        token = f"{user_id}.{token_id}"
+        log.info('[Users]: Token issued for user %s (expires at %s)', user_id, expires_at)
+        return token
+
+    def validate_token(
+        self,
+        token: str = None
+    ) -> dict:
+        """
+        Validate a token and return user information.
+
+        Args:
+            :param token (str): Token string in format "user_id.token_id"
+
+        Returns:
+            (dict | None): User info {'user_id', 'status', 'roles'} if valid; None if token is invalid, expired, used, or missing
+
+        Raises:
+            ValueError: If token format is invalid.
+
+        Examples:
+            >>> users = Users(vault=<VaultClient>, storage_connection=db_conn)
+            >>> user_info = users.validate_token(token='user1.a8f3kjs9dfjkl23jrlksjdf...')
+            >>> if user_info:
+            >>>     print(f"User: {user_info['user_id']}, Status: {user_info['status']}")
+        """
+        if not token or '.' not in token:
+            log.error('[Users]: Invalid token format')
+            raise ValueError("Invalid token format. Expected format: 'user_id.token_id'")
+
+        # Parse token
+        user_id, token_id = token.split('.', 1)
+
+        # Retrieve stored token data
+        token_data = self.storage.get_token(user_id=user_id)
+
+        if not token_data:
+            log.warning('[Users]: No valid token found for user %s', user_id)
+            return None
+
+        # Verify token hash
+        computed_hash = hashlib.pbkdf2_hmac(
+            'sha256',
+            token_id.encode(),
+            token_data['token_salt'].encode(),
+            100_000
+        ).hex()
+
+        if not secrets.compare_digest(computed_hash, token_data['token_hash']):
+            log.warning('[Users]: Token validation failed for user %s (hash mismatch)', user_id)
+            return None
+
+        # Mark token as used (single-use enforcement)
+        self.storage.mark_token_used(user_id=user_id)
+
+        # Retrieve user configuration from Vault in a single call
+        user_config = self.vault.kv2engine.read_secret(path=f"{self.vault_config_path}/{user_id}") or {}
+        user_status = user_config.get('status')
+        user_roles = user_config.get('roles')
+
+        user_info = {
+            'user_id': user_id,
+            'status': user_status if user_status else self.user_status_deny,
+            'roles': json.loads(user_roles) if user_roles else []
+        }
+
+        log.info('[Users]: Token validated successfully for user %s', user_id)
+        return user_info
+
+    def revoke_token(
+        self,
+        user_id: str = None
+    ) -> None:
+        """
+        Revoke any existing token for the specified user.
+
+        Args:
+            :param user_id (str): User ID to revoke token for.
+
+        Raises:
+            ValueError: If user_id is not provided.
+
+        Examples:
+            >>> users = Users(vault=<VaultClient>, storage_connection=db_conn)
+            >>> users.revoke_token(user_id='user1')
+        """
+        if not user_id:
+            log.error('[Users]: user_id is required for token revocation')
+            raise ValueError("user_id is required for token revocation")
+
+        if '.' in str(user_id):
+            log.error('[Users]: user_id cannot contain period characters (breaks token format)')
+            raise ValueError("user_id cannot contain period characters")
+
+        # Mark all active tokens as used
+        self.storage.mark_token_used(user_id=user_id)
+        log.info('[Users]: All tokens revoked for user %s', user_id)
