@@ -260,7 +260,7 @@ def test_token_with_custom_ttl(users_instance):
     user_info_short = users_instance.validate_token(token=token_short)
     assert user_info_short is not None
 
-    # Note: token_short is now marked as used, so we issue a new one for the long test
+    # Different user with a longer TTL; short token was for testUser9 and is now used
     # Validate long TTL token
     user_info_long = users_instance.validate_token(token=token_long)
     assert user_info_long is not None
