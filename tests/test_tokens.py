@@ -202,12 +202,11 @@ def test_token_backward_compatibility(users_instance_without_rl, postgres_instan
     cursor.execute("DROP TABLE IF EXISTS users_tokens CASCADE")
     connection.commit()
 
-    # Try to issue token (should not raise exception, just log warning)
+    # Try to issue token (should not raise exception, returns None when storage unavailable)
     token = users_instance_without_rl.issue_token(user_id='testUser7', ttl_minutes=10)
 
-    # Token should be None or the method should handle gracefully
-    # Since store_token returns None when table doesn't exist, we just verify no exception
-    assert token is not None  # Token is generated even if not stored
+    # Token should be None to signal storage unavailability
+    assert token is None
 
     # Recreate the table for subsequent tests
     cursor.execute("""

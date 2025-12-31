@@ -2,9 +2,9 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## v4.2.0 - 2025-12-30
+## v4.2.0 - 2025-12-31
 ### What's Changed
-**Full Changelog**: https://github.com/obervinov/users-package/compare/v4.1.3...v4.2.0
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v4.1.3...v4.2.0 by @obervinov in https://github.com/obervinov/users-package/pull/78
 #### 🚀 Features
 * Add generic token-based authentication support for frontend integration (web UIs, mobile apps, CLI tools)
   - New methods: `issue_token()`, `validate_token()`, `revoke_token()`

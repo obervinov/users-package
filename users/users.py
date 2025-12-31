@@ -357,7 +357,7 @@ class Users:
             :param ttl_minutes (int): Token validity period in minutes (default 10).
 
         Returns:
-            (str): Token in format "user_id.token_id"
+            (str | None): Token in format "user_id.token_id" or None if token could not be stored (e.g., tokens table missing)
 
         Raises:
             ValueError: If user_id is not provided.
@@ -385,12 +385,16 @@ class Users:
         expires_at = datetime.now() + timedelta(minutes=ttl_minutes)
 
         # Store token in database
-        self.storage.store_token(
+        store_result = self.storage.store_token(
             user_id=user_id,
             token_hash=token_hash,
             token_salt=token_salt,
             expires_at=expires_at
         )
+
+        if store_result is False:
+            log.warning('[Users]: Token storage skipped; tokens table missing. Returning None for backward compatibility.')
+            return None
 
         # Return plaintext token
         token = f"{user_id}.{token_id}"

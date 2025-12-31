@@ -252,7 +252,7 @@ class Storage:
         token_hash: str = None,
         token_salt: str = None,
         expires_at: datetime = None
-    ) -> None:
+    ) -> bool:
         """
         Store a hashed token in the database.
         Marks any previous active tokens as used before inserting new one.
@@ -262,6 +262,9 @@ class Storage:
             token_hash (str): The hashed token.
             token_salt (str): The salt used for hashing.
             expires_at (datetime): The token expiration timestamp.
+
+        Returns:
+            bool: True if the token was stored, False if storage is unavailable (e.g., table missing).
 
         Example:
             >>> storage = Storage(database_connection)
@@ -274,10 +277,13 @@ class Storage:
 
             if not table_exists:
                 log.warning('[Users.Storage]: users_tokens table does not exist. Token storage skipped for backward compatibility.')
-                return
+                return False
 
             # Mark previous active tokens as used
-            self.cursor.execute(f"UPDATE users_tokens SET token_used = TRUE WHERE user_id = '{user_id}' AND token_used = FALSE")
+            self.cursor.execute(
+                "UPDATE users_tokens SET token_used = TRUE WHERE user_id = %s AND token_used = FALSE",
+                (user_id,)
+            )
 
             # Insert new token
             self.cursor.execute(
@@ -286,6 +292,7 @@ class Storage:
             )
             self.connection.commit()
             log.info('[Users.Storage]: Token stored successfully for user %s', user_id)
+            return True
         # pylint: disable=broad-except
         except Exception as error:
             self.connection.rollback()
