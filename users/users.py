@@ -412,8 +412,7 @@ class Users:
             :param token (str): Token string in format "user_id.token_id"
 
         Returns:
-            (dict): User information if valid {'user_id': str, 'status': str, 'roles': list}
-            (None): If token invalid, expired, or already used
+            (dict | None): User info {'user_id', 'status', 'roles'} if valid; None if token is invalid, expired, used, or missing
 
         Raises:
             ValueError: If token format is invalid.
@@ -453,15 +452,10 @@ class Users:
         # Mark token as used (single-use enforcement)
         self.storage.mark_token_used(user_id=user_id)
 
-        # Retrieve user configuration from Vault
-        user_status = self.vault.kv2engine.read_secret(
-            path=f"{self.vault_config_path}/{user_id}",
-            key='status'
-        )
-        user_roles = self.vault.kv2engine.read_secret(
-            path=f"{self.vault_config_path}/{user_id}",
-            key='roles'
-        )
+        # Retrieve user configuration from Vault in a single call
+        user_config = self.vault.kv2engine.read_secret(path=f"{self.vault_config_path}/{user_id}") or {}
+        user_status = user_config.get('status')
+        user_roles = user_config.get('roles')
 
         user_info = {
             'user_id': user_id,
