@@ -46,8 +46,8 @@ def test_access_control_decorator(users_instance):
         return access_result
     result = allowed_exist_user_function(message)
     assert result is not None
-    assert result['access'] == users_instance.user_status_allow
-    assert 'rate_limits' in result  # v4.3.0+: rate_limits always present when rate limiting enabled
+    assert result['access'] == users_instance.user_status_allow  # pylint: disable=unsubscriptable-object
+    assert 'rate_limits' in result  # v4.3.0+: rate_limits always present when rate limiting enabled  # pylint: disable=unsupported-membership-test
 
     # the user is explicitly blocked from accessing the bot
     message = MockMessage(chat_id='testUser25', message_id=random.randint(1, 9999))
