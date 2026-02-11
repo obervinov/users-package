@@ -85,7 +85,10 @@ class RateLimiter:
                     key in self.requests_configuration for key in ['requests_per_day', 'requests_per_hour']
                 ):
                     log.error('[Users.RateLimiter]: Invalid requests configuration for user ID %s: %s', self.user_id, self.requests_configuration)
-                    raise WrongUserConfiguration("User configuration in Vault is wrong. Please provide a valid configuration with requests_per_day and requests_per_hour.")
+                    raise WrongUserConfiguration(
+                        "User configuration in Vault is wrong. "
+                        "Please provide a valid configuration with requests_per_day and requests_per_hour."
+                    )
             except (TypeError, JSONDecodeError) as error:
                 log.error('[Users.RateLimiter]: Wrong value for requests configuration for user ID %s: %s', self.user_id, error)
                 raise WrongUserConfiguration("User configuration in Vault is wrong. Please provide a valid configuration for requests.") from error

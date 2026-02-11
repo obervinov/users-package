@@ -45,6 +45,7 @@ def test_access_control_decorator(users_instance):
         print(message)
         return access_result
     result = allowed_exist_user_function(message)
+    assert result is not None
     assert result['access'] == users_instance.user_status_allow
     assert 'rate_limits' in result  # v4.3.0+: rate_limits always present when rate limiting enabled
 
