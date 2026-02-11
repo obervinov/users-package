@@ -5,7 +5,7 @@ authentication, authorization and request limiting.
 import json
 import secrets
 import hashlib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from logger import log
 from vault import VaultClient
 from .constants import USERS_VAULT_CONFIG_PATH, USER_STATUS_ALLOW, USER_STATUS_DENY
@@ -392,7 +392,7 @@ class Users:
         token_hash = hashlib.pbkdf2_hmac('sha256', token_id.encode(), token_salt.encode(), 100_000).hex()
 
         # Calculate expiration
-        expires_at = datetime.now() + timedelta(minutes=ttl_minutes)
+        expires_at = datetime.now(timezone.utc) + timedelta(minutes=ttl_minutes)
 
         # Store token in database
         store_result = self.storage.store_token(

@@ -11,7 +11,7 @@ def test_check_rl_counters_exceed_per_hour(timestamp_pattern, users_instance):
     """
     Checking behaviour when the user request counter is exceeded per hour.
     """
-    now = datetime.datetime.now()
+    now = datetime.datetime.now(datetime.timezone.utc)
     user = users_instance.user_access_check(user_id='testUser5', role_id='admin_role')
     assert user['rate_limits'] is not None
     assert re.match(timestamp_pattern, str(user['rate_limits'])) is not None
@@ -25,7 +25,7 @@ def test_check_rl_counters_exceed_per_day(timestamp_pattern, users_instance):
     """
     Checking behaviour when the user request counter is exceeded per day.
     """
-    now = datetime.datetime.now()
+    now = datetime.datetime.now(datetime.timezone.utc)
     user = users_instance.user_access_check(user_id='testUser6', role_id='admin_role')
     assert user['rate_limits'] is not None
     assert re.match(timestamp_pattern, str(user['rate_limits'])) is not None
@@ -39,7 +39,7 @@ def test_check_rl_counters_exceed_both(timestamp_pattern, users_instance):
     """
     Checking behaviour when the user request counter is exceeded for both counters (per hour and per day).
     """
-    now = datetime.datetime.now()
+    now = datetime.datetime.now(datetime.timezone.utc)
     user = users_instance.user_access_check(user_id='testUser7', role_id='admin_role')
     assert user['rate_limits'] is not None
     assert re.match(timestamp_pattern, str(user['rate_limits'])) is not None
