@@ -256,6 +256,10 @@ class Users:
             if user_info['permissions'] == self.user_status_allow and self.rate_limits:
                 rl_controller = RateLimiter(vault=self.vault, storage=self.storage, user_id=user_id)
                 user_info['rate_limits'] = rl_controller.determine_rate_limit()
+        elif user_info['access'] == self.user_status_allow and self.rate_limits:
+            # Rate limiting without authorization - for cases where only rate limiting is needed
+            rl_controller = RateLimiter(vault=self.vault, storage=self.storage, user_id=user_id)
+            user_info['rate_limits'] = rl_controller.determine_rate_limit()
 
         self.storage.log_user_request(
             user_id=user_id,

@@ -2,6 +2,23 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v4.3.0 - 2026-02-11
+### What's Changed
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v4.2.0...v4.3.0 by @obervinov
+#### 🚀 Features
+* **Rate Limits Refactoring**: Decoupled rate limiting from authorization logic
+  - Rate limits now work independently without requiring `role_id` parameter
+  - Added `elif` block in `user_access_check()` for rate limiting without authorization
+  - Maintains backward compatibility: existing code with `role_id` continues to work
+* **Storage Bug Fix**: Fixed `log_user_request()` to always insert `rate_limits` column value
+  - Previously skipped `rate_limits` column when value was `None`, causing database inconsistencies
+  - Now always inserts `NULL` when `rate_limits` is `None`
+#### 💥 Breaking Changes
+* None - fully backward compatible. Existing implementations with `role_id` parameter continue to work as before.
+#### 🐛 Bug Fixes
+* Fixed architectural constraint where rate limits calculation was only performed inside authorization block
+* Fixed SQL insertion bug in `Storage.log_user_request()` when `rate_limits=None`
+
 ## v4.2.0 - 2025-12-31
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v4.1.3...v4.2.0 by @obervinov in https://github.com/obervinov/users-package/pull/78
