@@ -73,10 +73,16 @@ def test_authorization_doesnt_exist_roles(users_instance):
     assert 'rate_limits' in result
     assert users_instance.user_access_check(user_id='testUser3', role_id='admin_role')['permissions'] == users_instance.user_status_deny
     assert users_instance.user_access_check(user_id='testUser3', role_id='guest_role')['permissions'] == users_instance.user_status_deny
-    assert users_instance.user_access_check(user_id='testUser3') == {'access': users_instance.user_status_allow}
+    # v4.3.0+: rate_limits calculated without role_id
+    result3 = users_instance.user_access_check(user_id='testUser3')
+    assert result3['access'] == users_instance.user_status_allow
+    assert 'rate_limits' in result3
     assert users_instance.user_access_check(user_id='testUser4', role_id='admin_role')['permissions'] == users_instance.user_status_deny
     assert users_instance.user_access_check(user_id='testUser4', role_id='guest_role')['permissions'] == users_instance.user_status_deny
-    assert users_instance.user_access_check(user_id='testUser4') == {'access': users_instance.user_status_allow}
+    # v4.3.0+: rate_limits calculated without role_id
+    result4 = users_instance.user_access_check(user_id='testUser4')
+    assert result4['access'] == users_instance.user_status_allow
+    assert 'rate_limits' in result4
 
 
 @pytest.mark.order(9)
