@@ -141,25 +141,43 @@ The `access_control()` decorator is used to control access to specific functions
 
 The `user_access_check()` method is the main entry point for authentication, authorization, and request rate limit verification. It is used to control the request rate (limits) for a specific user.
 
+**New in v4.3.0**: Rate limits can now be calculated independently without requiring `role_id` parameter. This allows rate limiting for authentication-only scenarios.
+
 - **Arguments:**
   - `user_id (str)`: Required user ID.
-  - `role_id (str)`: Required role ID for the specified user ID.
+  - `role_id (str)`: Optional role ID for authorization. If provided, authorization will be performed and rate limits calculated after successful authorization. If omitted, only authentication and rate limits (if enabled) will be processed.
 
 - **Keyword Arguments:**
   - `chat_id (str)`: Required chat ID for the specified user ID. Additional context for logging.
   - `message_id (str)`: Required message ID for the specified user ID. Additional context for logging.
 
 - **Examples:**
+  
+  **With authorization and rate limits:**
   ```python
   user_access_check(user_id='user1', role_id='admin_role', chat_id='chat1', message_id='msg1')
+  # Returns: {'access': 'allowed', 'permissions': 'allowed', 'rate_limits': datetime or None}
+  ```
+  
+  **Authentication and rate limits only (v4.3.0+):**
+  ```python
+  user_access_check(user_id='user1', chat_id='chat1', message_id='msg1')
+  # Returns: {'access': 'allowed', 'rate_limits': datetime or None}
   ```
 
 - **Returns:**
-  - A dictionary with access status, permissions, and rate limit information.
+  - A dictionary with access status, permissions (if role_id provided), and rate limit information.
     ```python
+    # With role_id:
     {
       'access': self.user_status_allow / self.user_status_deny,
       'permissions': self.user_status_allow / self.user_status_deny,
+      'rate_limits': '2023-08-06 11:47:09.440933' / None
+    }
+    
+    # Without role_id (v4.3.0+):
+    {
+      'access': self.user_status_allow / self.user_status_deny,
       'rate_limits': '2023-08-06 11:47:09.440933' / None
     }
     ```

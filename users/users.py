@@ -11,7 +11,7 @@ from vault import VaultClient
 from .constants import USERS_VAULT_CONFIG_PATH, USER_STATUS_ALLOW, USER_STATUS_DENY
 from .ratelimiter import RateLimiter
 from .storage import Storage
-from .exceptions import VaultInstanceNotSet
+from .exceptions import VaultInstanceNotSet, WrongUserConfiguration
 
 
 class Users:
@@ -254,8 +254,18 @@ class Users:
             user_info['permissions'] = self._authorization(user_id=user_id, role_id=role_id)
 
             if user_info['permissions'] == self.user_status_allow and self.rate_limits:
+                try:
+                    rl_controller = RateLimiter(vault=self.vault, storage=self.storage, user_id=user_id)
+                    user_info['rate_limits'] = rl_controller.determine_rate_limit()
+                except WrongUserConfiguration as error:
+                    log.warning('[Users]: Rate limits skipped for user %s: %s', user_id, error)
+        elif user_info['access'] == self.user_status_allow and self.rate_limits:
+            # Rate limiting without authorization - for cases where only rate limiting is needed
+            try:
                 rl_controller = RateLimiter(vault=self.vault, storage=self.storage, user_id=user_id)
                 user_info['rate_limits'] = rl_controller.determine_rate_limit()
+            except WrongUserConfiguration as error:
+                log.warning('[Users]: Rate limits skipped for user %s: %s', user_id, error)
 
         self.storage.log_user_request(
             user_id=user_id,

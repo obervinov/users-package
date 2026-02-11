@@ -1,7 +1,7 @@
 # Copilot Instructions for users-package
 
 ## Project Overview
-A production-grade Python package providing **user management for Telegram bots**: authentication, authorization, and rate limiting. Distributed as a Poetry-managed package installed via Git tags (e.g., `v4.1.3`).
+A production-grade Python package providing **user management for Telegram bots**: authentication, authorization, and rate limiting. Distributed as a Poetry-managed package installed via Git tags (e.g., `v4.3.0`).
 
 ## Architecture & Component Boundaries
 
@@ -126,7 +126,7 @@ def admin_command(message, access_result: dict = None):
 4. Update [CHANGELOG.md](../CHANGELOG.md) following Keep a Changelog format
 
 ### Versioning & Release
-- Follows **Semantic Versioning** (current: `v4.1.3`)
+- Follows **Semantic Versioning** (current: `v4.3.0`)
 - Update `pyproject.toml` version and `CHANGELOG.md`
 - Create Git tag: `git tag v4.x.x && git push --tags`
 - Package consumed via: `users = { git = "https://github.com/obervinov/users-package.git", tag = "v4.x.x" }`
@@ -157,7 +157,62 @@ All core functionality MUST have tests:
 ❌ **Don't** modify rate limit logic without updating tests  
 ✅ **Do** test both `requests_per_hour` and `requests_per_day` scenarios
 
-## Token Authentication (Planned v4.2.0)
+## Rate Limiting Architecture (v4.3.0+)
+
+### Key Changes in v4.3.0
+**Decoupled rate limiting from authorization** - rate limits now work independently without requiring `role_id` parameter.
+
+### Implementation Details
+```python
+# users/users.py - user_access_check() method
+def user_access_check(self, user_id, role_id=None, **kwargs):
+    user_info['access'] = self._authentication(user_id)
+    
+    # Case 1: Authorization + Rate Limits (original behavior)
+    if user_info['access'] == self.user_status_allow and role_id:
+        user_info['permissions'] = self._authorization(user_id, role_id)
+        if user_info['permissions'] == self.user_status_allow and self.rate_limits:
+            user_info['rate_limits'] = RateLimiter(...).determine_rate_limit()
+    
+    # Case 2: Rate Limits WITHOUT Authorization (NEW in v4.3.0)
+    elif user_info['access'] == self.user_status_allow and self.rate_limits:
+        user_info['rate_limits'] = RateLimiter(...).determine_rate_limit()
+    
+    return user_info
+```
+
+### Use Cases
+1. **With Authorization** (existing): `user_access_check(user_id='user1', role_id='posts')`
+   - Returns: `{'access': 'allowed', 'permissions': 'allowed', 'rate_limits': datetime}`
+   - Use when checking both permissions AND rate limits
+
+2. **Without Authorization** (v4.3.0+): `user_access_check(user_id='user1')`
+   - Returns: `{'access': 'allowed', 'rate_limits': datetime}`
+   - Use for per-request rate limiting without role checks
+   - Example: WebUI link submission where each link needs separate rate limit
+
+### Storage Bug Fix (v4.3.0)
+**Fixed**: `Storage.log_user_request()` now always inserts `rate_limits` column
+```python
+# OLD (buggy):
+if request['rate_limits']:
+    sql_query = "INSERT ... VALUES (..., '{rate_limits}')"
+else:
+    sql_query = "INSERT ... VALUES (...)"  # ← Missing column!
+
+# NEW (fixed):
+rate_limits_value = f"'{request['rate_limits']}'" if request['rate_limits'] else 'NULL'
+sql_query = "INSERT ... VALUES (..., {rate_limits_value})"  # ← Always includes column
+```
+
+### Best Practices
+✅ **Do** call `user_access_check()` per-operation for accurate rate limiting  
+✅ **Do** use `role_id` when checking both authorization and rate limits  
+✅ **Do** omit `role_id` when only rate limiting is needed (v4.3.0+)  
+❌ **Don't** batch multiple operations with single rate limit check  
+❌ **Don't** assume `rate_limits` key exists - use `.get('rate_limits')`
+
+## Token Authentication (v4.2.0)
 
 ### Feature Overview
 Adding generic token-based authentication for frontend integration (web UIs, mobile apps, CLI tools). Tokens provide temporary access without storing user credentials.
