@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v4.3.1 - 2026-02-11
+### What's Changed
+**Full Changelog**: https://github.com/obervinov/users-package/compare/v4.3.0...v4.3.1
+#### 🐛 Bug Fixes
+* **Timezone-aware datetime usage**: Replaced all `datetime.now()` calls with `datetime.now(timezone.utc)` to ensure consistency with PostgreSQL's UTC-based `NOW()` function and prevent timestamp comparison issues across systems
+  - Updated `users/ratelimiter.py`: 8 instances in rate limit calculations and timestamp comparisons
+  - Updated `users/users.py`: Token expiration calculation
+  - Updated `users/storage.py`: Docstring example
+  - Updated `tests/conftest.py`: 20 test fixture timestamps
+  - Updated `tests/test_rate_limits.py`: 3 test assertion timestamps
+
 ## v4.3.0 - 2026-02-11
 ### What's Changed
 **Full Changelog**: https://github.com/obervinov/users-package/compare/v4.2.0...v4.3.0 by @obervinov
