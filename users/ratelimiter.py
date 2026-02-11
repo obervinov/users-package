@@ -5,7 +5,7 @@ This module provides the rate limit functionality for requests to the Telegram b
 import random
 import json
 from json.decoder import JSONDecodeError
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from logger import log
 from vault import VaultClient
 from .constants import USERS_VAULT_CONFIG_PATH
@@ -144,7 +144,7 @@ class RateLimiter:
         if user_requests:
             # If rate limits is active (compared the last request with the current time)
             exist_rate_limit = user_requests[0][2]
-            if exist_rate_limit and datetime.strptime(exist_rate_limit, '%Y-%m-%d %H:%M:%S.%f') >= datetime.now():
+            if exist_rate_limit and datetime.strptime(exist_rate_limit, '%Y-%m-%d %H:%M:%S.%f') >= datetime.now(timezone.utc):
                 rate_limits = self._validate_rate_limit()
             # If rate limits need to apply
             elif (
@@ -182,7 +182,7 @@ class RateLimiter:
         per_hour_exceeded = self.requests_counters['requests_per_hour'] >= self.requests_configuration['requests_per_hour']
 
         # If the rate limit has already expired - reset the rate limit
-        if datetime.now() >= datetime.strptime(latest_rate_limit_timestamp, '%Y-%m-%d %H:%M:%S.%f'):
+        if datetime.now(timezone.utc) >= datetime.strptime(latest_rate_limit_timestamp, '%Y-%m-%d %H:%M:%S.%f'):
             log.info('[Users.RateLimiter]: The rate limit %s for user ID %s has expired and will be reset', latest_rate_limit_timestamp, self.user_id)
             return None
 
@@ -193,7 +193,7 @@ class RateLimiter:
                 if latest_rate_limit_timestamp:
                     new_rate_limit = datetime.strptime(latest_rate_limit_timestamp, '%Y-%m-%d %H:%M:%S.%f') + timedelta(days=1)
                 else:
-                    new_rate_limit = datetime.now() + timedelta(days=1)
+                    new_rate_limit = datetime.now(timezone.utc) + timedelta(days=1)
 
             # Case2: If the counter exceeds the configuration per HOUR
             elif per_hour_exceeded:
@@ -201,7 +201,7 @@ class RateLimiter:
                 if latest_rate_limit_timestamp:
                     new_rate_limit = datetime.strptime(latest_rate_limit_timestamp, '%Y-%m-%d %H:%M:%S.%f') + timedelta(hours=1, minutes=shift_minutes)
                 else:
-                    new_rate_limit = datetime.now() + timedelta(hours=1, minutes=shift_minutes)
+                    new_rate_limit = datetime.now(timezone.utc) + timedelta(hours=1, minutes=shift_minutes)
 
             log.info('[Users.RateLimiter]: The rate limit already applied for user ID %s. Rate limit: %s', self.user_id, str(new_rate_limit))
             return new_rate_limit
@@ -230,12 +230,12 @@ class RateLimiter:
                 latest_rate_limit_timestamp = result[0][2]
                 rate_limit = datetime.strptime(latest_rate_limit_timestamp, '%Y-%m-%d %H:%M:%S.%f') + timedelta(days=1)
             else:
-                rate_limit = datetime.now() + timedelta(days=1)
+                rate_limit = datetime.now(timezone.utc) + timedelta(days=1)
             log.info('[Users.RateLimiter]: The requests limit per day are exhausted for user ID %s. The rate limit will expire at %s', self.user_id, str(rate_limit))
         # If the rate limit is not yet applied
         elif self.requests_configuration['requests_per_hour'] <= self.requests_counters['requests_per_hour']:
             shift_minutes = random.randint(1, self.requests_configuration['random_shift_minutes'])
-            rate_limit = datetime.now() + timedelta(hours=1, minutes=shift_minutes)
+            rate_limit = datetime.now(timezone.utc) + timedelta(hours=1, minutes=shift_minutes)
             log.info('[Users.RateLimiter]: The requests limit per hour are exhausted for user ID %s. The rate limit will expire at %s', self.user_id, str(rate_limit))
 
         return rate_limit
@@ -257,9 +257,9 @@ class RateLimiter:
         if self.user_requests:
             for request in self.user_requests:
                 request_timestamp = request[1]
-                if request_timestamp >= datetime.now() - timedelta(hours=1):
+                if request_timestamp >= datetime.now(timezone.utc) - timedelta(hours=1):
                     requests_per_hour = requests_per_hour + 1
-                if request_timestamp >= datetime.now() - timedelta(days=1):
+                if request_timestamp >= datetime.now(timezone.utc) - timedelta(days=1):
                     requests_per_day = requests_per_day + 1
         log.debug(
             '[Users.RateLimiter]: User ID %s: Counters %s, Requests %s',

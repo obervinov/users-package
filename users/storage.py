@@ -263,7 +263,7 @@ class Storage:
 
         Example:
             >>> storage = Storage(database_connection)
-            >>> storage.store_token("user1", "hash123", "salt456", datetime.now() + timedelta(minutes=10))
+            >>> storage.store_token("user1", "hash123", "salt456", datetime.now(timezone.utc) + timedelta(minutes=10))
         """
         try:
             # Check if table exists (backward compatibility)
