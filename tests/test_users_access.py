@@ -67,7 +67,10 @@ def test_authorization_doesnt_exist_roles(users_instance):
     """
     assert users_instance.user_access_check(user_id='testUser2', role_id='admin_role')['permissions'] == users_instance.user_status_deny
     assert users_instance.user_access_check(user_id='testUser2', role_id='guest_role')['permissions'] == users_instance.user_status_deny
-    assert users_instance.user_access_check(user_id='testUser2') == {'access': users_instance.user_status_allow}
+    # v4.3.0+: rate_limits calculated without role_id
+    result = users_instance.user_access_check(user_id='testUser2')
+    assert result['access'] == users_instance.user_status_allow
+    assert 'rate_limits' in result
     assert users_instance.user_access_check(user_id='testUser3', role_id='admin_role')['permissions'] == users_instance.user_status_deny
     assert users_instance.user_access_check(user_id='testUser3', role_id='guest_role')['permissions'] == users_instance.user_status_deny
     assert users_instance.user_access_check(user_id='testUser3') == {'access': users_instance.user_status_allow}
@@ -91,7 +94,11 @@ def test_authorization_user_denied(users_instance):
     Verify response when the user is denied access.
     """
     assert users_instance.user_access_check(user_id='testUser21')['access'] == users_instance.user_status_allow
-    assert users_instance.user_access_check(user_id='testUser21') == {'access': users_instance.user_status_allow}
+    # Note: testUser21 has no requests configuration, but access check should still work
+    result = users_instance.user_access_check(user_id='testUser21')
+    assert result['access'] == users_instance.user_status_allow
+    # rate_limits key not present when user has no requests configuration
+    assert 'rate_limits' not in result or result.get('rate_limits') is None
     assert users_instance.user_access_check(user_id='testUser21', role_id='admin_role') == {
         'access': users_instance.user_status_allow,
         'permissions': users_instance.user_status_deny
