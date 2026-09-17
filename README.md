@@ -639,7 +639,7 @@ description = ""
 
 [tool.poetry.dependencies]
 python = "^3.12"
-users = { git = "https://github.com/obervinov/users-package.git", tag = "v4.1.3" }
+users = { git = "https://github.com/obervinov/users-package.git", tag = "v4.3.2" }
 
 [build-system]
 requires = ["poetry-core"]
@@ -652,4 +652,4 @@ poetry install
 ## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/github-actions.png" width="25" title="github-actions"> GitHub Actions
 | Name  | Version |
 | ------------------------ | ----------- |
-| GitHub Actions Templates | [v2.1.1](https://github.com/obervinov/_templates/tree/v2.1.1) |
+| GitHub Actions Templates | [v4.0.0](https://github.com/obervinov/_templates/tree/v4.0.0) |
