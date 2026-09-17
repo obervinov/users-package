@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### What's Changed
 #### 🐛 Bug Fixes
 * `.github/workflows`: move the reusable workflows to `obervinov/_templates@v4.0.0`. Node 20 is removed from the Actions runner on 2026-09-23, and the pinned templates still called `actions/create-release` (`runs.using: node12`, archived) along with a set of `node20` actions — releases and checks in this repository would stop running.
+#### 📚 Documentation
+* `README.md`: correct the `auth` dict shape in every example (`auth['approle']['id']` / `['secret-id']`, and example 3 had a value-less `'secret_id':`), the `configuration/database` secret keys — `{host, port, dbname}` only, credentials come from the vault database engine — and the rate limit key, which is `random_shift_minutes`. Also fixes the `docker-compose.ymla` link and the unbalanced quote in the install snippet.
 
 
 ## v4.3.0 - 2026-02-11
