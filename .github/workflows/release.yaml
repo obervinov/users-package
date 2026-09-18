@@ -14,4 +14,4 @@ on:
 
 jobs:
   release:
-    uses: obervinov/_templates/.github/workflows/release.yaml@v2.1.1
+    uses: obervinov/_templates/.github/workflows/release.yaml@v4.0.0

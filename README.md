@@ -9,7 +9,7 @@
 ![GitHub issues](https://img.shields.io/github/issues/obervinov/users-package?style=for-the-badge)
 ![GitHub repo size](https://img.shields.io/github/repo-size/obervinov/users-package?style=for-the-badge)
 
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/book.png" width="25" title="about"> About this project
+## <img src="https://github.com/obervinov/_templates/blob/main/icons/book.png" width="25" title="about"> About this project
 **Project Description**
 
 This Python module is designed to simplify user management in __Telegram Bots__ by providing necessary functionality such as: `authentication`, `authorization` and `request limitation`, providing efficient management of user attributes and access rights.
@@ -30,8 +30,8 @@ sequenceDiagram
 
 - This module requires certain dependencies related to
     - [Vault](https://www.vaultproject.io)
-      - [Vault Server](docker-compose.ymla) for storing user configurations and historical data
-      - [Additional Module](https://github.com/obervinov/vault-package ) to interact with the Vault API
+      - [Vault Server](docker-compose.yml) for storing user configurations and historical data
+      - [Additional Module](https://github.com/obervinov/vault-package) to interact with the Vault API
       - [Vault Policy](tests/vault/policy.hcl) with access rights to the Vault Server
     - [PostgreSQL](https://www.postgresql.org)
       - [PostgreSQL Server](docker-compose.yml) for storing user data and historical records
@@ -50,7 +50,7 @@ sequenceDiagram
 - [Installing](#-installing)
 
 
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="21" title="constants"> Description of module Constants
+## <img src="https://github.com/obervinov/_templates/blob/main/icons/stack2.png" width="21" title="constants"> Description of module Constants
 
 This module contains constant values
 
@@ -61,7 +61,7 @@ This module contains constant values
 | `USER_STATUS_DENY`        | User access status for denied access.             | `"denied"`              |
 
 
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="21" title="exceptions"> Description of module Exceptions
+## <img src="https://github.com/obervinov/_templates/blob/main/icons/stack2.png" width="21" title="exceptions"> Description of module Exceptions
 | Exception                    | Describe                              | Tips |
 |------------------------------|---------------------------------------|------|
 | `WrongUserConfiguration`     | Raised when user configuration is wrong. | Please, see the configuration [example](#-structure-of-configuration-and-statistics-data-in-vault) |
@@ -71,7 +71,7 @@ This module contains constant values
 | `FailedStorageConnection`    | Raised when the connection to the storage (PostgreSQL) failed. | Please, check the connection to the PostgreSQL server |
 
 
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/build.png" width="25" title="class"> Users class
+## <img src="https://github.com/obervinov/_templates/blob/main/icons/build.png" width="25" title="class"> Users class
 ### Class Initialization
 
 The `Users` class provides authentication, authorization, user attribute management and user request logging for Telegram bots. You can initialize it with different options
@@ -152,13 +152,13 @@ The `user_access_check()` method is the main entry point for authentication, aut
   - `message_id (str)`: Required message ID for the specified user ID. Additional context for logging.
 
 - **Examples:**
-  
+
   **With authorization and rate limits:**
   ```python
   user_access_check(user_id='user1', role_id='admin_role', chat_id='chat1', message_id='msg1')
   # Returns: {'access': 'allowed', 'permissions': 'allowed', 'rate_limits': datetime or None}
   ```
-  
+
   **Authentication and rate limits only (v4.3.0+):**
   ```python
   user_access_check(user_id='user1', chat_id='chat1', message_id='msg1')
@@ -174,7 +174,7 @@ The `user_access_check()` method is the main entry point for authentication, aut
       'permissions': self.user_status_allow / self.user_status_deny,
       'rate_limits': '2023-08-06 11:47:09.440933' / None
     }
-    
+
     # Without role_id (v4.3.0+):
     {
       'access': self.user_status_allow / self.user_status_deny,
@@ -193,7 +193,7 @@ The `user_access_check()` method is the main entry point for authentication, aut
 | `str`     | `vault_config_path` | The prefix of the configuration path in the Vault.           | `"configuration/users"` |
 
 
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/build.png" width="25" title="class"> RateLimiter class
+## <img src="https://github.com/obervinov/_templates/blob/main/icons/build.png" width="25" title="class"> RateLimiter class
 ### Class Initialization
 
 The `RateLimiter` class provides restriction functionality for user requests to the Telegram bot in the context of a specific user.
@@ -211,7 +211,7 @@ The `RateLimiter` class provides restriction functionality for user requests to 
 
 ### method: Rate Limit Determination
 
-The `determine_rate_limit()` method is the main entry point for checking bot request limits for the specified user. It returns information about whether the request rate limits are active and when they expire 
+The `determine_rate_limit()` method is the main entry point for checking bot request limits for the specified user. It returns information about whether the request rate limits are active and when they expire
 
 - **Examples:**
   ```python
@@ -253,7 +253,7 @@ The `get_user_request_counters()` method calculates the number of requests made 
 | `dict`         | `requests_counters`      | Counters for the number of requests per day and per hour.                | `None`                          |
 
 
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/build.png" width="25" title="class"> Storage class
+## <img src="https://github.com/obervinov/_templates/blob/main/icons/build.png" width="25" title="class"> Storage class
 ### Class Initialization
 The storage class for the storage of user data: requests, access logs, etc in the PostgreSQL database.</br>
 **Only one of the parameters is required for initialization: `db_connection` or `vault`**.
@@ -339,7 +339,7 @@ The `get_users()` method retrieves all users from the database.
   - A list of users `[{'user_id': '12345', 'chat_id': '67890', 'status': 'denied'}, ...]`.
 
 
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/config.png" width="25" title="token-authentication"> Token Authentication
+## <img src="https://github.com/obervinov/_templates/blob/main/icons/config.png" width="25" title="token-authentication"> Token Authentication
 
 ### Overview
 Starting from **v4.2.0**, the Users package supports generic token-based authentication for frontend integration (web UIs, mobile apps, CLI tools). This feature enables temporary access without storing user credentials.
@@ -380,7 +380,7 @@ Validate a token and return user information.
 **Arguments:**
 - `token (str)`: Token string in format `"user_id.token_id"`
 
-**Returns:** 
+**Returns:**
 - `dict`: User info `{'user_id': str, 'status': str, 'roles': list}` if valid
 - `None`: If token is invalid, expired, or already used
 
@@ -420,7 +420,7 @@ Tokens stored in `users_tokens` table. See full schema in [tables.sql](tests/pos
 All token methods gracefully handle missing `users_tokens` table, logging warnings without raising exceptions. Existing deployments continue working without schema updates.
 
 
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/requirements.png" width="25" title="configuration-structure"> Structure of configuration in Vault
+## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="configuration-structure"> Structure of configuration in Vault
 This project uses a Vault server with the KV2 engine and Database Engine for storing user configurations and database connection data.
 It supports user configurations to define system access rights, roles, and request restrictions.
 
@@ -434,7 +434,7 @@ It supports user configurations to define system access rights, roles, and reque
   - `requests`: Limits on the number of requests
       - `requests_per_day`
       - `requests_per_hour`
-      - `random_shift_time` (additional, random shift in minutes from 0 to the specified number) in minutes
+      - `random_shift_minutes` (additional, random shift in minutes from 0 to the specified number)
 
 - **example of a secret with configuration**:
 ```json
@@ -452,36 +452,24 @@ It supports user configurations to define system access rights, roles, and reque
 ### Database Configuration
 - **path to the secret**: `configuration/database`
 
-- **keys and values with simple database connection**:
+- **keys and values**:
   - `host`: The host of the PostgreSQL server.
   - `port`: The port of the PostgreSQL server.
-  - `database`: The name of the PostgreSQL database.
-  - `user`: The username for the PostgreSQL database.
-  - `password`: The password for the PostgreSQL database.
+  - `dbname`: The name of the PostgreSQL database.
 
   ```json
   {
     "host": "localhost",
     "port": 5432,
-    "dbname": "mydatabase",
-    "user": "myuser",
-    "password": "mypassword",
+    "dbname": "mydatabase"
   }
   ```
 
-- **keys and values with Vault Database Engine**:
-  - `role`: The role name for the Vault database engine.
-  - `instance`: The instance of the VaultClient for interacting with the Vault API.
+  The username and password are not stored in this secret: they are issued by the Vault
+  database engine for the `role` passed to `Users(vault={'instance': ..., 'role': ...})`.
+  All three keys above are required — a missing one raises `KeyError` on connect.
 
-  ```json
-  {
-    "host": "localhost",
-    "port": 5432,
-    "dbname": "mydatabase",
-  }
-  ```
-
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/requirements.png" width="25" title="data-structure"> Structure of historical data in PostgreSQL
+## <img src="https://github.com/obervinov/_templates/blob/main/icons/requirements.png" width="25" title="data-structure"> Structure of historical data in PostgreSQL
 This project uses a PostgreSQL database to store historical data about user requests and access events. It supports user request logging to track user activity and access rights.
 The detailed table schema can be found in this [sql file](tests/postgres/tables.sql).
 
@@ -491,7 +479,7 @@ Contains records of user requests, access permission, access level, and apply li
 ### Users Table
 Contains records of user metadata for the Telegram bot, such as user ID, chat ID, and message ID.
 
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/config.png" width="25" title="usage"> Additional usage example
+## <img src="https://github.com/obervinov/_templates/blob/main/icons/config.png" width="25" title="usage"> Additional usage example
 Example 1 - With Rate Limits
 ```python
 # import modules
@@ -504,13 +492,15 @@ vault_client = VaultClient(
   namespace='my_project',
   auth={
       'type': 'approle',
-      'role_id': 'my_role',
-      'secret_id': 'my_secret_id'
+      'approle': {
+          'id': 'my_role_id',
+          'secret-id': 'my_secret_id'
+      }
   }
 )
 
 # create the Users instance of the class with rate limits and get user information
-users = Users(vault=<VaultClient>, rate_limits=True, storage_connection=psycopg2.connect(**db_config))
+users = Users(vault=vault_client, rate_limits=True, storage_connection=psycopg2.connect(**db_config))
 user_info = users.user_access_check(user_id=message.chat.id, role_id="admin_role", chat_id=message.chat.id, message_id=message.message_id)
 
 # check permissions, roles, and rate limits
@@ -539,13 +529,15 @@ vault_client = VaultClient(
   namespace='my_project',
   auth={
       'type': 'approle',
-      'role_id': 'my_role',
-      'secret_id': 'my_secret_id'
+      'approle': {
+          'id': 'my_role_id',
+          'secret-id': 'my_secret_id'
+      }
   }
 )
 
 # create the Users instance of the class without rate limits and get user information
-users = Users(vault=<VaultClient>, storage_connection=psycopg2.connect(**db_config))
+users = Users(vault=vault_client, storage_connection=psycopg2.connect(**db_config))
 user_info = users.user_access_check(user_id=message.chat.id, role_id="admin_role", chat_id=message.chat.id, message_id=message.message_id)
 
 # check permissions and roles
@@ -571,13 +563,15 @@ vault_client = VaultClient(
   namespace='my_project',
   auth={
       'type': 'approle',
-      'role_id': 'my_role',
-      'secret_id':
+      'approle': {
+          'id': 'my_role_id',
+          'secret-id': 'my_secret_id'
+      }
   }
 )
 
 # create the Users instance of the class with rate limits
-users = Users(vault=<VaultClient>, rate_limits=True, storage_connection=psycopg2.connect(**db_config))
+users = Users(vault=vault_client, rate_limits=True, storage_connection=psycopg2.connect(**db_config))
 
 # create a function with the access_control decorator
 @telegram.message_handler(commands=['start'])
@@ -604,8 +598,10 @@ vault_client = VaultClient(
   namespace='my_project',
   auth={
       'type': 'approle',
-      'role_id': 'my_role',
-      'secret_id': 'my_secret_id'
+      'approle': {
+          'id': 'my_role_id',
+          'secret-id': 'my_secret_id'
+      }
   }
 )
 
@@ -629,17 +625,17 @@ users.revoke_token(user_id='user1')
 ```
 
 
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/stack2.png" width="20" title="install"> Installing
+## <img src="https://github.com/obervinov/_templates/blob/main/icons/stack2.png" width="20" title="install"> Installing
 ```bash
 tee -a pyproject.toml <<EOF
 [tool.poetry]
-name = myproject"
+name = "myproject"
 version = "1.0.0"
 description = ""
 
 [tool.poetry.dependencies]
 python = "^3.12"
-users = { git = "https://github.com/obervinov/users-package.git", tag = "v4.1.3" }
+users = { git = "https://github.com/obervinov/users-package.git", tag = "v4.3.2" }
 
 [build-system]
 requires = ["poetry-core"]
@@ -649,7 +645,5 @@ EOF
 poetry install
 ```
 
-## <img src="https://github.com/obervinov/_templates/blob/v1.0.5/icons/github-actions.png" width="25" title="github-actions"> GitHub Actions
-| Name  | Version |
-| ------------------------ | ----------- |
-| GitHub Actions Templates | [v2.1.1](https://github.com/obervinov/_templates/tree/v2.1.1) |
+## <img src="https://github.com/obervinov/_templates/blob/main/icons/github-actions.png" width="25" title="github-actions"> GitHub Actions
+[![GitHub Actions Templates](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2Fobervinov%2Fusers-package%2FHEAD%2F.github%2Fworkflows%2Fpr.yaml&search=pr.yaml%40%28v%5B0-9.%5D%2B%29&replace=%241&label=_templates&color=blue&logo=githubactions&logoColor=white)](https://github.com/obervinov/_templates)
