@@ -635,7 +635,7 @@ description = ""
 
 [tool.poetry.dependencies]
 python = "^3.12"
-users = { git = "https://github.com/obervinov/users-package.git", tag = "v4.3.2" }
+users = { git = "https://github.com/obervinov/users-package.git", tag = "v4" }
 
 [build-system]
 requires = ["poetry-core"]
