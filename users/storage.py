@@ -142,8 +142,7 @@ class Storage:
             self.cursor.execute(f"INSERT INTO users (user_id, chat_id, status) VALUES ('{user_id}', '{chat_id}', '{status}')")
             self.connection.commit()
             log.info('[Users]: %s has been successfully registered in the database.', user_id)
-        # pylint: disable=no-member
-        except psycopg2.errors.UniqueViolation:
+        except psycopg2.errors.UniqueViolation:  # pylint: disable=no-member
             self.connection.rollback()
             self.cursor.execute(f"UPDATE users SET chat_id='{chat_id}', status='{status}' WHERE user_id='{user_id}'")
             self.connection.commit()
@@ -338,8 +337,7 @@ class Storage:
                     'token_used': result[3]
                 }
             return None
-        # pylint: disable=broad-except
-        except Exception as error:
+        except Exception as error:  # pylint: disable=broad-exception-caught
             log.error('[Users.Storage]: Failed to retrieve token: %s', error)
             return None
 
