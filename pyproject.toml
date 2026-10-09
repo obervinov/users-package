@@ -20,7 +20,7 @@ include = ["CHANGELOG.md"]
 python = "^3.12"
 psycopg2-binary = "^2"
 logger = { git = "https://github.com/obervinov/logger-package.git", tag = "v2.0.4" }
-vault  = { git = "https://github.com/obervinov/vault-package.git", tag = "v4.0.3" }
+vault  = { git = "https://github.com/obervinov/vault-package.git", tag = "v4.0.4" }
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9"
