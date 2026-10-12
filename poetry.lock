@@ -352,7 +352,7 @@ colors = ["colorama"]
 
 [[package]]
 name = "logger"
-version = "2.0.4"
+version = "2.0.7"
 description = "This is an additional implementation over the logging module. This module is designed for fast initialization and configuration of readable and structured logging."
 optional = false
 python-versions = "^3.12"
@@ -363,8 +363,8 @@ develop = false
 [package.source]
 type = "git"
 url = "https://github.com/obervinov/logger-package.git"
-reference = "v2.0.4"
-resolved_reference = "85857e7fe783f11c328d025f53431796022a2abe"
+reference = "v2"
+resolved_reference = "b80c00d238779eec986a136e439cfdba6b566e58"
 
 [[package]]
 name = "mccabe"
@@ -647,7 +647,7 @@ zstd = ["backports-zstd (>=1.0.0) ; python_version < \"3.14\""]
 
 [[package]]
 name = "vault"
-version = "4.0.4"
+version = "4.0.6"
 description = "The main goal of the implementation is to simplify the use and interaction with Vault Server for my standard python projects. This module contains a set of methods for working with secrets and database engines in Vault."
 optional = false
 python-versions = "^3.12"
@@ -657,16 +657,16 @@ develop = false
 
 [package.dependencies]
 hvac = "^2"
-logger = {git = "https://github.com/obervinov/logger-package.git", tag = "v2.0.4"}
+logger = {git = "https://github.com/obervinov/logger-package.git", tag = "v2"}
 requests = "^2"
 
 [package.source]
 type = "git"
 url = "https://github.com/obervinov/vault-package.git"
-reference = "v4.0.4"
-resolved_reference = "1354cdef8e3b8217444cf77d3de15715cb90a640"
+reference = "v4"
+resolved_reference = "097aa1c0fc16fdec9ce30afc44fa7f56c30f604a"
 
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "75f6d32e8a62f98346840cf1806fb9f963953d16ccc14072a897a06c20c36bef"
+content-hash = "d64f54c8d52aaf676bc65e73bfef25ffb620e6caf981c4368548200f84fabb92"
